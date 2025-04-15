@@ -73,17 +73,24 @@ public class MicRecorderWithCountdown {
                         targetLine.stop();
                         targetLine.close();
 
-                        // save recording to file, maybe not needed later on
                         byte[] audioData = out.toByteArray();
+
+                        // Optionally save to file
                         ByteArrayInputStream bais = new ByteArrayInputStream(audioData);
                         AudioInputStream ais = new AudioInputStream(bais, format,
                                 audioData.length / format.getFrameSize());
+                        AudioSystem.write(ais, AudioFileFormat.Type.WAVE, new File("aufnahme.wav"));
 
-                        File outputFile = new File("aufnahme.wav");
-                        AudioSystem.write(ais, AudioFileFormat.Type.WAVE, outputFile);
+                        // Convert to shorts and detect pitch
+                        short[] samples = bytesToShorts(audioData, format.isBigEndian());
+                        double pitch = AutocorrelationAnalyser.detectPitch(samples);
 
-                        SwingUtilities.invokeLater(
-                                () -> statusLabel.setText("✅ Aufnahme beendet (gespeichert als aufnahme.wav)"));
+                        // Update status
+                        if (pitch != -1) {
+                            statusLabel.setText(String.format("✅ Aufnahme beendet. erkannte Tonhöhe: %.2f Hz", pitch));
+                        } else {
+                            statusLabel.setText("❌ Keine Tonhöhe erkannt.");
+                        }
 
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -98,4 +105,20 @@ public class MicRecorderWithCountdown {
             frame.setVisible(true);
         });
     }
+
+    private static short[] bytesToShorts(byte[] bytes, boolean isBigEndian) {
+        int samples = bytes.length / 2;
+        short[] shorts = new short[samples];
+    
+        for (int i = 0; i < samples; i++) {
+            int low = bytes[2 * i] & 0xff;
+            int high = bytes[2 * i + 1] & 0xff;
+            shorts[i] = isBigEndian
+                    ? (short) ((high << 8) | low)
+                    : (short) ((low << 8) | high);
+        }
+    
+        return shorts;
+    }
+    
 }
