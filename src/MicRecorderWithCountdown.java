@@ -18,7 +18,7 @@ public class MicRecorderWithCountdown {
             JLabel statusLabel = new JLabel("Wähle ein Mikrofon und starte die Aufnahme");
             JButton recordButton = new JButton("Aufnahme starten");
 
-            format = new AudioFormat(44100.0f, 16, 1, true, false);
+            format = new AudioFormat(22050.0f, 16, 1, true, false);
 
             // Look for available microphones
             for (Mixer.Info info : AudioSystem.getMixerInfo()) {

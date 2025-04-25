@@ -25,7 +25,7 @@ public class FrequencyAnalyzer {
     float[] audioDataFloat = byteArrayToFloatArray(audioData);
     float[] spectrum = new float[frameSize / 2];
 
-    double sampleRate = 44100.0;
+    double sampleRate = 22050.0;
     double[] detectedFrequencies = new double[(audioDataFloat.length - frameSize) / frameSize + 1];
     int frameCount = 0;
 

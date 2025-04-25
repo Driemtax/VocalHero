@@ -3,7 +3,7 @@ public class Main {
         double targetFrequency = 440.0; // Beispiel: A4
         double tolerance = 10.0;
         double durationSeconds = 3.0;
-        double sampleRate = 44100.0;
+        double sampleRate = 22050.0;
 
         byte[] testSignal = generateSineWaveBytes(targetFrequency, durationSeconds, sampleRate);
         
