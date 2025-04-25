@@ -1,6 +1,8 @@
+import Helper.Note;
+
 public class Main {
     public static void main(String[] args) {
-        double targetFrequency = 440.0; // Beispiel: A4
+        double targetFrequency = Note.A4.getFrequency(); // Beispiel: A4
         double tolerance = 10.0;
         double durationSeconds = 3.0;
         double sampleRate = 22050.0;
