@@ -3,14 +3,16 @@ import java.util.Arrays;
 public class FrequencyAnalyzer {
   private final int frameSize, myCosSize2Pi;
   private final float[] mySin, myCos;
+  private final double sampleRate;
 
   /**
    * Signalverarbeitungsobjekt mit Lookuptables für Sin und Cosinus
    * 
    * @param size Größe der FFT (muss eine Zweierpotenz sein)
    */
-  public FrequencyAnalyzer(int size) {
+  public FrequencyAnalyzer(int size, double sampleRate) {
     frameSize = 2048;
+    this.sampleRate = sampleRate;
     myCosSize2Pi = size; // 0 - 2*PI
     myCos = new float[myCosSize2Pi]; // für FFT reicht size/2, als0 0 bis PI, nur DCT braucht size
     mySin = new float[myCosSize2Pi];
@@ -21,7 +23,7 @@ public class FrequencyAnalyzer {
   }
 
   public double getDominantFrequency(byte[] audioData) {
-    // Konvertiere die Byte-Daten in ein Float-Array
+    // convert byte data to float array
     float[] audioDataFloat = byteArrayToFloatArray(audioData);
     float[] spectrum = new float[frameSize / 2];
 
@@ -33,7 +35,7 @@ public class FrequencyAnalyzer {
       float[] frame = Arrays.copyOfRange(audioDataFloat, offset, offset + frameSize);
       calculateSpectrum(frame, spectrum);
 
-      // Peak-Detection: stärkste Frequenz im Spektrum finden
+      // Peak-Detection: find strongest frequency in the spectrum
       int maxIndex = 0;
       float maxValue = 0;
       for (int i = 1; i < spectrum.length; i++) {
@@ -42,11 +44,11 @@ public class FrequencyAnalyzer {
           maxIndex = i;
         }
       }
-      // Frequenz berechnen
+      // calculate frequency
       double frequency = maxIndex * sampleRate / frameSize;
       detectedFrequencies[frameCount++] = frequency;
     }
-    // Nur die tatsächlich gefüllten Werte betrachten
+    // only consider the values that are actually filled
     double[] validFrequencies = Arrays.copyOf(detectedFrequencies, frameCount);
     Arrays.sort(validFrequencies);
     double medianFrequency = validFrequencies[validFrequencies.length / 2];

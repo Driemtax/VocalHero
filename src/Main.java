@@ -9,7 +9,7 @@ public class Main {
 
         byte[] testSignal = generateSineWaveBytes(targetFrequency, durationSeconds, sampleRate);
         
-        FrequencyAnalyzer analyzer = new FrequencyAnalyzer(2048);
+        FrequencyAnalyzer analyzer = new FrequencyAnalyzer(2048, sampleRate);
         double medianFrequency = analyzer.getDominantFrequency(testSignal);
         if (Math.abs(medianFrequency - targetFrequency) < tolerance) {
             System.out.println("Richtig gesungen! Erkannte Frequenz: " + medianFrequency + " Hz");
