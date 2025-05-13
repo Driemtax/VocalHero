@@ -1,124 +1,126 @@
 import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
-import java.io.*;
+import java.util.List;
+
+import AudioIO.Recorder;
+import AudioIO.Player;
+import AudioProcessing.FrequencyAnalyzer;
 
 public class MicRecorderWithCountdown {
-    private static TargetDataLine targetLine;
-    private static AudioFormat format;
+    private Recorder recorder;
+    private FrequencyAnalyzer analyzer;
+    private Player player;
+    private AudioFormat format;
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Mikrofon Recorder");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(600, 200);
-            frame.setLayout(new FlowLayout());
-
-            JComboBox<Mixer.Info> deviceComboBox = new JComboBox<>();
-            JLabel statusLabel = new JLabel("Wähle ein Mikrofon und starte die Aufnahme");
-            JButton recordButton = new JButton("Aufnahme starten");
-
-            format = new AudioFormat(22050.0f, 16, 1, true, false);
-
-            // Look for available microphones
-            for (Mixer.Info info : AudioSystem.getMixerInfo()) {
-                Mixer mixer = AudioSystem.getMixer(info);
-                Line.Info[] targetLines = mixer.getTargetLineInfo();
-                for (Line.Info lineInfo : targetLines) {
-                    if (lineInfo instanceof DataLine.Info) {
-                        try {
-                            TargetDataLine testLine = (TargetDataLine) mixer.getLine(lineInfo);
-                            testLine.open(format);
-                            testLine.close();
-                            deviceComboBox.addItem(info);
-                        } catch (Exception ignored) {
-                        }
-                    }
-                }
-            }
-
-            recordButton.addActionListener(e -> {
-                Mixer.Info selectedMixer = (Mixer.Info) deviceComboBox.getSelectedItem();
-                if (selectedMixer == null) {
-                    statusLabel.setText("Bitte ein Mikrofon auswählen!");
-                    return;
-                }
-
-                new Thread(() -> {
-                    try {
-                        // show countdown
-                        for (int i = 3; i > 0; i--) {
-                            final int count = i;
-                            SwingUtilities.invokeLater(() -> statusLabel.setText("Aufnahme startet in: " + count));
-                            Thread.sleep(1000);
-                        }
-
-                        // start recording
-                        Mixer mixer = AudioSystem.getMixer(selectedMixer);
-                        targetLine = (TargetDataLine) mixer.getLine(new DataLine.Info(TargetDataLine.class, format));
-                        targetLine.open(format);
-                        targetLine.start();
-
-                        statusLabel.setText("🎙️ Aufnahme läuft (3 Sekunden)...");
-
-                        ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        byte[] buffer = new byte[4096];
-                        long startTime = System.currentTimeMillis();
-
-                        while (System.currentTimeMillis() - startTime < 3000) {
-                            int bytesRead = targetLine.read(buffer, 0, buffer.length);
-                            out.write(buffer, 0, bytesRead);
-                        }
-
-                        targetLine.stop();
-                        targetLine.close();
-
-                        byte[] audioData = out.toByteArray();
-
-                        // Optionally save to file
-                        ByteArrayInputStream bais = new ByteArrayInputStream(audioData);
-                        AudioInputStream ais = new AudioInputStream(bais, format,
-                                audioData.length / format.getFrameSize());
-                        AudioSystem.write(ais, AudioFileFormat.Type.WAVE, new File("aufnahme.wav"));
-
-                        // Convert to shorts and detect pitch
-                        short[] samples = bytesToShorts(audioData, format.isBigEndian());
-                        double pitch = AutocorrelationAnalyser.detectPitch(samples);
-
-                        // Update status
-                        if (pitch != -1) {
-                            statusLabel.setText(String.format("✅ Aufnahme beendet. erkannte Tonhöhe: %.2f Hz", pitch));
-                        } else {
-                            statusLabel.setText("❌ Keine Tonhöhe erkannt.");
-                        }
-
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        SwingUtilities.invokeLater(() -> statusLabel.setText("❌ Fehler bei der Aufnahme."));
-                    }
-                }).start();
-            });
-
-            frame.add(deviceComboBox);
-            frame.add(recordButton);
-            frame.add(statusLabel);
-            frame.setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> new MicRecorderWithCountdown().createUI());
     }
 
-    private static short[] bytesToShorts(byte[] bytes, boolean isBigEndian) {
-        int samples = bytes.length / 2;
-        short[] shorts = new short[samples];
-    
-        for (int i = 0; i < samples; i++) {
-            int low = bytes[2 * i] & 0xff;
-            int high = bytes[2 * i + 1] & 0xff;
-            shorts[i] = isBigEndian
-                    ? (short) ((high << 8) | low)
-                    : (short) ((low << 8) | high);
+    private void createUI() {
+        JFrame frame = new JFrame("Gesangstrainer");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 300);
+        frame.setLayout(new GridLayout(0, 2, 10, 10));
+
+        format = new AudioFormat(22050.0f, 16, 1, true, false);
+        recorder = new Recorder(format);
+        analyzer = new FrequencyAnalyzer(2048, format.getSampleRate());
+
+        // UI Komponenten
+        JComboBox<Mixer.Info> deviceComboBox = new JComboBox<>();
+        JButton recordButton = new JButton("Aufnahme starten (3 Sek.)");
+        JButton playButton = new JButton("Abspielen");
+        JLabel statusLabel = new JLabel("Status: Bereit");
+        JComboBox<String> noteComboBox = new JComboBox<>(new String[]{"C4", "D4", "E4", "F4", "G4", "A4", "B4"});
+        JLabel targetNoteLabel = new JLabel("Zielnote: -");
+        JLabel detectedNoteLabel = new JLabel("Erkannte Note: -");
+
+        // Mikrofone laden
+        List<Mixer.Info> mics = recorder.getAvailableMicrophones();
+        mics.forEach(deviceComboBox::addItem);
+
+        // Action Listener
+        recordButton.addActionListener(e -> startRecording(deviceComboBox, statusLabel));
+        playButton.addActionListener(e -> playRecording(statusLabel));
+        noteComboBox.addActionListener(e -> targetNoteLabel.setText("Zielnote: " + noteComboBox.getSelectedItem()));
+
+        // Layout
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        leftPanel.add(new JLabel("Mikrofon:"));
+        leftPanel.add(deviceComboBox);
+        leftPanel.add(recordButton);
+        leftPanel.add(playButton);
+        leftPanel.add(statusLabel);
+
+        JPanel rightPanel = new JPanel(new GridLayout(3, 1));
+        rightPanel.add(new JLabel("Übungsmodus:"));
+        rightPanel.add(new JLabel("Wähle eine Zielnote:"));
+        rightPanel.add(noteComboBox);
+        rightPanel.add(targetNoteLabel);
+        rightPanel.add(detectedNoteLabel);
+
+        frame.add(leftPanel);
+        frame.add(rightPanel);
+        frame.setVisible(true);
+    }
+
+    private void startRecording(JComboBox<Mixer.Info> deviceComboBox, JLabel statusLabel) {
+        Mixer.Info selectedMixer = (Mixer.Info) deviceComboBox.getSelectedItem();
+        if (selectedMixer == null) {
+            statusLabel.setText("Bitte Mikrofon auswählen!");
+            return;
         }
-    
-        return shorts;
+
+        new Thread(() -> {
+            try {
+                // Countdown
+                for (int i = 3; i > 0; i--) {
+                    updateStatus(statusLabel, "Aufnahme startet in: " + i);
+                    Thread.sleep(1000);
+                }
+
+                updateStatus(statusLabel, "🎙️ Aufnahme läuft...");
+                recorder.startRecording(3, selectedMixer);
+                Thread.sleep(3000);
+                
+                byte[] audioData = recorder.getAudioData();
+                double frequency = analyzer.getDominantFrequency(audioData);
+                
+                updateStatus(statusLabel, String.format("✅ Aufnahme beendet. Frequenz: %.2f Hz", frequency));
+                detectedNoteLabel.setText("Erkannte Note: " + frequencyToNote(frequency));
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                updateStatus(statusLabel, "❌ Aufnahmefehler!");
+            }
+        }).start();
     }
-    
+
+    private void playRecording(JLabel statusLabel) {
+        if (recorder.getAudioData() == null) {
+            statusLabel.setText("Keine Aufnahme vorhanden!");
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                player = new Player(recorder.getAudioData(), format);
+                player.play();
+                updateStatus(statusLabel, "▶️ Wiedergabe läuft...");
+            } catch (LineUnavailableException ex) {
+                updateStatus(statusLabel, "❌ Wiedergabefehler!");
+            }
+        }).start();
+    }
+
+    // Mock-Methode für Noteerkennung
+    private String frequencyToNote(double frequency) {
+        // Hier später echte Implementierung
+        return "C4 (mock)";
+    }
+
+    private void updateStatus(JLabel label, String text) {
+        SwingUtilities.invokeLater(() -> label.setText(text));
+    }
 }

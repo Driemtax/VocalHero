@@ -1,3 +1,4 @@
+import AudioProcessing.FrequencyAnalyzer;
 import Helper.Note;
 
 public class Main {

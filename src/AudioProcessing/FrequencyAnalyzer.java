@@ -1,3 +1,4 @@
+package AudioProcessing;
 import java.util.Arrays;
 
 public class FrequencyAnalyzer {
