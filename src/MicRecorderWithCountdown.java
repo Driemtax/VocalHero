@@ -1,6 +1,7 @@
 import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import AudioIO.Recorder;
@@ -13,6 +14,8 @@ public class MicRecorderWithCountdown {
     private Player player;
     private AudioFormat format;
 
+    private JComboBox<Mixer.Info> speakerComboBox;
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MicRecorderWithCountdown().createUI());
     }
@@ -23,12 +26,13 @@ public class MicRecorderWithCountdown {
         frame.setSize(800, 300);
         frame.setLayout(new GridLayout(0, 2, 10, 10));
 
-        format = new AudioFormat(22050.0f, 16, 1, true, false);
+        format = new AudioFormat(44100.0f, 16, 2, true, false);
         recorder = new Recorder(format);
         analyzer = new FrequencyAnalyzer(2048, format.getSampleRate());
 
         // UI Komponenten
-        JComboBox<Mixer.Info> deviceComboBox = new JComboBox<>();
+        JComboBox<Mixer.Info> micComboBox = new JComboBox<>();
+        speakerComboBox = new JComboBox<>();
         JButton recordButton = new JButton("Aufnahme starten (3 Sek.)");
         JButton playButton = new JButton("Abspielen");
         JLabel statusLabel = new JLabel("Status: Bereit");
@@ -38,17 +42,22 @@ public class MicRecorderWithCountdown {
 
         // Mikrofone laden
         List<Mixer.Info> mics = recorder.getAvailableMicrophones();
-        mics.forEach(deviceComboBox::addItem);
+        mics.forEach(micComboBox::addItem);
+
+        // Load speaker
+        List<Mixer.Info> speakers = getAvailableSpeakers(format);
+        speakers.forEach(speakerComboBox::addItem);
 
         // Action Listener
-        recordButton.addActionListener(e -> startRecording(deviceComboBox, statusLabel));
+        recordButton.addActionListener(e -> startRecording(micComboBox, statusLabel, detectedNoteLabel));
         playButton.addActionListener(e -> playRecording(statusLabel));
         noteComboBox.addActionListener(e -> targetNoteLabel.setText("Zielnote: " + noteComboBox.getSelectedItem()));
 
         // Layout
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         leftPanel.add(new JLabel("Mikrofon:"));
-        leftPanel.add(deviceComboBox);
+        leftPanel.add(micComboBox);
+        leftPanel.add(speakerComboBox);
         leftPanel.add(recordButton);
         leftPanel.add(playButton);
         leftPanel.add(statusLabel);
@@ -65,7 +74,7 @@ public class MicRecorderWithCountdown {
         frame.setVisible(true);
     }
 
-    private void startRecording(JComboBox<Mixer.Info> deviceComboBox, JLabel statusLabel) {
+    private void startRecording(JComboBox<Mixer.Info> deviceComboBox, JLabel statusLabel, JLabel detectedNoteLabel) {
         Mixer.Info selectedMixer = (Mixer.Info) deviceComboBox.getSelectedItem();
         if (selectedMixer == null) {
             statusLabel.setText("Bitte Mikrofon auswählen!");
@@ -103,12 +112,20 @@ public class MicRecorderWithCountdown {
             return;
         }
 
+        Mixer.Info selectedSpeaker = (Mixer.Info) speakerComboBox.getSelectedItem();
+        if (selectedSpeaker == null) {
+            statusLabel.setText("Bitte Lautsprecher auswählen!");
+            return;
+        }
+
         new Thread(() -> {
             try {
                 player = new Player(recorder.getAudioData(), format);
-                player.play();
+                player.play(selectedSpeaker);
                 updateStatus(statusLabel, "▶️ Wiedergabe läuft...");
             } catch (LineUnavailableException ex) {
+                System.out.println(ex.getMessage());
+                ex.printStackTrace();
                 updateStatus(statusLabel, "❌ Wiedergabefehler!");
             }
         }).start();
@@ -122,5 +139,17 @@ public class MicRecorderWithCountdown {
 
     private void updateStatus(JLabel label, String text) {
         SwingUtilities.invokeLater(() -> label.setText(text));
+    }
+
+    private List<Mixer.Info> getAvailableSpeakers(AudioFormat format) {
+        List<Mixer.Info> speakers = new ArrayList<>();
+        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+        for (Mixer.Info mixerInfo : AudioSystem.getMixerInfo()) {
+            Mixer mixer = AudioSystem.getMixer(mixerInfo);
+            if (mixer.isLineSupported(info)) {
+                speakers.add(mixerInfo);
+            }
+        }
+        return speakers;
     }
 }

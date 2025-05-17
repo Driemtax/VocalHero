@@ -1,22 +1,31 @@
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.Line;
+import javax.sound.sampled.Mixer;
+
 import AudioProcessing.FrequencyAnalyzer;
 import Helper.Note;
 
 public class Main {
     public static void main(String[] args) {
-        double targetFrequency = Note.A4.getFrequency(); // Beispiel: A4
-        double tolerance = 10.0;
-        double durationSeconds = 3.0;
-        double sampleRate = 22050.0;
+        MicRecorderWithCountdown.main(args);
 
-        byte[] testSignal = generateSineWaveBytes(targetFrequency, durationSeconds, sampleRate);
-        
-        FrequencyAnalyzer analyzer = new FrequencyAnalyzer(2048, sampleRate);
-        double medianFrequency = analyzer.getDominantFrequency(testSignal);
-        if (Math.abs(medianFrequency - targetFrequency) < tolerance) {
-            System.out.println("Richtig gesungen! Erkannte Frequenz: " + medianFrequency + " Hz");
-        } else {
-            System.out.println("Falsch gesungen! Erkannte Frequenz: " + medianFrequency + " Hz. Erwartet: " + targetFrequency + " Hz");
-        }
+        // Mixer.Info[] mixers = AudioSystem.getMixerInfo();
+        // for (Mixer.Info mixerInfo : mixers) {
+        //     Mixer mixer = AudioSystem.getMixer(mixerInfo);
+        //     Line.Info[] lineInfos = mixer.getSourceLineInfo();
+        //     for (Line.Info lineInfo : lineInfos) {
+        //         if (lineInfo instanceof DataLine.Info) {
+        //             DataLine.Info dataLineInfo = (DataLine.Info) lineInfo;
+        //             AudioFormat[] formats = dataLineInfo.getFormats();
+        //             System.out.println("Supported formats for " + mixerInfo.getName() + ":");
+        //             for (AudioFormat format : formats) {
+        //                 System.out.println(format.toString());
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     private static byte[] generateSineWaveBytes(double frequency, double durationSeconds, double sampleRate) {

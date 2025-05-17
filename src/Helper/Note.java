@@ -85,4 +85,8 @@ public enum Note {
         int index = start + (int) (Math.random() * (end - start + 1));
         return notes[index];
     }
+
+//     public static Note getNoteFromFrequency(double frequency){
+
+//     }
 }
