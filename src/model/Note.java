@@ -94,6 +94,17 @@ public enum Note {
     //     }
 
     /** 
+     * get a Note based on a Note and an Interval sets descending to false as default
+     * 
+     * @param startNote note from which you want the interval
+     * @param interval interval you want
+     * @return the note the interval after the startnote, or startnote TODO replace with exception
+    */
+    public static Note getNoteFromInterval(Note startNote, Interval interval){
+        return getNoteFromInterval(startNote, interval, false);
+    }
+
+    /** 
      * get a Note based on a Note and an Interval
      * 
      * @param startNote note from which you want the interval
