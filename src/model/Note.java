@@ -1,6 +1,8 @@
 // Authors: Lars Beer, David Herrmann
 package model;
 
+import java.security.InvalidParameterException;
+
 public enum Note {
      C2("C2", 65.41),
     Cs2("C#2", 69.30),
@@ -96,18 +98,32 @@ public enum Note {
      * 
      * @param startNote note from which you want the interval
      * @param interval interval you want
+     * @param descending is the interval descendeng or not
      * @return the note the interval after the startnote, or startnote TODO replace with exception
     */
-    public static Note getNoteFromInterval(Note startNote, Interval interval){
+    public static Note getNoteFromInterval(Note startNote, Interval interval, Boolean descending){
         int noteIndex = 0;
+        int newIndex = 0;
         Note intervalNote = startNote;
         for (Note note : values()) {
             if(note.getName().equals(startNote.getName())){
                 noteIndex = note.ordinal();
-                intervalNote = values()[noteIndex + interval.getSemitones()];
-                return intervalNote;
+                if (descending) {
+                    newIndex = noteIndex - interval.getSemitones();
+                }
+                else {
+                    newIndex = noteIndex + interval.getSemitones();
+                }
+                if (!(newIndex < 0) || !(newIndex > (values().length - 1))){
+                    intervalNote = values()[newIndex];
+                    return intervalNote;
+                }
+                else{
+                    throw new IndexOutOfBoundsException("No Note for index: " + newIndex);
+                }
             }
         }
-        return intervalNote;
+        throw new InvalidParameterException("No corresponding note for: " + startNote.getName());
+
     }
 }
