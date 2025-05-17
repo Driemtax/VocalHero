@@ -1,4 +1,4 @@
-// Authors:
+// Authors:David Herrmann
 package model;
 
 public enum Interval {

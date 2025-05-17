@@ -1,4 +1,4 @@
-// Authors: Lars Beer,
+// Authors: Lars Beer, David Herrmann
 package model;
 
 public enum Note {
