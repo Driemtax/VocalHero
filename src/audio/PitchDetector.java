@@ -2,6 +2,7 @@
 package audio;
 
 import java.util.Arrays;
+import Util.Helper;
 
 public class PitchDetector {
     private final int frameSize, myCosSize2Pi;
@@ -25,9 +26,21 @@ public class PitchDetector {
     }
   }
 
+  public double[] getDominantFrequencies(byte[] audioData, double windowSizeSec) {
+        int windowSize = (int)(sampleRate * windowSizeSec);
+        int steps = audioData.length / windowSize;
+        double[] frequencies = new double[steps];
+        
+        for(int i=0; i<steps; i++) {
+            byte[] chunk = Arrays.copyOfRange(audioData, i*windowSize, (i+1)*windowSize);
+            frequencies[i] = getDominantFrequency(chunk);
+        }
+        return frequencies;
+    }
+
   public double getDominantFrequency(byte[] audioData) {
     // convert byte data to float array
-    float[] audioDataFloat = byteArrayToFloatArray(audioData);
+    float[] audioDataFloat = Helper.byteArrayToFloatArray(audioData);
     float[] spectrum = new float[frameSize / 2];
 
     double[] detectedFrequencies = new double[(audioDataFloat.length - frameSize) / frameSize + 1];
@@ -57,6 +70,14 @@ public class PitchDetector {
 
     return medianFrequency;
   }
+
+  public double getNoteStability(double[] frequencies) {
+        double avg = Arrays.stream(frequencies).average().orElse(0);
+        double variance = Arrays.stream(frequencies)
+                               .map(d -> Math.pow(d - avg, 2))
+                               .average().orElse(0);
+        return 1 / (1 + variance);
+    }
 
   /**
    * FFT - Fast Fourier Transform (Cooley und Tukey / Radix-2-Algorithmus)
@@ -118,19 +139,5 @@ public class PitchDetector {
     // Betrag in Spectrum übertragen (Phase interessiert hier nicht)
     for (int i = 0; i < frameSize / 2; i++)
       spectrum[i] = (float) Math.sqrt(re[i] * re[i] + im[i] * im[i]);
-  }
-
-  private float[] byteArrayToFloatArray(byte[] audioData) {
-    int numSamples = audioData.length / 2;
-    float[] signal = new float[numSamples];
-
-    for (int i = 0; i < numSamples; i++) {
-      int low = audioData[2 * i] & 0xFF;
-      int high = audioData[2 * i + 1]; // signed
-      int sample = (high << 8) | low;
-      // Normierung auf -1.0 bis +1.0
-      signal[i] = sample / 32768f;
-    }
-    return signal;
   }
 }
