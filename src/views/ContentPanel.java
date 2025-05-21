@@ -26,6 +26,13 @@ public class ContentPanel extends JPanel {
     public void showDefaultMessage() {
         showStartPanel(); // z. B. falls nichts gewählt
     }
+
+    public void showLevelScreen() {
+        removeAll();
+        add(new LevelScreen(), BorderLayout.CENTER);
+        revalidate();
+        repaint();
+    }
 }
 
 

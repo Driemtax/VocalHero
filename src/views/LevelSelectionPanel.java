@@ -17,6 +17,18 @@ public class LevelSelectionPanel extends JPanel {
             levelBtn.setForeground(i <= 2 ? Color.GREEN : Color.RED);
             levelBtn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             levelBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            
+            // Add click action to show LevelScreen
+            levelBtn.addActionListener(e -> {
+                Container parent = getParent();
+                while (parent != null && !(parent instanceof ContentPanel)) {
+                    parent = parent.getParent();
+                }
+                if (parent instanceof ContentPanel) {
+                    ((ContentPanel) parent).showLevelScreen();
+                }
+            });
+            
             add(levelBtn);
         }
     }
