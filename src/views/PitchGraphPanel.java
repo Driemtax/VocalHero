@@ -7,10 +7,10 @@ import java.util.LinkedList;
 
 public class PitchGraphPanel extends JPanel {
     private final LinkedList<Double> pitchData = new LinkedList<>();
-    private final Timer timer;
+    //private final Timer timer;
 
     private static final int MAX_POINTS = 1000; // Datenpunkte im Graph
-    private static final int UPDATE_INTERVAL = 20; // ms
+    //private static final int UPDATE_INTERVAL = 20; // ms
     private static final int SCROLL_SPEED = 2; // Pixel pro Frame
 
     public PitchGraphPanel() {
@@ -18,13 +18,21 @@ public class PitchGraphPanel extends JPanel {
 
         // Dummy-Daten: Sinusverlauf zur Simulation
         // Wichtig: Entfernen, wenn echte Audio-Daten verarbeitet werden
-        timer = new Timer(UPDATE_INTERVAL, e -> {
+        /*timer = new Timer(UPDATE_INTERVAL, e -> {
             double t = System.currentTimeMillis() / 200.0;
             double pitchOffset = Math.sin(t) * 50; // simulierte Abweichung
             addPitchValue(pitchOffset);
         });
-        timer.start();
+        timer.start();*/
     }
+
+    private double centToY(double centOffset) {
+        int h = getHeight();
+        double centerY = h / 2.0;
+        double pixelsPerCent = h / 2.0 / 100.0; // 100 Cent == halbe Höhe
+        return centerY + (-centOffset * pixelsPerCent); // minus = oben
+    }
+
 
     // Diese Methode wird von der Audio-Verarbeitung aufgerufen
     public void updatePitch(double frequency) {
@@ -52,6 +60,7 @@ public class PitchGraphPanel extends JPanel {
         super.paintComponent(g);
         int w = getWidth();
         int h = getHeight();
+        
 
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -67,6 +76,7 @@ public class PitchGraphPanel extends JPanel {
         g2.setColor(Color.BLUE);
         g2.setStroke(new BasicStroke(2f));
 
+
         int centerX = w / 2;
         int numPoints = pitchData.size();
         int startX = centerX - numPoints * SCROLL_SPEED;
@@ -75,7 +85,7 @@ public class PitchGraphPanel extends JPanel {
         int x = startX;
 
         for (double pitchOffset : pitchData) {
-            double y = centerY + pitchOffset;
+            double y = centToY(pitchOffset);
             if (x == startX) {
                 path.moveTo(x, y);
             } else {
@@ -88,7 +98,7 @@ public class PitchGraphPanel extends JPanel {
         // Punkt in der Mitte (immer aktuelle Tonhöhe)
         g2.setColor(Color.BLUE);
         if (!pitchData.isEmpty()) {
-            double currentY = centerY + pitchData.getLast();
+            double currentY = centToY(pitchData.getLast());
             g2.fillOval(centerX - 5, (int) currentY - 5, 10, 10);
         }
     }
