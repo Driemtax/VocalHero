@@ -33,6 +33,14 @@ public class ContentPanel extends JPanel {
         revalidate();
         repaint();
     }
+
+    public void showSettingsScreen() {
+        removeAll();
+        add(new SettingsScreen(), BorderLayout.CENTER);
+        revalidate();
+        repaint();
+    }
+
 }
 
 

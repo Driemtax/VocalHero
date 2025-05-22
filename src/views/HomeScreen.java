@@ -33,8 +33,11 @@ public class HomeScreen extends JPanel {
         gbc.gridy = 2;
         ModernButton settingsBtn = new ModernButton("Einstellungen");
         settingsBtn.setPreferredSize(new Dimension(200, 50));
-        settingsBtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Einstellungen noch nicht implementiert."));
-        add(settingsBtn, gbc);
+        settingsBtn.addActionListener(e -> {
+            frame.showApp();
+            frame.getContentPanel().showSettingsScreen();
+        });
+        add(settingsBtn, gbc);  
 
         // 3. Beenden
         gbc.gridy = 3;

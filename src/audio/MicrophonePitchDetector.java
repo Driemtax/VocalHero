@@ -9,11 +9,8 @@ public class MicrophonePitchDetector extends Thread {
     private final PitchGraphPanel graphPanel;
     private boolean running = true;
 
-    private static final float SAMPLE_RATE = 48000;
+    private static final float SAMPLE_RATE = 44100;
     private static final int BUFFER_SIZE = 2048;
-
-    private final double alpha = 0.1; // Glättung: je kleiner, desto träger
-    private double smoothedCents = 0.0;
 
     // Optional: für Median-Filter
     private final List<Double> history = new ArrayList<>();
@@ -26,7 +23,18 @@ public class MicrophonePitchDetector extends Thread {
     public void run() {
         try {
             AudioFormat format = new AudioFormat(SAMPLE_RATE, 16, 1, true, true);
-            TargetDataLine microphone = AudioSystem.getTargetDataLine(format);
+            //TargetDataLine microphone = AudioSystem.getTargetDataLine(format);
+
+            Mixer.Info selectedInput = AudioSettings.getInputDevice();
+            if (selectedInput == null) {
+                System.err.println("Kein Eingabegerät ausgewählt.");
+                return;
+            }
+
+            Mixer mixer = AudioSystem.getMixer(selectedInput);
+            TargetDataLine microphone = (TargetDataLine) mixer.getLine(new DataLine.Info(TargetDataLine.class, format));
+
+
             microphone.open(format, BUFFER_SIZE);
             microphone.start();
 

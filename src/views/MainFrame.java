@@ -1,6 +1,11 @@
 package views;
 
+import javax.sound.sampled.Mixer;
 import javax.swing.*;
+
+import audio.AudioPreferences;
+import audio.AudioSettings;
+
 import java.awt.*;
 
 public class MainFrame extends JFrame {
@@ -12,6 +17,16 @@ public class MainFrame extends JFrame {
     public static final String APP = "app";
 
     public MainFrame() {
+
+        Mixer.Info input = AudioPreferences.loadSavedInputDevice();
+        if (input == null) input = AudioSettings.getDefaultInputDevice();
+
+        Mixer.Info output = AudioPreferences.loadSavedOutputDevice();
+        if (output == null) output = AudioSettings.getDefaultOutputDevice();
+
+        AudioSettings.setInputDevice(input);
+        AudioSettings.setOutputDevice(output);
+
         setTitle("Gesangstrainer");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -46,6 +61,10 @@ public class MainFrame extends JFrame {
     public void showApp() {
         contentPanel.showStartPanel(); // zeigt StartPanel direkt beim Einstieg
         cardLayout.show(rootPanel, APP);
+    }
+
+    public ContentPanel getContentPanel() {
+        return contentPanel;
     }
 
 }
