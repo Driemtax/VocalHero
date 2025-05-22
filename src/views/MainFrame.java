@@ -48,9 +48,4 @@ public class MainFrame extends JFrame {
         cardLayout.show(rootPanel, APP);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new SplashScreen(() -> {
-            new MainFrame();
-        }));
-    }
 }
