@@ -23,7 +23,6 @@ public class Recorder {
         this.format = format;
     }
 
-     // Getter/Setter
     public AudioFormat getFormat() { return format; }
     public void setFormat(AudioFormat format) { this.format = format; }
     public Mixer.Info getSelectedMixer() { return selectedMixer; }
