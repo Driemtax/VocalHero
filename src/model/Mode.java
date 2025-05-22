@@ -1,3 +1,4 @@
+// Authors:David Herrmann
 package model;
 
 public enum Mode {
