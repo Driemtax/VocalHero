@@ -8,12 +8,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class Recorder {
     private TargetDataLine targetLine;
     private AudioFormat format;
     private Mixer.Info selectedMixer;
     private ByteArrayOutputStream audioBuffer;
+    private Consumer<byte[]> audioChunkListener;
+
     
     public Recorder() {
         this(new AudioFormat(22050.0f, 16, 1, true, false));
@@ -26,6 +29,7 @@ public class Recorder {
     public AudioFormat getFormat() { return format; }
     public void setFormat(AudioFormat format) { this.format = format; }
     public Mixer.Info getSelectedMixer() { return selectedMixer; }
+    public void setAudioChunkListener(Consumer<byte[]> listener) {this.audioChunkListener = listener;}
 
     /**
      * Returns all available microphones
@@ -73,6 +77,14 @@ public class Recorder {
             while (System.currentTimeMillis() - startTime < durationSeconds * 1000L) {
                 int bytesRead = targetLine.read(buffer, 0, buffer.length);
                 audioBuffer.write(buffer, 0, bytesRead);
+
+                // Send a COPY of the buffer to the listener
+                // This is important to avoid modifying the original buffer
+                if (audioChunkListener != null) {
+                    byte[] chunkCopy = new byte[bytesRead];
+                    System.arraycopy(buffer, 0, chunkCopy, 0, bytesRead);
+                    audioChunkListener.accept(chunkCopy);
+                }
             }
             stopRecording();
         }).start();
