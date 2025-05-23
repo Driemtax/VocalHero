@@ -1,6 +1,5 @@
-// Authors:
+// Authors: David Herrmann
 package model;
 
-public class Feedback {
-    
+public record Feedback(float score) {
 }
