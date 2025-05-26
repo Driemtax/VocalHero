@@ -4,24 +4,20 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import model.*;
-import manager.AudioManager;
 import Util.Helper;
 
 public class MelodyAnalyzer {
     private final PitchDetector pitchDetector;
-    private final AudioManager audioManager;
     private final List<MidiNote> referenceNotes;
     private final double timingTolerance;
     private final double pitchTolerance;
     private byte[] audioData;
     private double sampleRate;
 
-    public MelodyAnalyzer(AudioManager audioManager, 
-                         List<MidiNote> referenceNotes,
+    public MelodyAnalyzer(List<MidiNote> referenceNotes,
                          double sampleRate,
                          byte[] audioData) {
         this.audioData = audioData;
-        this.audioManager = audioManager;
         this.referenceNotes = referenceNotes;
         this.sampleRate = sampleRate;
         this.pitchDetector = new PitchDetector(2048, sampleRate);
@@ -98,12 +94,6 @@ public class MelodyAnalyzer {
         return new AnalysisResult(overallScore, pitchAccuracy, timingAccuracy);
     }
 }
-
-record AnalysisResult(
-    double overallScore,
-    double pitchAccuracy,
-    double timingAccuracy
-) {}
 
 record NoteResult(boolean pitchCorrect, boolean timingCorrect) {}
 
