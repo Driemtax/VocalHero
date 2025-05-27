@@ -1,38 +1,75 @@
 package views;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class ExercisesMenu extends JPanel {
-    private JPanel subMenu;
+    private JPopupMenu popupMenu;
+    private ModernButton mainButton;
 
     public ExercisesMenu(ContentPanel contentPanel) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(new Color(30, 30, 30));
 
-        ModernButton mainButton = new ModernButton("Übungen");
-        mainButton.addActionListener(e -> toggleSubMenu());
+        mainButton = new ModernButton("Übungen");
         add(mainButton);
 
-        subMenu = new JPanel();
-        subMenu.setLayout(new BoxLayout(subMenu, BoxLayout.Y_AXIS));
-        subMenu.setBackground(new Color(30, 30, 30));
-        subMenu.setVisible(false);
+        // Popup-Menü erstellen
+        popupMenu = new JPopupMenu();
+        popupMenu.setBackground(new Color(40, 40, 40));
+        popupMenu.setBorder(new EmptyBorder(5, 0, 5, 0));
 
         String[] options = {"Einzeltöne", "Intervalle", "Melodien"};
         for (String option : options) {
-            ModernButton btn = new ModernButton(option);
-            btn.addActionListener(ev -> contentPanel.showLevelSelection(option));
-            subMenu.add(btn);
+            JMenuItem menuItem = createStyledMenuItem(option);
+            menuItem.addActionListener(ev -> contentPanel.showLevelSelection(option));
+            popupMenu.add(menuItem);
         }
 
-        add(subMenu);
+        // Mouse Listener für Hover-Effekt
+        mainButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                popupMenu.show(mainButton, mainButton.getWidth(), 0);
+            }
+        });
+
+        // Listener für Popup-Menü, um es zu schließen wenn die Maus es verlässt
+        popupMenu.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
+            public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent evt) {}
+            public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent evt) {}
+            public void popupMenuCanceled(javax.swing.event.PopupMenuEvent evt) {}
+        });
+
+        // Mouse Listener für das Popup-Menü
+        popupMenu.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (!mainButton.getBounds().contains(evt.getPoint())) {
+                    popupMenu.setVisible(false);
+                }
+            }
+        });
     }
 
-    private void toggleSubMenu() {
-        subMenu.setVisible(!subMenu.isVisible());
-        revalidate();
-        repaint();
+    private JMenuItem createStyledMenuItem(String text) {
+        JMenuItem item = new JMenuItem(text);
+        item.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        item.setForeground(Color.WHITE);
+        item.setBackground(new Color(40, 40, 40));
+        item.setBorder(new EmptyBorder(8, 15, 8, 15));
+        item.setPreferredSize(new Dimension(160, 40));
+        item.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        item.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                item.setBackground(new Color(60, 60, 60));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                item.setBackground(new Color(40, 40, 40));
+            }
+        });
+        
+        return item;
     }
 }
 
