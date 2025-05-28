@@ -4,53 +4,26 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Level {
+public enum Level {
 
-    Mode mode;
-    Difficulty difficulty;
+    //TODO: Placeholder Level mit richtigen Levelnn ersetzen
+    N1(Mode.note,Difficulty.easy),
+    N2(Mode.note,Difficulty.medium),
+    N3(Mode.note,Difficulty.hard),
+
+    I1(Mode.note,Difficulty.easy),
+    I2(Mode.note,Difficulty.medium),
+    I3(Mode.note,Difficulty.hard),
+
+    M1(Mode.note,Difficulty.easy),
+    M2(Mode.note,Difficulty.medium),
+    M3(Mode.note,Difficulty.hard);
+
+    private final Mode mode;
+    private final Difficulty difficulty;
 
     Level(Mode mode, Difficulty difficulty){
         this.mode = mode;
         this.difficulty = difficulty;
     }
-
-    List<Note> getLevel() {
-        List<Note> notes = new ArrayList<>();
-        Range range = difficulty.getDifficultyRange();
-
-        switch (mode) {
-            case note:
-                for(int i = 0; i < 5; i++){
-                    notes.add(
-                        Note.getRandomNoteInRange(
-                            Note.values()[range.min()], 
-                            Note.values()[range.min()]
-                            )
-                        );
-                }
-                break;
-        
-            case interval:
-                for(int i = 0; i < 5; i++){
-                    Note note = Note.getRandomNoteInRange(Note.values()[range.min()], Note.values()[range.min()]);
-                    notes.add(note);
-                    Interval interval = Interval.getRandomIntervalInRange(Interval.m2, Interval.P8);
-                    notes.add(
-                        Note.getNoteFromInterval(note, interval)
-                    );
-                }
-                break;
-            
-            case melody:
-            //TODO implement this
-            
-                break;
-
-            default:
-                throw new IndexOutOfBoundsException();
-        }
-
-        return notes;
-    }
-
 }

@@ -1,6 +1,9 @@
 // Authors:David Herrmann
 package model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum Interval {
     P1("P1", 0),
     m2("m2", 1),
@@ -16,7 +19,6 @@ public enum Interval {
     M7("M7", 11),
     P8("P8", 12);
 
-
     private final String name;
     private final int semitones;
 
@@ -28,24 +30,20 @@ public enum Interval {
     public String getName() {
         return name;
     }
-   
-    public int getSemitones(){
+
+    public int getSemitones() {
         return semitones;
     }
 
-        /**
-     * generate a random Interval in the range from and to
-     * 
-     * @param from lowest possible Interval (inclusive)
-     * @param to   highest possible Interval (inclusive)
-     * @return a random Interval in the range from and to
-     */
-    public static Interval getRandomIntervalInRange(Interval from, Interval to) {
-        Interval[] intervals = values();
-        int start = from.ordinal();
-        int end = to.ordinal();
-        int index = start + (int) (Math.random() * (end - start + 1));
-        return intervals[index];
+    private static final Map<Integer, Interval> BY_SEMITONES = new HashMap<>();
+
+    static {
+        for (Interval i : values()) {
+            BY_SEMITONES.put(i.getSemitones(), i);
+        }
     }
-    
+
+    public static Interval fromSemitones(int semitones) {
+        return BY_SEMITONES.get(semitones);
+    }
 }
