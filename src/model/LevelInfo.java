@@ -10,6 +10,8 @@ public class LevelInfo {
     private Mixer.Info selectedMic;
     private Mixer.Info selectedSpeaker;
     private int recordingDuration;
+    private Mode mode;
+    private Difficulty difficulty;
 
     public LevelInfo(Mixer.Info selectedMic, Mixer.Info selectedSpeaker, int recordingDuration) {
         this.selectedMic = selectedMic;
@@ -27,5 +29,13 @@ public class LevelInfo {
 
     public int getRecordingDuration() {
         return recordingDuration;
+    }
+
+    public Difficulty getDifficulty() {
+        return difficulty;
+    }
+
+    public Mode getMode() {
+        return mode;
     }
 }
