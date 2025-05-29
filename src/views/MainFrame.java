@@ -1,10 +1,12 @@
+// Author: Jonas Rumpf
+
 package views;
 
 import javax.sound.sampled.Mixer;
 import javax.swing.*;
 
-import audio.AudioPreferences;
-import audio.AudioSettings;
+import model.AudioSettings;
+import utils.AudioPreferences;
 
 import java.awt.*;
 

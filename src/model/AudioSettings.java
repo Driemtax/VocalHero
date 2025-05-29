@@ -1,4 +1,6 @@
-package audio;
+// Author: Jonas Rumpf
+
+package model;
 
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;

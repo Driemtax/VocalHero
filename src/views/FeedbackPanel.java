@@ -1,4 +1,5 @@
-// Authors:
+// Author: Jonas Rumpf
+
 package views;
 
 import javax.swing.JPanel;

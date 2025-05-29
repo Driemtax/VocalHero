@@ -1,3 +1,5 @@
+// Author: Jonas Rumpf
+
 package views;
 
 import javax.sound.sampled.*;
@@ -5,8 +7,8 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 
-import audio.AudioPreferences;
-import audio.AudioSettings;
+import model.AudioSettings;
+import utils.AudioPreferences;
 
 import java.awt.*;
 

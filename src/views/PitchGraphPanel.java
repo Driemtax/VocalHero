@@ -1,3 +1,5 @@
+// Author: Jonas Rumpf
+
 package views;
 
 import javax.swing.*;
@@ -12,14 +14,15 @@ public class PitchGraphPanel extends JPanel {
     private static final int SCROLL_SPEED = 2;  // Pixel pro Frame
     private static final double MAX_VISIBLE_CENTS = 400.0; // ±400 Cent sichtbar
 
-    private String targetNote = "C4"; // Standard-Zielnote
-    private double targetFrequency = noteToFrequency(targetNote);
+    //private String targetNote = "C4"; // Standard-Zielnote
+    //private double targetFrequency = noteToFrequency(targetNote);
 
     public PitchGraphPanel() {
         setBackground(new Color(80, 80, 80));
     }
 
     /** Diese Methode wird von der Audio-Verarbeitung aufgerufen (liefert Cent-Abweichung) */
+    // Überarbeitung nötig
     public void addPitchValue(double centOffset) {
         pitchData.addLast(centOffset);
         if (pitchData.size() > MAX_POINTS) {
@@ -91,34 +94,4 @@ public class PitchGraphPanel extends JPanel {
         }
     }
 
-    /** Berechne Frequenz einer Note (z. B. C4 → 261.63 Hz) */
-    public static double noteToFrequency(String noteName) {
-        String[] noteNames = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
-        int semitoneOffset = 0;
-
-        String note = noteName.replaceAll("[0-9]", "");
-        int octave = Integer.parseInt(noteName.replaceAll("[^0-9]", ""));
-        for (int i = 0; i < noteNames.length; i++) {
-            if (noteNames[i].equals(note)) {
-                semitoneOffset = i;
-                break;
-            }
-        }
-
-        int midi = (octave + 1) * 12 + semitoneOffset;
-        return 440.0 * Math.pow(2, (midi - 69) / 12.0);
-    }
-
-    public void setTargetNote(String note) {
-        this.targetNote = note;
-        this.targetFrequency = noteToFrequency(note);
-    }
-
-    public double getTargetFrequency() {
-        return targetFrequency;
-    }
-
-    public String getTargetNote() {
-        return targetNote;
-    }
 }
