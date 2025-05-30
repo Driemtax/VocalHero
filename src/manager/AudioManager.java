@@ -1,4 +1,4 @@
-// Authors: Inaas Hammoush
+// Authors: Inaas Hammoush, Lars Beer
 package manager;
 
 import javax.sound.sampled.*;
@@ -131,5 +131,13 @@ public class AudioManager {
             e.printStackTrace();
             return -1;
         }
+    }
+
+    public List<Mixer.Info> getAvailableMicrophones() {
+        return recorder.getAvailableMicrophones();
+    }
+
+    public List<Mixer.Info> getAvailableSpeakers() {
+        return player.getAvailableSpeakers(format);
     }
 }

@@ -9,14 +9,19 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
 
 import model.AudioSettings;
 import utils.AudioPreferences;
+import controller.WindowController;
 
 import java.awt.*;
 
 public class SettingsScreen extends JPanel {
+    private WindowController windowController;
+
     private JComboBox<String> inputDeviceCombo;
     private JComboBox<String> outputDeviceCombo;
 
-    public SettingsScreen() {
+    public SettingsScreen(WindowController controller) {
+        this.windowController = controller;
+
         setLayout(new GridBagLayout());
         setBackground(new Color(50, 50, 50));
 
@@ -38,7 +43,11 @@ public class SettingsScreen extends JPanel {
         add(createLabel("Mikrofon:"), gbc);
 
         gbc.gridx = 1;
-        inputDeviceCombo = new JComboBox<>(getAudioInputDevices());
+        inputDeviceCombo = new JComboBox<>();
+        String[] inputDevices = windowController.getAudioInputDevices();
+        for (String device : inputDevices) {
+            inputDeviceCombo.addItem(device);
+        }
         styleComboBox(inputDeviceCombo);
         setSelectedDevice(inputDeviceCombo, AudioSettings.getInputDevice());
         add(inputDeviceCombo, gbc);
@@ -49,7 +58,11 @@ public class SettingsScreen extends JPanel {
         add(createLabel("Ausgabegerät:"), gbc);
 
         gbc.gridx = 1;
-        outputDeviceCombo = new JComboBox<>(getAudioOutputDevices());
+        outputDeviceCombo = new JComboBox<>();
+        String[] outputDevices = windowController.getAudioOutputDevices();
+        for (String device : outputDevices) {
+            outputDeviceCombo.addItem(device);
+        }
         styleComboBox(outputDeviceCombo);
         setSelectedDevice(outputDeviceCombo, AudioSettings.getOutputDevice());
         add(outputDeviceCombo, gbc);
@@ -83,28 +96,6 @@ public class SettingsScreen extends JPanel {
         JLabel label = new JLabel(text);
         label.setForeground(Color.WHITE);
         return label;
-    }
-
-    private String[] getAudioInputDevices() {
-        Mixer.Info[] mixers = AudioSystem.getMixerInfo();
-        return java.util.Arrays.stream(mixers)
-                .filter(info -> {
-                    Mixer mixer = AudioSystem.getMixer(info);
-                    return mixer.getTargetLineInfo().length > 0;
-                })
-                .map(Mixer.Info::getName)
-                .toArray(String[]::new);
-    }
-
-    private String[] getAudioOutputDevices() {
-        Mixer.Info[] mixers = AudioSystem.getMixerInfo();
-        return java.util.Arrays.stream(mixers)
-                .filter(info -> {
-                    Mixer mixer = AudioSystem.getMixer(info);
-                    return mixer.getSourceLineInfo().length > 0;
-                })
-                .map(Mixer.Info::getName)
-                .toArray(String[]::new);
     }
 
     private void setSelectedDevice(JComboBox<String> comboBox, Mixer.Info selectedInfo) {

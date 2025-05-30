@@ -5,8 +5,10 @@ package views;
 import javax.swing.*;
 import java.awt.*;
 
+import controller.WindowController;
+
 public class Sidebar extends JPanel {
-    public Sidebar(ContentPanel contentPanel, MainFrame frame) {
+    public Sidebar(ContentPanel contentPanel, WindowController controller) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(new Color(30, 30, 30));
         setPreferredSize(new Dimension(200, getHeight()));
@@ -18,7 +20,7 @@ public class Sidebar extends JPanel {
         add(Box.createVerticalGlue());
 
         ModernButton backToMenu = new ModernButton("⟵ Hauptmenü");
-        backToMenu.addActionListener(e -> frame.showHome());
+        backToMenu.addActionListener(e -> controller.showHome());
         add(backToMenu);
     }
 }
