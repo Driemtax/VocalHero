@@ -14,15 +14,16 @@ public class TrainingController {
 
     public void startTrainingSession(LevelInfo levelInfo) {
 
-        levelBuilder = new LevelBuilder();
-        Level level = levelBuilder.buildLevel(levelInfo);
-        audioManager = new AudioManager(levelInfo.getSelectedMic(), levelInfo.getSelectedSpeaker(), level.getReferenceNotes(), levelInfo.getRecordingDuration());
+        levelBuilder = new LevelBuilder(levelInfo);
+        Level level = levelBuilder.buildLevel();
+        audioManager = new AudioManager(level.getSelectedMic(), level.getSelectedSpeaker(), level.getReferenceNotes(), level.getRecordingDuration());
         feedbackManager = new FeedbackManager();
         progressManager = new ProgressManager();
     }
 
     public void startRecordingWithLivePitchGraph() {
         audioManager.startRecordingWithLivePitchGraph(pitch -> {
+            //this could be moved to WindowController
             feedbackManager.updatePitchGraph(pitch);
         });
     }

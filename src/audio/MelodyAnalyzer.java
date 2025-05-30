@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import model.*;
-import Util.Helper;
+import utils.Helper;
 
 public class MelodyAnalyzer {
     private final PitchDetector pitchDetector;

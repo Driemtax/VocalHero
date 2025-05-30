@@ -1,4 +1,4 @@
-package model.Util;
+package utils;
 
 import model.Interval;
 

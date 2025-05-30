@@ -1,8 +1,6 @@
 // Authors: Lars Beer, David Herrmann
 package model;
 
-import java.security.InvalidParameterException;
-
 public enum Note {
     C2("C2", 65.41),
     Cs2("C#2", 69.30),

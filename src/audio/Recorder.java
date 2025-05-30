@@ -78,8 +78,7 @@ public class Recorder {
                 int bytesRead = targetLine.read(buffer, 0, buffer.length);
                 audioBuffer.write(buffer, 0, bytesRead);
 
-                // Send a COPY of the buffer to the listener
-                // This is important to avoid modifying the original buffer
+                // Send a COPY of the buffer to the listener to avoid modifying the original
                 if (audioChunkListener != null) {
                     byte[] chunkCopy = new byte[bytesRead];
                     System.arraycopy(buffer, 0, chunkCopy, 0, bytesRead);

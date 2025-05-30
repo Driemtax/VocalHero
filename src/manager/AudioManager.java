@@ -61,22 +61,15 @@ public class AudioManager {
             pitchListener.accept(pitch);
         });
 
-        try {
-            recorder.startRecording(recordingDuration, selectedMic);
-            audioData = recorder.getAudioData();
-        } catch (LineUnavailableException e) {
-            // TODO: Handle exception through GUI
-            e.printStackTrace();
-        }
+        startRecording();
     }
 
     /**
-     * Starts recording audio for a specified duration.
-     * @param duration
+     * Starts recording audio for the duration specified in the AudioManager.
      */
-    public void startRecording(int duration) {
+    public void startRecording() {
         try {
-            recorder.startRecording(duration, selectedMic);
+            recorder.startRecording(recordingDuration, selectedMic);
             audioData = recorder.getAudioData();
         } catch (LineUnavailableException e) {
             // TODO: Handle exception through GUI
