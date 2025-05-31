@@ -2,7 +2,6 @@
 
 package model;
 
-import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
 
 public class AudioSettings {
@@ -23,25 +22,5 @@ public class AudioSettings {
 
     public static void setOutputDevice(Mixer.Info output) {
         outputDevice = output;
-    }
-
-    public static Mixer.Info getDefaultInputDevice() {
-        for (Mixer.Info info : AudioSystem.getMixerInfo()) {
-            Mixer mixer = AudioSystem.getMixer(info);
-            if (mixer.getTargetLineInfo().length > 0) {
-                return info;
-            }
-        }
-        return null;
-    }
-
-    public static Mixer.Info getDefaultOutputDevice() {
-        for (Mixer.Info info : AudioSystem.getMixerInfo()) {
-            Mixer mixer = AudioSystem.getMixer(info);
-            if (mixer.getSourceLineInfo().length > 0) {
-                return info;
-            }
-        }
-        return null;
     }
 }

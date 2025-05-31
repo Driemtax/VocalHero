@@ -1,7 +1,9 @@
-// Authors: Inaas Hammoush
+// Authors: Inaas Hammoush, Lars Beer
 package manager;
 
 import javax.sound.sampled.*;
+import javax.swing.SwingUtilities;
+
 import audio.MelodyAnalyzer;
 import audio.PitchDetector;
 import audio.Player;
@@ -44,6 +46,10 @@ public class AudioManager {
         this.melodyAnalyzer = new MelodyAnalyzer(referenceNotes, SAMPLE_RATE, audioData);
     }
 
+    public AudioFormat getFormat() {
+        return format;
+    }
+
     /**
      * Starts recording audio for a specified duration and provides live pitch graphing.
      * The pitch is calculated using the PitchDetector and passed to the provided listener.
@@ -62,7 +68,11 @@ public class AudioManager {
         });
 
         try {
-            recorder.startRecording(recordingDuration, selectedMic);
+            // Remove this after we finished implementing the live feedback, this Runnable is just 
+            // to not have a compile error
+            Runnable onRecordingFinishedCallback = () -> {
+            };
+            recorder.startRecording(recordingDuration, selectedMic, onRecordingFinishedCallback);
             audioData = recorder.getAudioData();
         } catch (LineUnavailableException e) {
             // TODO: Handle exception through GUI
@@ -74,14 +84,39 @@ public class AudioManager {
      * Starts recording audio for a specified duration.
      * @param duration
      */
-    public void startRecording(int duration) {
+    public void startRecording(int duration, Runnable onRecordingFinishedCallback) {
+        if (recorder == null) {
+            System.err.println("AudioManager: Recorder ist null!");
+            // Still need to invoke the callback to avoid deadlock in GUI
+            if (onRecordingFinishedCallback != null) SwingUtilities.invokeLater(onRecordingFinishedCallback);
+            return;
+        }
+        if (selectedMic == null) {
+            System.err.println("AudioManager: Kein Mikrofon ausgewählt!");
+             if (onRecordingFinishedCallback != null) SwingUtilities.invokeLater(onRecordingFinishedCallback);
+            return;
+        }
+        if (format == null) { // Zusätzlicher Check
+            System.err.println("AudioManager: AudioFormat ist nicht gesetzt!");
+            if (onRecordingFinishedCallback != null) SwingUtilities.invokeLater(onRecordingFinishedCallback);
+            return;
+        }
         try {
-            recorder.startRecording(duration, selectedMic);
-            audioData = recorder.getAudioData();
+            recorder.startRecording(duration, selectedMic, onRecordingFinishedCallback);
         } catch (LineUnavailableException e) {
             // TODO: Handle exception through GUI
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Gets the lastest recorded audio data. This will either be called after a recording is finished
+     * or in between recordings to get the latest audio data.
+     * @return byte[] of the audio data
+     */
+    public byte[] getRecordedAudioData() {
+        if (recorder == null) return new byte[0];
+        return recorder.getAudioData();
     }
 
     /**
@@ -101,6 +136,25 @@ public class AudioManager {
             // TODO: Handle exception through GUI
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Plays a frequency using the synthesizer to generate an instrument sound.
+     * @param frequency the frequency to play
+     * @param durationMs the duration in milliseconds
+     * @param onPlaybackFinishedCallback callback to execute when playback is finished
+     */
+    public void playReferenceNote(double frequency, int durationMs, Runnable onPlaybackFinishedCallback) {
+        if (player == null) {
+            System.err.println("AudioManager: Player ist nicht initialisiert!");
+            // still execute the callback to avoid deadlock in GUI
+            if (onPlaybackFinishedCallback != null) {
+                SwingUtilities.invokeLater(onPlaybackFinishedCallback);
+            }
+            return;
+        }
+        System.out.println("AudioManager: Spiele Referenznote (Freq: " + frequency + ", Dauer: " + durationMs + "ms)");
+        player.playNote(frequency, durationMs, onPlaybackFinishedCallback);
     }
 
     /**
@@ -130,6 +184,14 @@ public class AudioManager {
             // TODO: Handle exception appropriately
             e.printStackTrace();
             return -1;
+        }
+    }
+
+    // Beim Beenden der Anwendung den Player-Synthesizer schließen
+    public void cleanup() {
+        if (player != null) {
+            // TODO: Implement proper cleanup for the player
+            //player.closeSynthesizer();
         }
     }
 }
