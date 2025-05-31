@@ -107,7 +107,7 @@ public class TestRecorderPlayer {
                 }
 
                 updateStatus(statusLabel, "🎙️ Aufnahme läuft...");
-                recorder.startRecording(3, selectedMixer);
+                //recorder.startRecording(3, selectedMixer);
                 Thread.sleep(3000);
                 
                 byte[] audioData = recorder.getAudioData();
@@ -164,7 +164,7 @@ public class TestRecorderPlayer {
             double frequency = note.getFrequency();
             if (frequency > 0) {
                 // Spielt die Note für 1 Sekunde (1000 ms) ab
-                player.playNote(frequency, 1000);
+                //player.playNote(frequency, 1000);
             }
         }).start();
     }

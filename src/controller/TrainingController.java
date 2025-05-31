@@ -4,8 +4,10 @@ package controller;
 
 import java.util.List;
 
+import javax.security.auth.callback.Callback;
 import javax.sound.sampled.Mixer;
 
+import audio.Player;
 import manager.*;
 import model.LevelInfo;
 import utils.AudioPreferences;
@@ -17,6 +19,7 @@ public class TrainingController {
     private FeedbackManager feedbackManager;
     private LevelBuilder levelBuilder;
     private ProgressManager progressManager;
+    private byte[] audioData;
 
     public TrainingController() {
         // Initialize managers (we need this way before we start a training session)
@@ -39,6 +42,43 @@ public class TrainingController {
         audioManager.startRecordingWithLivePitchGraph(pitch -> {
             feedbackManager.updatePitchGraph(pitch);
         });
+    }
+
+    public void startRecording(Runnable onRecordingFinishedCallback) {
+        // This callback will be executed when the recording is finished.
+        Runnable actionsAfterRecordingIsComplete = () -> {
+            System.out.println("TrainingController: Aufnahme tatsächlich beendet (im EDT Kontext). Hole Audiodaten.");
+            byte[] recordedData = audioManager.getRecordedAudioData();
+            System.out.println("TrainingController: " + recordedData.length + " Bytes aufgenommen.");
+            this.audioData = recordedData;
+
+            // TODO: Process audio data here, e.g. analyze it or save it.
+
+            // Execute the UI callback when processing is done
+            if (onRecordingFinishedCallback != null) {
+                System.out.println("TrainingController: Führe UI-Update-Callback aus der View aus.");
+                onRecordingFinishedCallback.run(); 
+            }
+        };
+        
+        // actually start the recording
+        audioManager.startRecording(3, actionsAfterRecordingIsComplete);
+    }
+
+    /**
+     * Spielt den Referenzton für ein bestimmtes Level ab.
+     * @param uiUpdateCallbackFromView Callback zur Aktualisierung der View nach der Wiedergabe.
+     */
+    public void playReferenceNote(Runnable uiUpdateCallbackFromView) {
+        // This callback will be executed when the playback is complete.
+        Runnable actionsAfterPlaybackIsComplete = () -> {
+            if (uiUpdateCallbackFromView != null) {
+                uiUpdateCallbackFromView.run();
+            }
+        };
+
+        // TODO: Pass actual frequency and duration from the level object
+        audioManager.playReferenceNote(440.0, 1, actionsAfterPlaybackIsComplete);
     }
 
     public List<Mixer.Info> getAvailableInputDevices() {

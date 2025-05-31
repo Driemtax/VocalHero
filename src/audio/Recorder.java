@@ -2,6 +2,8 @@
 package audio;
 
 import javax.sound.sampled.*;
+import javax.swing.SwingUtilities;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -61,9 +63,15 @@ public class Recorder {
      * @param mixerInfo specifies which microphone to use for the recording
      * @throws LineUnavailableException
      */
-    public void startRecording(int durationSeconds, Mixer.Info mixerInfo) throws LineUnavailableException {
+    public void startRecording(int durationSeconds, Mixer.Info mixerInfo, Runnable onRecordingFinished) throws LineUnavailableException {
         this.selectedMixer = mixerInfo;
         Mixer mixer = AudioSystem.getMixer(mixerInfo);
+
+        // close old line if still open
+        if (targetLine != null && targetLine.isOpen()) {
+            targetLine.stop();
+            targetLine.close();
+        }
         
         targetLine = (TargetDataLine) mixer.getLine(new DataLine.Info(TargetDataLine.class, format));
         targetLine.open(format);
@@ -74,19 +82,29 @@ public class Recorder {
         
         new Thread(() -> {
             long startTime = System.currentTimeMillis();
-            while (System.currentTimeMillis() - startTime < durationSeconds * 1000L) {
-                int bytesRead = targetLine.read(buffer, 0, buffer.length);
-                audioBuffer.write(buffer, 0, bytesRead);
+            try {
+                while (System.currentTimeMillis() - startTime < durationSeconds * 1000L) {
+                    int bytesRead = targetLine.read(buffer, 0, buffer.length);
+                    audioBuffer.write(buffer, 0, bytesRead);
 
-                // Send a COPY of the buffer to the listener
-                // This is important to avoid modifying the original buffer
-                if (audioChunkListener != null) {
-                    byte[] chunkCopy = new byte[bytesRead];
-                    System.arraycopy(buffer, 0, chunkCopy, 0, bytesRead);
-                    audioChunkListener.accept(chunkCopy);
+                    // Send a COPY of the buffer to the listener
+                    // This is important to avoid modifying the original buffer
+                    if (audioChunkListener != null) {
+                        byte[] chunkCopy = new byte[bytesRead];
+                        System.arraycopy(buffer, 0, chunkCopy, 0, bytesRead);
+                        audioChunkListener.accept(chunkCopy);
+                    }
+                }
+            } catch (Exception e) {
+                // TODO: handle exception
+            } finally {
+                stopRecording();
+
+                // Important: run callback on the Event Dispatch Thread (EDT), cause UI updates must be done on the EDT
+                if (onRecordingFinished != null) {
+                    SwingUtilities.invokeLater(onRecordingFinished);
                 }
             }
-            stopRecording();
         }).start();
     }
 

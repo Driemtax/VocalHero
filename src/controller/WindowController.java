@@ -7,6 +7,8 @@ import views.SplashScreen;
 import java.awt.*;
 import javax.swing.*;
 import java.util.List;
+import java.util.Locale.Category;
+
 import javax.sound.sampled.*;
 
 
@@ -93,7 +95,7 @@ public class WindowController extends JFrame{
     //TODO: need to somehow notify trainingController and LevelBuilder about training method and level
     public void showLevelScreen(String category, int level) {
         contentPanel.removeAll();
-        contentPanel.add(new LevelScreen(), BorderLayout.CENTER);
+        contentPanel.add(new LevelScreen(this, category, level), BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
     }
@@ -134,5 +136,39 @@ public class WindowController extends JFrame{
     }
 
 
+    /**
+     * Starts the recording with a live pitch graph.
+     * This will be called by the LevelScreen to start the recording with live feedback.
+     *
+     * @param uiUpdateCallbackFromView
+     */
+    public void startRecordingForLevel(Runnable onRecordingFinishedCallback) {
+        if (trainingController != null) {
+            trainingController.startRecording(onRecordingFinishedCallback);
+        } else {
+            System.err.println("WindowController: TrainingController ist null. Aufnahme kann nicht gestartet werden.");
+            // reactivate UI buttons, even if the recording cannot be started
+            if (onRecordingFinishedCallback != null) {
+                SwingUtilities.invokeLater(onRecordingFinishedCallback);
+            }
+        }
+    }
 
+    /**
+     * Plays the reference note for the current level.
+     * This will be called by the LevelScreen to play the reference note.
+     * The callback will be executed after the playback is finished.
+     * @param uiUpdateCallbackFromView
+     */
+    public void playReferenceNote(Runnable uiUpdateCallbackFromView) {
+        if (trainingController != null) {
+            trainingController.playReferenceNote(uiUpdateCallbackFromView);
+        } else {
+            System.err.println("WindowController: TrainingController ist null. Referenzton kann nicht abgespielt werden.");
+            // reactivate UI buttons, even if the playback cannot be started
+            if (uiUpdateCallbackFromView != null) {
+                SwingUtilities.invokeLater(uiUpdateCallbackFromView);
+            }
+        }
+    }
 }

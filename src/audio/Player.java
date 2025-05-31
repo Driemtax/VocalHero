@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.sound.midi.*;
 import javax.sound.sampled.*;
+import javax.swing.SwingUtilities;
 
 public class Player {
     private Synthesizer synthesizer;
@@ -70,28 +71,49 @@ public class Player {
      * @param frequency
      * @param durationMs
      */
-    public void playNote(double frequency, int durationMs) {
+    public void playNote(double frequency, int durationMs, Runnable onPlaybackFinishedCallback) {
         if (synthesizer == null || !synthesizer.isOpen()) {
             System.err.println("Synthesizer ist nicht verfügbar.");
+            // still execute the callback to avoid deadlock in GUI
+            if (onPlaybackFinishedCallback != null) {
+                SwingUtilities.invokeLater(onPlaybackFinishedCallback);
+            }
             return;
         }
 
-        MidiChannel[] channels = synthesizer.getChannels();
-        // Use Channel 0 and set the instrument to a default sound (e.g., 0=Acoustic Grand Piano)
-        MidiChannel channel = channels[0];
-        channel.programChange(0);
+        new Thread(() -> {
+            MidiChannel[] channels = synthesizer.getChannels();
+            if (channels == null || channels.length == 0) {
+                System.err.println("Player: Keine MIDI-Kanäle verfügbar.");
+                 if (onPlaybackFinishedCallback != null) {
+                    SwingUtilities.invokeLater(onPlaybackFinishedCallback);
+                }
+                return;
+            }
+            // Use Channel 0 and set the instrument to a default sound (e.g., 0=Acoustic Grand Piano)
+            MidiChannel channel = channels[0];
+            channel.programChange(0); // Instrument 0 (Piano)
 
-        int midiNote = frequencyToMidiNote(frequency);
-        int velocity = 100; // velocity describes how hard the key of the instrument is pressed
+            int midiNote = frequencyToMidiNote(frequency);
+            int velocity = 100; // velocity describes how hard the key of the instrument is pressed
 
-        channel.noteOn(midiNote, velocity);
-        try {
-            Thread.sleep(durationMs);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } finally {
-            channel.noteOff(midiNote);
-        }
+            try {
+                System.out.println("Player-Thread: NoteOn (Note: " + midiNote + ", Freq: " + frequency + ")");
+                channel.noteOn(midiNote, velocity);
+                Thread.sleep(durationMs);
+            } catch (InterruptedException e) {
+                System.out.println("Player-Thread: Wiedergabe unterbrochen.");
+                Thread.currentThread().interrupt(); // Restore the interrupted status
+            } finally {
+                System.out.println("Player-Thread: NoteOff (Note: " + midiNote + ")");
+                channel.noteOff(midiNote); // Important to turn off the note after the duration
+
+                // Execute the callback on the Event Dispatch Thread (EDT) to update the UI
+                if (onPlaybackFinishedCallback != null) {
+                    SwingUtilities.invokeLater(onPlaybackFinishedCallback);
+                }
+            }
+        }, "PlaybackThread-" + System.currentTimeMillis()).start();
     }
 
     /**
