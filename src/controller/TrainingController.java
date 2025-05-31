@@ -4,14 +4,11 @@ package controller;
 
 import java.util.List;
 
-import javax.security.auth.callback.Callback;
 import javax.sound.sampled.Mixer;
 
-import audio.Player;
 import manager.*;
 import model.LevelInfo;
 import utils.AudioPreferences;
-import model.AudioSettings;
 import model.Level;
 
 public class TrainingController {
