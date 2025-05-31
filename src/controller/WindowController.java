@@ -7,7 +7,6 @@ import views.SplashScreen;
 import java.awt.*;
 import javax.swing.*;
 import java.util.List;
-import java.util.Locale.Category;
 
 import javax.sound.sampled.*;
 
@@ -79,12 +78,12 @@ public class WindowController extends JFrame{
     }
 
     public void showSplashScreen() {
-        // Das ist das Runnable, das ausgeführt wird, NACHDEM der SplashScreen fertig ist.
+        // This is the Runnable that will be executed when the splash screen is finished.
         Runnable onSplashScreenFinished = () -> {
             initAndShowMainApplicationUI();
         };
         
-        // Der SplashScreen sollte sich selbst sichtbar machen und nach Ablauf des Runnables disposen.
+        // The SplashScreen will be shown and will call the onSplashScreenFinished Runnable when it is done.
         splashScreen = new SplashScreen(onSplashScreenFinished);
     }
 
