@@ -8,6 +8,7 @@ import java.util.List;
 import audio.PitchDetector;
 import audio.Recorder;
 import model.Note;
+import utils.AudioPreferences;
 import audio.Player;
 
 public class TestRecorderPlayer {
@@ -45,11 +46,11 @@ public class TestRecorderPlayer {
         JButton playTargetNoteButton = new JButton("Zielnote abspielen");
 
         // Mikrofone laden
-        List<Mixer.Info> mics = recorder.getAvailableMicrophones();
+        List<Mixer.Info> mics = AudioPreferences.getAvailableMicrophones(format);
         mics.forEach(micComboBox::addItem);
 
         // Load speaker
-        List<Mixer.Info> speakers = player.getAvailableSpeakers(format);
+        List<Mixer.Info> speakers = AudioPreferences.getAvailableSpeakers(format);
         speakers.forEach(speakerComboBox::addItem);
 
         // Action Listener

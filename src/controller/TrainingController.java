@@ -82,11 +82,11 @@ public class TrainingController {
     }
 
     public List<Mixer.Info> getAvailableInputDevices() {
-        return audioManager.getAvailableMicrophones();
+        return AudioPreferences.getAvailableMicrophones(audioManager.getFormat());
     }
 
     public List<Mixer.Info> getAvailableOutputDevices() {
-        return audioManager.getAvailableSpeakers();
+        return AudioPreferences.getAvailableSpeakers(audioManager.getFormat());
     }
 
     // We should do this in constructor of training controller and use AudioSettings in the rest of Application

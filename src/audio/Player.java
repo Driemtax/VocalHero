@@ -2,8 +2,6 @@ package audio;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.sound.midi.*;
 import javax.sound.sampled.*;
@@ -20,23 +18,6 @@ public class Player {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Returns all available speakers
-     * @param format the audio format to check for compatibility
-     * @return List<Mixer.Info> of available speakers
-     */
-    public List<Mixer.Info> getAvailableSpeakers(AudioFormat format) {
-        List<Mixer.Info> speakers = new ArrayList<>();
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-        for (Mixer.Info mixerInfo : AudioSystem.getMixerInfo()) {
-            Mixer mixer = AudioSystem.getMixer(mixerInfo);
-            if (mixer.isLineSupported(info)) {
-                speakers.add(mixerInfo);
-            }
-        }
-        return speakers;
     }
 
     /**

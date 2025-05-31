@@ -8,8 +8,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 public class Recorder {
@@ -32,30 +30,6 @@ public class Recorder {
     public void setFormat(AudioFormat format) { this.format = format; }
     public Mixer.Info getSelectedMixer() { return selectedMixer; }
     public void setAudioChunkListener(Consumer<byte[]> listener) {this.audioChunkListener = listener;}
-
-    /**
-     * Returns all available microphones
-     * @return List<Mixer.Info>
-     */
-    public List<Mixer.Info> getAvailableMicrophones() {
-        List<Mixer.Info> microphones = new ArrayList<>();
-        for (Mixer.Info info : AudioSystem.getMixerInfo()) {
-            Mixer mixer = AudioSystem.getMixer(info);
-            Line.Info[] targetLines = mixer.getTargetLineInfo();
-            for (Line.Info lineInfo : targetLines) {
-                if (lineInfo instanceof DataLine.Info) {
-                    try {
-                        TargetDataLine testLine = (TargetDataLine) mixer.getLine(lineInfo);
-                        testLine.open(format);
-                        testLine.close();
-                        microphones.add(info);
-                    } catch (Exception ignored) {
-                    }
-                }
-            }
-        }
-        return microphones;
-    }
 
     /**
      * Starts a recording of a specified duration

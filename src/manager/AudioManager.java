@@ -46,6 +46,10 @@ public class AudioManager {
         this.melodyAnalyzer = new MelodyAnalyzer(referenceNotes, SAMPLE_RATE, audioData);
     }
 
+    public AudioFormat getFormat() {
+        return format;
+    }
+
     /**
      * Starts recording audio for a specified duration and provides live pitch graphing.
      * The pitch is calculated using the PitchDetector and passed to the provided listener.
@@ -181,14 +185,6 @@ public class AudioManager {
             e.printStackTrace();
             return -1;
         }
-    }
-
-    public List<Mixer.Info> getAvailableMicrophones() {
-        return recorder.getAvailableMicrophones();
-    }
-
-    public List<Mixer.Info> getAvailableSpeakers() {
-        return player.getAvailableSpeakers(format);
     }
 
     // Beim Beenden der Anwendung den Player-Synthesizer schließen
