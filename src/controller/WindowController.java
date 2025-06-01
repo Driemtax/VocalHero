@@ -177,4 +177,12 @@ public class WindowController extends JFrame{
             }
         }
     }
+
+    public void showResults(int score, String category, int level) {
+        FeedbackPanel feedbackPanel = new FeedbackPanel(score, category, level, this);
+        contentPanel.removeAll();
+        contentPanel.add(feedbackPanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
 }
