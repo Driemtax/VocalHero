@@ -9,7 +9,7 @@ import controller.WindowController;
 public class LevelScreen extends JPanel {
     private WindowController windowController;
 
-    private ModernButton startRecordingButton;
+    private RecordingButton startRecordingButton;
     private ModernButton playReferenceButton;
     private ModernButton testFeedbackButton; // Add this line
     private PitchGraphPanel pitchPanel;
@@ -31,12 +31,23 @@ public class LevelScreen extends JPanel {
         // Create button panel
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(new Color(20, 20, 20));
-        startRecordingButton = new ModernButton("Start Recording");
+        startRecordingButton = new RecordingButton();
         playReferenceButton = new ModernButton("Play Reference");
         testFeedbackButton = new ModernButton("Test Feedback"); // Add this line
         buttonPanel.add(startRecordingButton);
         buttonPanel.add(playReferenceButton);
         buttonPanel.add(testFeedbackButton); // Add this line
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(new Color(20, 20, 20));
+        topPanel.add(buttonPanel, BorderLayout.CENTER);
+
+        // Help Button erstellen und rechts ausrichten
+        ModernHelpButton helpButton = new ModernHelpButton(category);
+        JPanel helpButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        helpButtonPanel.setBackground(new Color(20, 20, 20));
+        helpButtonPanel.add(helpButton);
+        topPanel.add(helpButtonPanel, BorderLayout.EAST);
 
         // Create main content panel
         JPanel contentPanel = new JPanel(new GridLayout(2, 1));
@@ -46,24 +57,26 @@ public class LevelScreen extends JPanel {
         contentPanel.add(scorePanel);
 
         // Add panels to main layout
-        add(buttonPanel, BorderLayout.NORTH);  // Changed from NORTH to SOUTH
+        add(topPanel, BorderLayout.NORTH);  // Changed from NORTH to SOUTH
         add(contentPanel, BorderLayout.CENTER);
 
         // Add button listeners (empty for now, will be connected to TrainingController later)
         startRecordingButton.addActionListener(e -> {
             // TODO: Do we need visual changes for the buttons to look disabled?
             startRecordingButton.setEnabled(false);
+            startRecordingButton.setRecording(true);
             playReferenceButton.setEnabled(false);
 
             // Callback for when recording is finished
             // TODO: return a feedback here and show in UI
             Runnable onRecordingFinishedCallback = () -> {
-            startRecordingButton.setEnabled(true);
-            playReferenceButton.setEnabled(true);
-            System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
-            // Hier könntest du weitere UI-Updates machen, z.B. Ergebnisse anzeigen
-            // windowController.showResults(score);
-        };
+                startRecordingButton.setEnabled(true);
+                startRecordingButton.setRecording(false);
+                playReferenceButton.setEnabled(true);
+                System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
+                // Hier könntest du weitere UI-Updates machen, z.B. Ergebnisse anzeigen
+                // windowController.showResults(score);
+            };
             
             windowController.startRecordingForLevel(onRecordingFinishedCallback); 
         });
