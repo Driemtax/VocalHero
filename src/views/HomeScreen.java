@@ -3,10 +3,16 @@
 package views;
 
 import javax.swing.*;
+
+import controller.WindowController;
+
 import java.awt.*;
 
 public class HomeScreen extends JPanel {
-    public HomeScreen(MainFrame frame) {
+    private WindowController windowController;
+    public HomeScreen(WindowController controller) {
+        this.windowController = controller;
+
         setLayout(new GridBagLayout());
         setBackground(new Color(50, 50, 50));
 
@@ -27,7 +33,7 @@ public class HomeScreen extends JPanel {
         gbc.gridy = 1;
         ModernButton startBtn = new ModernButton("Start!");
         startBtn.setPreferredSize(new Dimension(200, 50));
-        startBtn.addActionListener(e -> frame.showApp());
+        startBtn.addActionListener(e -> windowController.showApp());
         add(startBtn, gbc);
 
         // 2. Einstellungen
@@ -35,8 +41,8 @@ public class HomeScreen extends JPanel {
         ModernButton settingsBtn = new ModernButton("Einstellungen");
         settingsBtn.setPreferredSize(new Dimension(200, 50));
         settingsBtn.addActionListener(e -> {
-            frame.showApp();
-            frame.getContentPanel().showSettingsScreen();
+            windowController.showApp();
+            windowController.showSettingsScreen();
         });
         add(settingsBtn, gbc);  
 

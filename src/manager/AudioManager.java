@@ -1,7 +1,9 @@
-// Authors: Inaas Hammoush
+// Authors: Inaas Hammoush, Lars Beer
 package manager;
 
 import javax.sound.sampled.*;
+import javax.swing.SwingUtilities;
+
 import audio.MelodyAnalyzer;
 import audio.PitchDetector;
 import audio.Player;
@@ -44,6 +46,10 @@ public class AudioManager {
         this.melodyAnalyzer = new MelodyAnalyzer(referenceNotes, SAMPLE_RATE, audioData);
     }
 
+    public AudioFormat getFormat() {
+        return format;
+    }
+
     /**
      * Starts recording audio for a specified duration and provides live pitch graphing.
      * The pitch is calculated using the PitchDetector and passed to the provided listener.
@@ -61,15 +67,12 @@ public class AudioManager {
             pitchListener.accept(pitch);
         });
 
-        startRecording();
-    }
-
-    /**
-     * Starts recording audio for the duration specified in the AudioManager.
-     */
-    public void startRecording() {
         try {
-            recorder.startRecording(recordingDuration, selectedMic);
+            // Remove this after we finished implementing the live feedback, this Runnable is just 
+            // to not have a compile error
+            Runnable onRecordingFinishedCallback = () -> {
+            };
+            recorder.startRecording(recordingDuration, selectedMic, onRecordingFinishedCallback);
             audioData = recorder.getAudioData();
         } catch (LineUnavailableException e) {
             // TODO: Handle exception through GUI
@@ -94,6 +97,25 @@ public class AudioManager {
             // TODO: Handle exception through GUI
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Plays a frequency using the synthesizer to generate an instrument sound.
+     * @param frequency the frequency to play
+     * @param durationMs the duration in milliseconds
+     * @param onPlaybackFinishedCallback callback to execute when playback is finished
+     */
+    public void playReferenceNote(double frequency, int durationMs, Runnable onPlaybackFinishedCallback) {
+        if (player == null) {
+            System.err.println("AudioManager: Player ist nicht initialisiert!");
+            // still execute the callback to avoid deadlock in GUI
+            if (onPlaybackFinishedCallback != null) {
+                SwingUtilities.invokeLater(onPlaybackFinishedCallback);
+            }
+            return;
+        }
+        System.out.println("AudioManager: Spiele Referenznote (Freq: " + frequency + ", Dauer: " + durationMs + "ms)");
+        player.playNote(frequency, durationMs, onPlaybackFinishedCallback);
     }
 
     /**
@@ -123,6 +145,14 @@ public class AudioManager {
             // TODO: Handle exception appropriately
             e.printStackTrace();
             return -1;
+        }
+    }
+
+    // Beim Beenden der Anwendung den Player-Synthesizer schließen
+    public void cleanup() {
+        if (player != null) {
+            // TODO: Implement proper cleanup for the player
+            //player.closeSynthesizer();
         }
     }
 }
