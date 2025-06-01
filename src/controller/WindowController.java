@@ -1,4 +1,4 @@
-//Authors: Lars Beer
+//Authors: Lars Beer, Inaas Hammoush
 package controller;
 
 import views.*;
@@ -134,39 +134,63 @@ public class WindowController extends JFrame{
         return outputDeviceNames;
     }
 
+    public void setPitchListener(PitchGraphPanel pitchListener) {
+        if (trainingController != null) {
+            trainingController.setPitchListener(pitchListener::addPitchValue);
+        } else {
+            System.err.println("WindowController: TrainingController ist null. PitchListener kann nicht gesetzt werden.");
+        }
+    }
+
 
     /**
      * Starts the recording with a live pitch graph.
      * This will be called by the LevelScreen to start the recording with live feedback.
      *
-     * @param uiUpdateCallbackFromView
+     * @param updateUiAfterRecordingCallback
      */
-    public void startRecordingForLevel(Runnable onRecordingFinishedCallback) {
+    public void startRecordingForLevel(Runnable updateUiAfterRecordingCallback) {
         if (trainingController != null) {
-            trainingController.startRecording(onRecordingFinishedCallback);
+            trainingController.startRecordingWithLivePitchGraph(updateUiAfterRecordingCallback);
         } else {
             System.err.println("WindowController: TrainingController ist null. Aufnahme kann nicht gestartet werden.");
             // reactivate UI buttons, even if the recording cannot be started
-            if (onRecordingFinishedCallback != null) {
-                SwingUtilities.invokeLater(onRecordingFinishedCallback);
+            if (updateUiAfterRecordingCallback != null) {
+                SwingUtilities.invokeLater(updateUiAfterRecordingCallback);
             }
         }
     }
 
     /**
+     * Shows the results screen with the given category, level, and score.
+     * This will be called by the LevelScreen to show the results after recording.
+     *
+     * @param category The category of the level.
+     * @param level The level number.
+     * @param score The score achieved in the level.
+     */
+    // public void showResults() { // This is just an example
+    //     int score = trainingController.getFeedback().getScore();
+    //     contentPanel.removeAll();
+    //     contentPanel.add(new ResultScreen(this, category, level, score), BorderLayout.CENTER);
+    //     contentPanel.revalidate();
+    //     contentPanel.repaint();
+    // }
+
+    /**
      * Plays the reference note for the current level.
      * This will be called by the LevelScreen to play the reference note.
      * The callback will be executed after the playback is finished.
-     * @param uiUpdateCallbackFromView
+     * @param updateUiAfterPlaybackCallback
      */
-    public void playReferenceNote(Runnable uiUpdateCallbackFromView) {
+    public void playReference(Runnable updateUiAfterPlaybackCallback) {
         if (trainingController != null) {
-            trainingController.playReferenceNote(uiUpdateCallbackFromView);
+            trainingController.playReference(updateUiAfterPlaybackCallback);
         } else {
             System.err.println("WindowController: TrainingController ist null. Referenzton kann nicht abgespielt werden.");
             // reactivate UI buttons, even if the playback cannot be started
-            if (uiUpdateCallbackFromView != null) {
-                SwingUtilities.invokeLater(uiUpdateCallbackFromView);
+            if (updateUiAfterPlaybackCallback != null) {
+                SwingUtilities.invokeLater(updateUiAfterPlaybackCallback);
             }
         }
     }

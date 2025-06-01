@@ -8,77 +8,98 @@ import javax.sound.sampled.Mixer;
 
 import manager.*;
 import model.LevelInfo;
+import model.Mode;
 import utils.AudioPreferences;
+import model.AnalysisResult;
+import model.Feedback;
 import model.Level;
 
 public class TrainingController {
     private AudioManager audioManager;
     private FeedbackManager feedbackManager;
     private LevelBuilder levelBuilder;
+    Level level;
     private ProgressManager progressManager;
-    private byte[] audioData;
+    private AnalysisResult analysisResult;
 
     public TrainingController() {
-        // Initialize managers (we need this way before we start a training session)
+        // Initialize managers (we need the AudioManager before we start a training session)
         audioManager = new AudioManager(null, null, null, 0);
         feedbackManager = new FeedbackManager();
-        levelBuilder = new LevelBuilder();
         progressManager = new ProgressManager();
     }
 
     public void startTrainingSession(LevelInfo levelInfo) {
-
-        levelBuilder = new LevelBuilder(levelInfo);
-        Level level = levelBuilder.buildLevel();
+        this.levelBuilder = new LevelBuilder(levelInfo);
+        this.level = levelBuilder.buildLevel();
         audioManager = new AudioManager(level.getSelectedMic(), level.getSelectedSpeaker(), level.getReferenceNotes(), level.getRecordingDuration());
-        feedbackManager = new FeedbackManager();
-        progressManager = new ProgressManager();
     }
 
-    public void startRecordingWithLivePitchGraph() {
-        audioManager.startRecordingWithLivePitchGraph(pitch -> {
-            //this could be moved to WindowController
-            feedbackManager.updatePitchGraph(pitch);
-        });
-    }
-
-    public void startRecording(Runnable onRecordingFinishedCallback) {
-        // This callback will be executed when the recording is finished.
-        Runnable actionsAfterRecordingIsComplete = () -> {
-            System.out.println("TrainingController: Aufnahme tatsächlich beendet (im EDT Kontext). Hole Audiodaten.");
-            byte[] recordedData = audioManager.getRecordedAudioData();
-            System.out.println("TrainingController: " + recordedData.length + " Bytes aufgenommen.");
-            this.audioData = recordedData;
-
-            // TODO: Process audio data here, e.g. analyze it or save it.
-
-            // Execute the UI callback when processing is done
-            if (onRecordingFinishedCallback != null) {
-                System.out.println("TrainingController: Führe UI-Update-Callback aus der View aus.");
-                onRecordingFinishedCallback.run(); 
-            }
-        };
-        
-        // actually start the recording
-        audioManager.startRecording(3, actionsAfterRecordingIsComplete);
+    public void setPitchListener( PitchListener pitchListener) {
+        feedbackManager.setPitchListener(pitchListener);
     }
 
     /**
-     * Spielt den Referenzton für ein bestimmtes Level ab.
-     * @param uiUpdateCallbackFromView Callback zur Aktualisierung der View nach der Wiedergabe.
+     * Starts recording audio for a specified duration and provides live pitch graphing.
+     * @param updateUiAfterRecordingCallback Callback for updating the UI after recording is complete.
      */
-    public void playReferenceNote(Runnable uiUpdateCallbackFromView) {
-        // This callback will be executed when the playback is complete.
-        Runnable actionsAfterPlaybackIsComplete = () -> {
-            if (uiUpdateCallbackFromView != null) {
-                uiUpdateCallbackFromView.run();
-            }
-        };
+    public void startRecordingWithLivePitchGraph(Runnable updateUiAfterRecordingCallback) {
 
-        // TODO: Pass actual frequency and duration from the level object
-        audioManager.playReferenceNote(440.0, 1, actionsAfterPlaybackIsComplete);
+        audioManager.startRecordingWithLivePitchGraph(
+        pitch -> {feedbackManager.updatePitchGraph(pitch);},
+        () -> {
+            // This callback is called when the recording is complete
+            setLevelFeedback(); // Analyze the recorded audio and set feedback
+            updateUiAfterRecordingCallback.run(); // Update the UI after recording
+        });
     }
 
+    public void setLevelFeedback() {
+        if (level.getMode() == Mode.NOTE || level.getMode() == Mode.INTERVAL) {
+            // For NOTE and INTERVAL modes, detect the pitch of the sung note
+            double pitch = audioManager.detectPitchOfRecordedAudio();
+            // set the Feedback Object in the Level object
+            // TODO: Create a Feedback object based on the detected pitch
+            level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, pitch)); // Placeholder for Feedback object, to be implemented later
+        } else {
+            // For MELODY mode, analyze the melody of the sung audio
+            System.out.println("TrainingController: Analysing melody...");
+            analysisResult = audioManager.analyzeMelody();
+            // set the Feedback Object in the Level object
+            // TODO: Create a Feedback object based on the analysis result 
+            level.setFeedback(feedbackManager.calculateFeedbackForRecordedMelody(analysisResult)); // Placeholder for Feedback object, to be implemented later
+        }
+    }
+
+    /**
+     * Returns the Level Feedback (should be called by WindowController).
+     * @return The current Level Feedback.
+     */
+    public Feedback getFeedback() {
+        return level.getFeedback();
+    }
+
+
+    /**
+     * Spielt den Referenzton für ein bestimmtes Level ab.
+     * @param updateUiAfterPlaybackCallback Callback zur Aktualisierung der View nach der Wiedergabe.
+     */
+    public void playReference(Runnable updateUiAfterPlaybackCallback) {
+
+        // The Level object contains a list of reference MidiNotes 
+        // for now, the audioManager only plays one note and not the whole list
+
+        if (level.getReferenceNotes() == null || level.getReferenceNotes().isEmpty()) {
+            System.err.println("TrainingController: Keine Referenznoten für das Level verfügbar.");
+            if (updateUiAfterPlaybackCallback != null) {
+                updateUiAfterPlaybackCallback.run(); // Reactivate UI buttons even if no notes are available
+            }
+            return;
+        }
+        audioManager.playReference(level.getReferenceNotes(), updateUiAfterPlaybackCallback);
+    }
+
+    // TODO: remove these methods from AudioPreferences into a separate util class
     public List<Mixer.Info> getAvailableInputDevices() {
         return AudioPreferences.getAvailableMicrophones(audioManager.getFormat());
     }
