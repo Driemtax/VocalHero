@@ -18,7 +18,8 @@ public class Sidebar extends JPanel {
         ModernButton exercisesButton = new ModernButton("Übungen");
         ModernButton progressButton = new ModernButton("Fortschritt");
 
-        exercisesButton.addActionListener(e -> contentPanel.showCategoryScreen());
+        exercisesButton.addActionListener(e -> controller.showCategoryScreen());
+        progressButton.addActionListener(e -> controller.showProgressScreen());
 
         add(tutorialsButton);
         add(exercisesButton);

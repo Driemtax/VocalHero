@@ -1,3 +1,5 @@
+// Author: Jonas Rumpf
+
 package utils;
 
 public class ScoreEvaluation {

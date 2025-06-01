@@ -120,6 +120,13 @@ public class WindowController extends JFrame{
         contentPanel.repaint();
     }
 
+    public void showProgressScreen() {
+        contentPanel.removeAll();
+        contentPanel.add(new ProgressPanel(), BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
     public String[] getAudioInputDevices() {
         List<Mixer.Info> inputDevices = trainingController.getAvailableInputDevices();
 
