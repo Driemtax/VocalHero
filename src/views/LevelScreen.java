@@ -11,6 +11,7 @@ public class LevelScreen extends JPanel {
 
     private ModernButton startRecordingButton;
     private ModernButton playReferenceButton;
+    private ModernButton testFeedbackButton; // Add this line
     private PitchGraphPanel pitchPanel;
     private ScorePanel scorePanel;
 
@@ -23,6 +24,8 @@ public class LevelScreen extends JPanel {
         this.currentCategory = category;
         this.currentLevel = level;
 
+        System.out.println("LevelScreen: Initializing for category: " + category + ", level: " + level);
+
         setLayout(new BorderLayout());
 
         // Create button panel
@@ -30,8 +33,10 @@ public class LevelScreen extends JPanel {
         buttonPanel.setBackground(new Color(20, 20, 20));
         startRecordingButton = new ModernButton("Start Recording");
         playReferenceButton = new ModernButton("Play Reference");
+        testFeedbackButton = new ModernButton("Test Feedback"); // Add this line
         buttonPanel.add(startRecordingButton);
         buttonPanel.add(playReferenceButton);
+        buttonPanel.add(testFeedbackButton); // Add this line
 
         // Create main content panel
         JPanel contentPanel = new JPanel(new GridLayout(2, 1));
@@ -76,6 +81,16 @@ public class LevelScreen extends JPanel {
 
             // Play the reference note for the current level
             windowController.playReferenceNote(onPlaybackFinishedCallback);
+        });
+        
+        testFeedbackButton.addActionListener(e -> {
+            int mockupScore = 84; // Test score
+            FeedbackPanel feedbackPanel = new FeedbackPanel(mockupScore, currentCategory, currentLevel, windowController);
+            
+            removeAll();
+            add(feedbackPanel);
+            revalidate();
+            repaint();
         });
     }
 

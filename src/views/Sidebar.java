@@ -14,9 +14,15 @@ public class Sidebar extends JPanel {
         setPreferredSize(new Dimension(200, getHeight()));
         setBorder(BorderFactory.createEmptyBorder(30, 10, 10, 10));
 
-        add(new ModernButton("Tutorials"));
-        add(new ExercisesMenu(contentPanel));
-        add(new ModernButton("Fortschritt"));
+        ModernButton tutorialsButton = new ModernButton("Tutorials");
+        ModernButton exercisesButton = new ModernButton("Übungen");
+        ModernButton progressButton = new ModernButton("Fortschritt");
+
+        exercisesButton.addActionListener(e -> contentPanel.showCategoryScreen());
+
+        add(tutorialsButton);
+        add(exercisesButton);
+        add(progressButton);
         add(Box.createVerticalGlue());
 
         ModernButton backToMenu = new ModernButton("⟵ Hauptmenü");

@@ -106,11 +106,18 @@ public class WindowController extends JFrame{
         contentPanel.repaint();
     }
 
+    public void showCategoryScreen() {
+        contentPanel.removeAll();
+        contentPanel.add(new CategoryScreen(contentPanel), BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
     public void showLevelSelection(String category) {
-        removeAll();
-        add(new LevelSelectionPanel(this, category), BorderLayout.CENTER);
-        revalidate();
-        repaint();
+        contentPanel.removeAll();
+        contentPanel.add(new LevelSelectionPanel(this, category), BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
 
     public String[] getAudioInputDevices() {

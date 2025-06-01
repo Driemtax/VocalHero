@@ -22,6 +22,13 @@ public class ContentPanel extends JPanel {
         repaint();
     }
 
+    public void showCategoryScreen() {
+        removeAll();
+        add(new CategoryScreen(this), BorderLayout.CENTER);
+        revalidate();
+        repaint();
+    }
+
     public void showLevelSelection(String category) {
         removeAll();
         add(new LevelSelectionPanel(windowController, category), BorderLayout.CENTER);
