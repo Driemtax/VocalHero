@@ -127,6 +127,13 @@ public class WindowController extends JFrame{
         contentPanel.repaint();
     }
 
+    public void showTutorialsScreen() {
+        contentPanel.removeAll();
+        contentPanel.add(new TutorialsScreen(), BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
     public String[] getAudioInputDevices() {
         List<Mixer.Info> inputDevices = trainingController.getAvailableInputDevices();
 
