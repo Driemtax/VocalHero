@@ -1,12 +1,12 @@
 import javax.swing.SwingUtilities;
 
-import views.MainFrame;
-import views.SplashScreen;
+import controller.TrainingController;
+import controller.WindowController;
 
 public class Main {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new SplashScreen(() -> {
-            new MainFrame();
-        }));
+        final TrainingController trainingController = new TrainingController();
+        final WindowController windowController = new WindowController(trainingController);
+        SwingUtilities.invokeLater(() -> windowController.showSplashScreen());
     }
 } 

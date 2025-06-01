@@ -1,16 +1,28 @@
+// Authors: Jonas Rumpf, Lars Beer
 package views;
 
 import javax.swing.*;
 import java.awt.*;
 
+import controller.WindowController;
+
 public class LevelScreen extends JPanel {
+    private WindowController windowController;
 
     private ModernButton startRecordingButton;
     private ModernButton playReferenceButton;
     private PitchGraphPanel pitchPanel;
     private ScorePanel scorePanel;
 
-    public LevelScreen() {
+    // Maybe show this information in the UI later.
+    private String currentCategory;
+    private int currentLevel;
+
+    public LevelScreen(WindowController controller, String category, int level) {
+        this.windowController = controller;
+        this.currentCategory = category;
+        this.currentLevel = level;
+
         setLayout(new BorderLayout());
 
         // Create button panel
@@ -34,11 +46,36 @@ public class LevelScreen extends JPanel {
 
         // Add button listeners (empty for now, will be connected to TrainingController later)
         startRecordingButton.addActionListener(e -> {
-            // Will be implemented when TrainingController is ready
+            // TODO: Do we need visual changes for the buttons to look disabled?
+            startRecordingButton.setEnabled(false);
+            playReferenceButton.setEnabled(false);
+
+            // Callback for when recording is finished
+            // TODO: return a feedback here and show in UI
+            Runnable onRecordingFinishedCallback = () -> {
+            startRecordingButton.setEnabled(true);
+            playReferenceButton.setEnabled(true);
+            System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
+            // Hier könntest du weitere UI-Updates machen, z.B. Ergebnisse anzeigen
+            // windowController.showResults(score);
+        };
+            
+            windowController.startRecordingForLevel(onRecordingFinishedCallback); 
         });
 
         playReferenceButton.addActionListener(e -> {
-            // Will be implemented when TrainingController is ready
+            // TODO: Do we need visual changes for the buttons to look disabled?
+            playReferenceButton.setEnabled(false);
+            startRecordingButton.setEnabled(false);
+
+            // Callback for when playback is finished
+            Runnable onPlaybackFinishedCallback = () -> {
+                playReferenceButton.setEnabled(true);
+                startRecordingButton.setEnabled(true);
+            };
+
+            // Play the reference note for the current level
+            windowController.playReferenceNote(onPlaybackFinishedCallback);
         });
     }
 
