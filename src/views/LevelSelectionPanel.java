@@ -37,6 +37,8 @@ public class LevelSelectionPanel extends JPanel {
 
         // TODO: add function to create a LevelInfo Object for each level
         // windowController.startTrainingSession(LevelIno)
+        // The LevelInfo should contain the Mode and the Difficulty 
+        // (and any other necessary parameters e.g. data needed to track progress)
     }
 }
 
