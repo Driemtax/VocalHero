@@ -4,6 +4,8 @@ package manager;
 import model.AnalysisResult;
 import model.Feedback;
 import model.MidiNote;
+import model.PitchListener;
+
 import java.util.List;
 
 public class FeedbackManager {

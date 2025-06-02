@@ -9,6 +9,7 @@ import javax.sound.sampled.Mixer;
 import manager.*;
 import model.LevelInfo;
 import model.Mode;
+import model.PitchListener;
 import utils.AudioPreferences;
 import model.AnalysisResult;
 import model.Feedback;
