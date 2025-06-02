@@ -4,6 +4,7 @@ package manager;
 
 import java.util.List;
 
+import model.AudioSettings;
 import model.Difficulty;
 import model.Level;
 import model.LevelInfo;
@@ -22,8 +23,7 @@ public class LevelBuilder {
     }
 
     public Level buildLevel() {
-        return new Level(levelInfo.getMode(), levelInfo.getDifficulty(), 
-                         levelInfo.getSelectedMic(), levelInfo.getSelectedSpeaker(), 
+        return new Level(levelInfo.getMode(), levelInfo.getDifficulty(),
                          generateReferenceNotes());
     }
 

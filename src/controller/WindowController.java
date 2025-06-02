@@ -6,6 +6,7 @@ import views.SplashScreen;
 
 import java.awt.*;
 import javax.swing.*;
+import model.LevelInfo;
 import java.util.List;
 
 import javax.sound.sampled.*;
@@ -142,6 +143,22 @@ public class WindowController extends JFrame{
         }
     }
 
+
+    /**
+     * Starts the training session with the given level info.
+     * This will be called by the HomeScreen to start a new training session.
+     *
+     * @param category The category of the level.
+     * @param level The level number.
+     */
+    public void startTrainingSession(LevelInfo levelInfo) {
+        if (trainingController != null) {
+            trainingController.startTrainingSession(levelInfo);
+            // showLevelScreen(category, level);
+        } else {
+            System.err.println("WindowController: TrainingController ist null. Training kann nicht gestartet werden.");
+        }
+    }    
 
     /**
      * Starts the recording with a live pitch graph.

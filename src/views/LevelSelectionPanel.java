@@ -34,6 +34,9 @@ public class LevelSelectionPanel extends JPanel {
             
             add(levelBtn);
         }
+
+        // TODO: add function to create a LevelInfo Object for each level
+        // windowController.startTrainingSession(LevelIno)
     }
 }
 

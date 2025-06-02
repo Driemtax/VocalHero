@@ -13,6 +13,8 @@ import utils.AudioPreferences;
 import model.AnalysisResult;
 import model.Feedback;
 import model.Level;
+import model.AudioSettings;
+import utils.AudioUtil;
 
 public class TrainingController {
     private AudioManager audioManager;
@@ -21,18 +23,19 @@ public class TrainingController {
     Level level;
     private ProgressManager progressManager;
     private AnalysisResult analysisResult;
+    private static AudioUtil audioUtil = new AudioUtil();
 
     public TrainingController() {
-        // Initialize managers (we need the AudioManager before we start a training session)
-        audioManager = new AudioManager(null, null, null, 0);
-        feedbackManager = new FeedbackManager();
+        initializeAudioSettings(); // Load saved audio settings or set defaults
         progressManager = new ProgressManager();
     }
 
     public void startTrainingSession(LevelInfo levelInfo) {
         this.levelBuilder = new LevelBuilder(levelInfo);
         this.level = levelBuilder.buildLevel();
-        audioManager = new AudioManager(level.getSelectedMic(), level.getSelectedSpeaker(), level.getReferenceNotes(), level.getRecordingDuration());
+        // RecordingDuration still needs to be set in the Level object (default is 3 seconds and more for melodies) 
+        audioManager = new AudioManager(AudioSettings.getInputDevice(), AudioSettings.getOutputDevice(), level.getReferenceNotes(), level.getRecordingDuration());
+        feedbackManager = new FeedbackManager(level.getReferenceNotes());
     }
 
     public void setPitchListener( PitchListener pitchListener) {
@@ -59,14 +62,12 @@ public class TrainingController {
             // For NOTE and INTERVAL modes, detect the pitch of the sung note
             double pitch = audioManager.detectPitchOfRecordedAudio();
             // set the Feedback Object in the Level object
-            // TODO: Create a Feedback object based on the detected pitch
             level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, pitch)); // Placeholder for Feedback object, to be implemented later
         } else {
             // For MELODY mode, analyze the melody of the sung audio
             System.out.println("TrainingController: Analysing melody...");
             analysisResult = audioManager.analyzeMelody();
             // set the Feedback Object in the Level object
-            // TODO: Create a Feedback object based on the analysis result 
             level.setFeedback(feedbackManager.calculateFeedbackForRecordedMelody(analysisResult)); // Placeholder for Feedback object, to be implemented later
         }
     }
@@ -99,31 +100,28 @@ public class TrainingController {
         audioManager.playReference(level.getReferenceNotes(), updateUiAfterPlaybackCallback);
     }
 
-    // TODO: remove these methods from AudioPreferences into a separate util class
     public List<Mixer.Info> getAvailableInputDevices() {
-        return AudioPreferences.getAvailableMicrophones(audioManager.getFormat());
+        return audioUtil.getAvailableMicrophones(audioManager.getFormat());
     }
 
     public List<Mixer.Info> getAvailableOutputDevices() {
-        return AudioPreferences.getAvailableSpeakers(audioManager.getFormat());
+        return audioUtil.getAvailableSpeakers(audioManager.getFormat());
     }
 
-    // We should do this in constructor of training controller and use AudioSettings in the rest of Application
-    // private void initializeAudioSettings() {
-    //     System.out.println("Initialisiere Audio-Einstellungen...");
-    //     Mixer.Info input = AudioPreferences.loadSavedInputDevice();
-    //     if (input == null) {
-    //         input = AudioSettings.getDefaultInputDevice();
-    //     }
+    private void initializeAudioSettings() {
+        System.out.println("Initialisiere Audio-Einstellungen...");
+        Mixer.Info input = AudioPreferences.loadSavedInputDevice();
+        if (input == null) {
+            input = audioUtil.getDefaultInputDevice();
+        }
 
-    //     Mixer.Info output = AudioPreferences.loadSavedOutputDevice();
-    //     if (output == null) {
-    //         output = AudioSettings.getDefaultOutputDevice();
-    //     }
+        Mixer.Info output = AudioPreferences.loadSavedOutputDevice();
+        if (output == null) {
+            output = audioUtil.getDefaultOutputDevice();
+        }
 
-    //     AudioSettings.setInputDevice(input);
-    //     AudioSettings.setOutputDevice(output);
-    //     System.out.println("Audio-Einstellungen initialisiert.");
-    //     // Hier könntest du auch den TrainingController informieren oder er könnte dies selbst tun.
-    // }
+        AudioSettings.setInputDevice(input);
+        AudioSettings.setOutputDevice(output);
+        System.out.println("Audio-Einstellungen initialisiert.");
+    }
 }
