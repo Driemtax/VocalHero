@@ -16,6 +16,7 @@ import model.Feedback;
 import model.Level;
 import model.AudioSettings;
 import utils.AudioUtil;
+import utils.Helper;
 
 public class TrainingController {
     private AudioManager audioManager;
@@ -48,9 +49,15 @@ public class TrainingController {
      * @param updateUiAfterRecordingCallback Callback for updating the UI after recording is complete.
      */
     public void startRecordingWithLivePitchGraph(Runnable updateUiAfterRecordingCallback) {
+        // Get the target frequency from the first reference note
+        double targetFrequency = level.getReferenceNotes().get(0).getFrequency();
 
         audioManager.startRecordingWithLivePitchGraph(
-        pitch -> {feedbackManager.updatePitchGraph(pitch);},
+        pitch -> {
+            // Convert frequency to cent offset before updating the pitch graph
+            double centOffset = Helper.frequencyToCentOffset(pitch, targetFrequency);
+            feedbackManager.updatePitchGraph(centOffset);
+        },
         () -> {
             // This callback is called when the recording is complete
             setLevelFeedback(); // Analyze the recorded audio and set feedback
@@ -62,8 +69,9 @@ public class TrainingController {
         if (level.getMode() == Mode.NOTE || level.getMode() == Mode.INTERVAL) {
             // For NOTE and INTERVAL modes, detect the pitch of the sung note
             double pitch = audioManager.detectPitchOfRecordedAudio();
+            System.out.println("TrainingController: Detected pitch: " + pitch);
             // set the Feedback Object in the Level object
-            level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, pitch)); // Placeholder for Feedback object, to be implemented later
+            level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, level.getReferenceNotes().get(0).frequency)); // Placeholder for Feedback object, to be implemented later
         } else {
             // For MELODY mode, analyze the melody of the sung audio
             System.out.println("TrainingController: Analysing melody...");
@@ -123,6 +131,7 @@ public class TrainingController {
 
         AudioSettings.setInputDevice(input);
         AudioSettings.setOutputDevice(output);
+        audioManager = new AudioManager(input, output, null, 3); // Default recording duration of 3 seconds
         System.out.println("Audio-Einstellungen initialisiert.");
     }
 }

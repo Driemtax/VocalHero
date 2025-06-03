@@ -22,7 +22,7 @@ public class ExercisesMenu extends JPanel {
         popupMenu.setBackground(new Color(40, 40, 40));
         popupMenu.setBorder(new EmptyBorder(5, 0, 5, 0));
 
-        String[] options = {"Einzeltöne", "Intervalle", "Melodien"};
+        String[] options = {"Einzelnote", "Intervalle", "Melodien"};
         for (String option : options) {
             JMenuItem menuItem = createStyledMenuItem(option);
             menuItem.addActionListener(ev -> contentPanel.showLevelSelection(option));

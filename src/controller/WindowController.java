@@ -1,4 +1,4 @@
-//Authors: Lars Beer, Inaas Hammoush
+//Authors: Lars Beer, Inaas Hammoush, Jonas Rumpf
 package controller;
 
 import views.*;
@@ -6,8 +6,14 @@ import views.SplashScreen;
 
 import java.awt.*;
 import javax.swing.*;
+
+import manager.FeedbackManager;
+import model.Feedback;
 import model.LevelInfo;
+import model.Mode;
+
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.sound.sampled.*;
 
@@ -94,6 +100,8 @@ public class WindowController extends JFrame{
 
     //TODO: need to somehow notify trainingController and LevelBuilder about training method and level
     public void showLevelScreen(String category, int level) {
+        LevelInfo levelInfo = new LevelInfo(level, Mode.fromString(category));
+        trainingController.startTrainingSession(levelInfo); // Start the training session with the given level info
         contentPanel.removeAll();
         contentPanel.add(new LevelScreen(this, category, level), BorderLayout.CENTER);
         contentPanel.revalidate();
@@ -186,13 +194,16 @@ public class WindowController extends JFrame{
      * @param level The level number.
      * @param score The score achieved in the level.
      */
-    // public void showResults() { // This is just an example
-    //     int score = trainingController.getFeedback().getScore();
+    public void showResults() {
+        Feedback feedback = trainingController.getFeedback();
+        System.out.println("Score: " + feedback.score());
+        System.out.println("Feedback Message: " + feedback.getFeedbackMessage());
+        System.out.println("Feedback Medal: " + feedback.getFeedbackMedal());
     //     contentPanel.removeAll();
     //     contentPanel.add(new ResultScreen(this, category, level, score), BorderLayout.CENTER);
     //     contentPanel.revalidate();
     //     contentPanel.repaint();
-    // }
+     }
 
     /**
      * Plays the reference note for the current level.

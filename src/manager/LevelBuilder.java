@@ -3,6 +3,7 @@
 package manager;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import model.AudioSettings;
 import model.Difficulty;
@@ -28,21 +29,23 @@ public class LevelBuilder {
     }
 
     private List<MidiNote> generateReferenceNotes() {
-        // This method should generate reference notes based on the difficulty level.
-        List<MidiNote> referenceNotes;
+        List<MidiNote> referenceNotes = new ArrayList<MidiNote>();
         Note note;
+        MidiNote convertedNote;
 
         switch (levelInfo.getMode()) {
             case NOTE:
                 note = NoteUtil.getRandomNoteInRange(levelInfo.getDifficulty().getDifficultyRange()); 
-                referenceNotes.add(note); // a function to convert Note to MidiNote is still needed
+                convertedNote = NoteUtil.toMidiNote(note, 0, 3);
+                referenceNotes.add(convertedNote); // a function to convert Note to MidiNote is still needed
                 return referenceNotes;
             case INTERVAL:
                 // Generate a random note and interval based on difficulty
                 note = NoteUtil.getRandomNoteInRange(levelInfo.getDifficulty().getDifficultyRange());
                 // Here the logic seems to be faulty, maybe a range should be passed instead of interval
                 Interval interval = IntervalUtil.getRandomIntervalInRange(null, null); 
-                referenceNotes.add(NoteUtil.getNoteFromInterval(note, interval)); // a function to convert Note to MidiNote is still needed
+                convertedNote = NoteUtil.toMidiNote(NoteUtil.getNoteFromInterval(note, interval), 0, 3);
+                referenceNotes.add(convertedNote); // a function to convert Note to MidiNote is still needed
                 return referenceNotes;
             case MELODY:
                 // Here we can get a random melody from a predefined pool
