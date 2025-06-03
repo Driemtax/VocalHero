@@ -1,4 +1,4 @@
-package Util;
+package utils;
 
 public class Helper {
     public static float[] byteArrayToFloatArray(byte[] audioData) {

@@ -37,7 +37,7 @@ public class Recorder {
      * @param mixerInfo specifies which microphone to use for the recording
      * @throws LineUnavailableException
      */
-    public void startRecording(int durationSeconds, Mixer.Info mixerInfo, Runnable onRecordingFinished) throws LineUnavailableException {
+    public void startRecording(int durationSeconds, Mixer.Info mixerInfo, Runnable getRecordedDataCallback) throws LineUnavailableException {
         this.selectedMixer = mixerInfo;
         Mixer mixer = AudioSystem.getMixer(mixerInfo);
 
@@ -75,8 +75,8 @@ public class Recorder {
                 stopRecording();
 
                 // Important: run callback on the Event Dispatch Thread (EDT), cause UI updates must be done on the EDT
-                if (onRecordingFinished != null) {
-                    SwingUtilities.invokeLater(onRecordingFinished);
+                if (getRecordedDataCallback != null) {
+                    SwingUtilities.invokeLater(getRecordedDataCallback);
                 }
             }
         }).start();

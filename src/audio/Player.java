@@ -97,6 +97,15 @@ public class Player {
         }, "PlaybackThread-" + System.currentTimeMillis()).start();
     }
 
+    // TODO: Add a method to play a list of MidiNotes, e.g. for a melody
+    /**
+     * Plays a list of MidiNotes, e.g. for the reference notes of a level
+     * @param referenceNotes List of MidiNotes to play
+     * @param onPlaybackFinishedCallback callback to execute when playback is finished
+     */
+
+     
+
     /**
      * Converts a frequency to a MIDI note number
      * @param frequency the frequency in Hz

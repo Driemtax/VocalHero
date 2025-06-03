@@ -2,7 +2,8 @@
 package audio;
 
 import java.util.Arrays;
-import Util.Helper;
+
+import utils.Helper;
 
 public class PitchDetector {
     private final int frameSize, myCosSize2Pi;

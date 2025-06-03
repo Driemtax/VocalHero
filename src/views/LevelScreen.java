@@ -36,6 +36,7 @@ public class LevelScreen extends JPanel {
         // Create main content panel
         JPanel contentPanel = new JPanel(new GridLayout(2, 1));
         pitchPanel = new PitchGraphPanel();
+        windowController.setPitchListener(pitchPanel); // Set the pitch listener for live updates
         scorePanel = new ScorePanel();
         contentPanel.add(pitchPanel);
         contentPanel.add(scorePanel);
@@ -52,15 +53,15 @@ public class LevelScreen extends JPanel {
 
             // Callback for when recording is finished
             // TODO: return a feedback here and show in UI
-            Runnable onRecordingFinishedCallback = () -> {
+            Runnable updateUiAfterRecordingCallback = () -> {
             startRecordingButton.setEnabled(true);
             playReferenceButton.setEnabled(true);
             System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
             // Hier könntest du weitere UI-Updates machen, z.B. Ergebnisse anzeigen
-            // windowController.showResults(score);
+            // windowController.showResults();
         };
             
-            windowController.startRecordingForLevel(onRecordingFinishedCallback); 
+            windowController.startRecordingForLevel(updateUiAfterRecordingCallback); 
         });
 
         playReferenceButton.addActionListener(e -> {
@@ -69,13 +70,13 @@ public class LevelScreen extends JPanel {
             startRecordingButton.setEnabled(false);
 
             // Callback for when playback is finished
-            Runnable onPlaybackFinishedCallback = () -> {
+            Runnable updateUiAfterPlaybackCallback = () -> {
                 playReferenceButton.setEnabled(true);
                 startRecordingButton.setEnabled(true);
             };
 
             // Play the reference note for the current level
-            windowController.playReferenceNote(onPlaybackFinishedCallback);
+            windowController.playReference(updateUiAfterPlaybackCallback);
         });
     }
 

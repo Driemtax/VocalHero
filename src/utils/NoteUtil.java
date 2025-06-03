@@ -1,7 +1,8 @@
-package model.Util;
+package utils;
 
 import model.Note;
 import model.Interval;
+import model.Range;
 
 public class NoteUtil {
     /**
@@ -11,11 +12,15 @@ public class NoteUtil {
      * @param to   highest possible note (inclusive)
      * @return a random note in the range from and to
      */
-    public static Note getRandomNoteInRange(Note from, Note to) {
+    public static Note getRandomNoteInRange(Range range) {
+        // TODO: Check edge cases for range
         Note[] notes = Note.values();
-        int start = from.ordinal();
-        int end = to.ordinal();
+        int start = range.min();
+        int end = range.max();
         int index = start + (int) (Math.random() * (end - start + 1));
+        if (index < 0 || index >= notes.length) {
+            throw new IndexOutOfBoundsException("Index out of bounds for note array: " + index);
+        }
         return notes[index];
     }
 

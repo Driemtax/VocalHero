@@ -7,8 +7,10 @@ import java.util.List;
 
 import audio.PitchDetector;
 import audio.Recorder;
+import model.AudioSettings;
 import model.Note;
 import utils.AudioPreferences;
+import utils.AudioUtil;
 import audio.Player;
 
 public class TestRecorderPlayer {
@@ -16,6 +18,7 @@ public class TestRecorderPlayer {
     private PitchDetector analyzer;
     private Player player;
     private AudioFormat format;
+    private AudioUtil audioUtil = new AudioUtil();
 
     private JComboBox<Mixer.Info> speakerComboBox;
 
@@ -46,11 +49,11 @@ public class TestRecorderPlayer {
         JButton playTargetNoteButton = new JButton("Zielnote abspielen");
 
         // Mikrofone laden
-        List<Mixer.Info> mics = AudioPreferences.getAvailableMicrophones(format);
+        List<Mixer.Info> mics = audioUtil.getAvailableMicrophones(format);
         mics.forEach(micComboBox::addItem);
 
         // Load speaker
-        List<Mixer.Info> speakers = AudioPreferences.getAvailableSpeakers(format);
+        List<Mixer.Info> speakers = audioUtil.getAvailableSpeakers(format);
         speakers.forEach(speakerComboBox::addItem);
 
         // Action Listener
