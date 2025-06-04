@@ -9,9 +9,12 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
 
 import model.AudioSettings;
 import utils.AudioPreferences;
+import utils.LanguagePreferences;
 import controller.WindowController;
+import i18n.LanguageManager;
 
 import java.awt.*;
+import java.util.Locale;
 
 public class SettingsScreen extends JPanel {
     private WindowController windowController;
@@ -30,7 +33,7 @@ public class SettingsScreen extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
 
-        JLabel titleLabel = new JLabel("Einstellungen");
+        JLabel titleLabel = new JLabel(LanguageManager.get("settings.title"));
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
         gbc.gridy = 0;
@@ -40,7 +43,7 @@ public class SettingsScreen extends JPanel {
 
         // Mikrofon-Auswahl
         gbc.gridy = 1;
-        add(createLabel("Mikrofon:"), gbc);
+        add(createLabel(LanguageManager.get("settings.microphone")), gbc);
 
         gbc.gridx = 1;
         inputDeviceCombo = new JComboBox<>();
@@ -55,7 +58,7 @@ public class SettingsScreen extends JPanel {
         // Ausgabegerät-Auswahl
         gbc.gridx = 0;
         gbc.gridy = 2;
-        add(createLabel("Ausgabegerät:"), gbc);
+        add(createLabel(LanguageManager.get("settings.outputDevice")), gbc);
 
         gbc.gridx = 1;
         outputDeviceCombo = new JComboBox<>();
@@ -88,6 +91,30 @@ public class SettingsScreen extends JPanel {
                     break;
                 }
             }
+        });
+
+        // Sprachauswahl
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        add(createLabel(LanguageManager.get("settings.language")), gbc);
+
+        gbc.gridx = 1;
+        String[] languages = { "Deutsch", "English" };
+        JComboBox<String> languageCombo = new JComboBox<>(languages);
+        languageCombo.setSelectedIndex(LanguagePreferences.getSavedLanguageIndex());
+        styleComboBox(languageCombo);
+        add(languageCombo, gbc);
+
+        languageCombo.addActionListener(e -> {
+            int idx = languageCombo.getSelectedIndex();
+            Locale locale = (idx == 0) ? Locale.GERMAN : Locale.ENGLISH;
+            LanguageManager.setLocale(locale);
+            LanguagePreferences.saveLanguage(locale);
+            JOptionPane.showMessageDialog(this,
+                LanguageManager.get("settings.restart_required"),
+                LanguageManager.get("settings.language"),
+                JOptionPane.INFORMATION_MESSAGE
+            );
         });
 
     }
