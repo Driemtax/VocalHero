@@ -8,6 +8,7 @@ import java.awt.*;
 import javax.swing.*;
 import model.LevelInfo;
 import model.Mode;
+import model.MidiNote;
 
 import java.util.List;
 
@@ -164,7 +165,22 @@ public class WindowController extends JFrame{
         } else {
             System.err.println("WindowController: TrainingController ist null. Training kann nicht gestartet werden.");
         }
-    }    
+    }   
+    
+    /**
+     * Returns the reference notes for the current level.
+     * This will be called by the LevelScreen to get the reference notes for the current level.
+     *
+     * @return List of MidiNote objects representing the reference notes for the current level.
+     */
+    public List<MidiNote> getReferenceNotesForCurrentLevel() {
+        if (trainingController != null) {
+            return trainingController.getReferenceNotesForCurrentLevel();
+        } else {
+            System.err.println("WindowController: TrainingController ist null. Referenznoten können nicht abgerufen werden.");
+            return List.of(); // Return an empty list if the controller is null
+        }
+    }
 
     /**
      * Starts the recording with a live pitch graph.

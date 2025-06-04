@@ -1,11 +1,12 @@
-// Authors: Jonas Rumpf, Lars Beer
+// Authors: Jonas Rumpf, Lars Beer, Inaas Hammoush
 package views;
 
 import javax.swing.*;
 import java.awt.*;
 
 import controller.WindowController;
-import model.LevelInfo;
+import model.MidiNote;
+import java.util.List;
 
 public class LevelScreen extends JPanel {
     private WindowController windowController;
@@ -36,7 +37,8 @@ public class LevelScreen extends JPanel {
         JPanel contentPanel = new JPanel(new GridLayout(2, 1));
         pitchPanel = new PitchGraphPanel();
         windowController.setPitchListener(pitchPanel); // Set the pitch listener for live updates
-        scorePanel = new ScorePanel();
+        List<MidiNote> referenceNotes = windowController.getReferenceNotesForCurrentLevel();
+        scorePanel = new ScorePanel(referenceNotes);
         contentPanel.add(pitchPanel);
         contentPanel.add(scorePanel);
 
