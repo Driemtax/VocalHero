@@ -6,13 +6,15 @@ import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import i18n.LanguageManager;
+
 public class RecordingButton extends ModernButton {
     private static final Color RECORDING_COLOR = new Color(60, 180, 60);  // Green
     private static final Color IDLE_COLOR = new Color(180, 60, 60);      // Red
     private boolean isRecording = false;
 
     public RecordingButton() {
-        super("Start Recording");
+        super(LanguageManager.get("recordingbutton.start"));
         setBackground(IDLE_COLOR);
         
         addMouseListener(new MouseAdapter() {

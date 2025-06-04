@@ -7,6 +7,7 @@ import javax.swing.*;
 import model.Mode;
 
 import java.awt.*;
+import i18n.LanguageManager;
 
 public class CategoryScreen extends JPanel {
     
@@ -27,7 +28,7 @@ public class CategoryScreen extends JPanel {
         };
         
         for (Mode mode : options) {
-            BigModernButton categoryBtn = new BigModernButton(mode.getName());
+            BigModernButton categoryBtn = new BigModernButton(LanguageManager.get("category." + mode.name().toLowerCase()));
             
             // Add click action to show LevelSelection
             categoryBtn.addActionListener(e -> {
@@ -38,7 +39,7 @@ public class CategoryScreen extends JPanel {
         }
         
         // Titel hinzufügen
-        JLabel titleLabel = new JLabel("Übungen");
+        JLabel titleLabel = new JLabel(LanguageManager.get("category.title"));
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);

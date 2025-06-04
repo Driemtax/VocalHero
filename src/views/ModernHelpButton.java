@@ -4,6 +4,7 @@ package views;
 
 import javax.swing.*;
 
+import i18n.LanguageManager;
 import model.Mode;
 
 import java.awt.*;
@@ -45,32 +46,32 @@ public class ModernHelpButton extends JButton {
 
     private void showCategoryHelpDialog() {
         String message = getHelpTextForCategory(mode);
-        showDarkInfoDialog(this, message, "How to Play");
+        showDarkInfoDialog(this, message, LanguageManager.get("help.title"));
     }
 
     private String getHelpTextForCategory(Mode mode) {
         switch (mode) {
             case INTERVAL:
-                return mode.getName() + " Training:\n\n"
-                     + "1. Click 'Play Reference' to hear the interval\n"
-                     + "2. Click 'Start Recording' and sing the interval\n"
-                     + "3. The graph will show your pitch in real-time\n"
-                     + "4. After 3 seconds, you'll get feedback on your performance\n\n"
-                     + "Try to match the interval as closely as possible!";
+                return mode.getName() + " " + LanguageManager.get("help.training") + ":\n\n"
+                     + LanguageManager.get("help.interval.1") + "\n"
+                     + LanguageManager.get("help.interval.2") + "\n"
+                     + LanguageManager.get("help.interval.3") + "\n"
+                     + LanguageManager.get("help.interval.4") + "\n\n"
+                     + LanguageManager.get("help.interval.tip");
             case MELODY:
-                return mode.getName() + " Training:\n\n"
-                     + "1. Click 'Play Reference' to hear the melody\n"
-                     + "2. Click 'Start Recording' and sing the melody\n"
-                     + "3. The graph will show your pitch in real-time\n"
-                     + "4. After 3 seconds, you'll get feedback on your performance\n\n"
-                     + "Try to match the melody as closely as possible!";
+                return mode.getName() + " " + LanguageManager.get("help.training") + ":\n\n"
+                     + LanguageManager.get("help.melody.1") + "\n"
+                     + LanguageManager.get("help.melody.2") + "\n"
+                     + LanguageManager.get("help.melody.3") + "\n"
+                     + LanguageManager.get("help.melody.4") + "\n\n"
+                     + LanguageManager.get("help.melody.tip");
             default:
-                return mode.getName() + " Training\n\n"
-                     + "1. Click 'Play Reference' to hear the target note\n"
-                     + "2. Click 'Start Recording' and sing the note\n"
-                     + "3. The graph will show your pitch in real-time\n"
-                     + "4. After 3 seconds, you'll get feedback on your performance\n\n"
-                     + "Try to match the reference note as closely as possible!";
+                return mode.getName() + " " + LanguageManager.get("help.training") + "\n\n"
+                     + LanguageManager.get("help.single.1") + "\n"
+                     + LanguageManager.get("help.single.2") + "\n"
+                     + LanguageManager.get("help.single.3") + "\n"
+                     + LanguageManager.get("help.single.4") + "\n\n"
+                     + LanguageManager.get("help.single.tip");
         }
     }
 

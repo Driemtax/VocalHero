@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 
 import controller.WindowController;
+import i18n.LanguageManager;
 import model.Mode;
 
 public class LevelScreen extends JPanel {
@@ -32,7 +33,7 @@ public class LevelScreen extends JPanel {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(new Color(20, 20, 20));
         startRecordingButton = new RecordingButton();
-        playReferenceButton = new ModernButton("Play Reference");
+        playReferenceButton = new ModernButton(LanguageManager.get("levelscreen.play_reference"));
         buttonPanel.add(startRecordingButton);
         buttonPanel.add(playReferenceButton);
 

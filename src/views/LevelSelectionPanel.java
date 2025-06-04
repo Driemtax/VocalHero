@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 import controller.WindowController;
+import i18n.LanguageManager;
 import model.Mode;
 
 public class LevelSelectionPanel extends JPanel {
@@ -18,7 +19,7 @@ public class LevelSelectionPanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
         for (int i = 1; i <= 10; i++) {
-            BigModernButton levelBtn = new BigModernButton("Level " + i);
+            BigModernButton levelBtn = new BigModernButton(LanguageManager.get("level") + " " + i);
             levelBtn.setLockStatus(i <= 2); // First two levels unlocked
             
             final int levelNumber = i;

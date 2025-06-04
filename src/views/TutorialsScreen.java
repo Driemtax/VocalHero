@@ -2,6 +2,7 @@ package views;
 
 import javax.swing.*;
 import java.awt.*;
+import i18n.LanguageManager;
 
 public class TutorialsScreen extends JPanel {
 
@@ -15,7 +16,7 @@ public class TutorialsScreen extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        JLabel title = new JLabel("Grundlegende Singtechniken");
+        JLabel title = new JLabel(LanguageManager.get("tutorials.title"));
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(new Color(230, 230, 230));
         gbc.gridwidth = 2;
@@ -24,20 +25,20 @@ public class TutorialsScreen extends JPanel {
         gbc.gridy++;
         gbc.gridwidth = 1;
 
-        addTutorialSection("🎶 Atemtechnik",
-            "Atme tief in den Bauch ein, nicht nur in die Brust. Eine gute Atemstütze hilft dir, Töne sicher und lang zu halten.", gbc);
+        addTutorialSection("🎶 " + LanguageManager.get("tutorials.breathing.heading"),
+            LanguageManager.get("tutorials.breathing.text"), gbc);
 
-        addTutorialSection("🗣️ Haltung",
-            "Stehe oder sitze aufrecht. Eine entspannte, aber aufrechte Haltung verbessert deine Stimmkontrolle und Klangqualität.", gbc);
+        addTutorialSection("🗣️ " + LanguageManager.get("tutorials.posture.heading"),
+            LanguageManager.get("tutorials.posture.text"), gbc);
 
-        addTutorialSection("👄 Artikulation",
-            "Sprich und singe die Vokale und Konsonanten deutlich aus. Das macht deinen Gesang verständlicher und klarer.", gbc);
+        addTutorialSection("👄 " + LanguageManager.get("tutorials.articulation.heading"),
+            LanguageManager.get("tutorials.articulation.text"), gbc);
 
-        addTutorialSection("🎯 Intonation",
-            "Höre genau auf die Töne und versuche, sie möglichst sauber zu treffen. Übe mit einem Klavier oder einer Stimm-App.", gbc);
+        addTutorialSection("🎯 " + LanguageManager.get("tutorials.intonation.heading"),
+            LanguageManager.get("tutorials.intonation.text"), gbc);
 
-        addTutorialSection("🔄 Übung macht den Meister",
-            "Regelmäßiges Üben ist der Schlüssel. Singe täglich kurze Übungen, um deine Stimme zu trainieren und Fortschritte zu machen.", gbc);
+        addTutorialSection("🔄 " + LanguageManager.get("tutorials.practice.heading"),
+            LanguageManager.get("tutorials.practice.text"), gbc);
     }
 
     private void addTutorialSection(String heading, String text, GridBagConstraints gbc) {

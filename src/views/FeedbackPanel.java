@@ -5,6 +5,7 @@ package views;
 import javax.swing.*;
 import java.awt.*;
 import controller.WindowController;
+import i18n.LanguageManager;
 import model.Feedback;
 import model.Mode;
 
@@ -33,15 +34,15 @@ public class FeedbackPanel extends JPanel {
     }
     
     private void initializeComponents() {
-        scoreLabel = new JLabel("Score: " + feedback.score() + "%");
-        medalLabel = new JLabel("Medal: " + feedback.getFeedbackMedal());
+        scoreLabel = new JLabel(LanguageManager.get("feedback.score") + ": " + feedback.score() + "%");
+        medalLabel = new JLabel(LanguageManager.get("feedback.medal") + ": " + feedback.getFeedbackMedal());
         
         // Buttons erstellen
-        retryButton = new ModernButton("Retry");
-        menuButton = new ModernButton("Menu");
+        retryButton = new ModernButton(LanguageManager.get("feedback.retry"));
+        menuButton = new ModernButton(LanguageManager.get("feedback.menu"));
         
         if (feedback.score() >= MIN_SCORE) {
-            continueButton = new ModernButton("Continue");
+            continueButton = new ModernButton(LanguageManager.get("feedback.continue"));
         }
         
         // Styling

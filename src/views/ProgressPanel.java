@@ -3,6 +3,9 @@
 package views;
 
 import javax.swing.*;
+
+import i18n.LanguageManager;
+
 import java.awt.*;
 import java.util.Map;
 import utils.FileUtils;
@@ -26,9 +29,9 @@ public class ProgressPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
 
-        addCategoryProgress("Einzelnote", progressData.getOrDefault("Einzelnote", new int[]{0, 10}), gbc, 0, new Color(0x4F8A8B));
-        addCategoryProgress("Intervalle",  progressData.getOrDefault("Intervalle",  new int[]{0, 8}),  gbc, 1, new Color(0xF9A826));
-        addCategoryProgress("Melodie",  progressData.getOrDefault("Melodie",  new int[]{0, 12}), gbc, 2, new Color(0xF76E6C));
+        addCategoryProgress(LanguageManager.get("progress.single_note"), progressData.getOrDefault("Einzelnote", new int[]{0, 10}), gbc, 0, new Color(0x4F8A8B));
+        addCategoryProgress(LanguageManager.get("progress.intervals"),  progressData.getOrDefault("Intervalle",  new int[]{0, 8}),  gbc, 1, new Color(0xF9A826));
+        addCategoryProgress(LanguageManager.get("progress.melody"),  progressData.getOrDefault("Melodie",  new int[]{0, 12}), gbc, 2, new Color(0xF76E6C));
     }
 
     private void addCategoryProgress(String name, int[] data, GridBagConstraints gbc, int row, Color barColor) {
