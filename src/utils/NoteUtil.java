@@ -2,7 +2,6 @@ package utils;
 
 import model.MidiNote;
 import model.Interval;
-import model.MidiNote;
 import model.Range;
 
 public class NoteUtil {

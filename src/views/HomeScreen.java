@@ -7,6 +7,7 @@ import javax.swing.*;
 import controller.WindowController;
 
 import java.awt.*;
+import i18n.LanguageManager;
 
 public class HomeScreen extends JPanel {
     private WindowController windowController;
@@ -31,14 +32,14 @@ public class HomeScreen extends JPanel {
 
         // 1. Start!
         gbc.gridy = 1;
-        ModernButton startBtn = new ModernButton("Start!");
+        ModernButton startBtn = new ModernButton(LanguageManager.get("home.start"));
         startBtn.setPreferredSize(new Dimension(200, 50));
         startBtn.addActionListener(e -> windowController.showApp());
         add(startBtn, gbc);
 
         // 2. Einstellungen
         gbc.gridy = 2;
-        ModernButton settingsBtn = new ModernButton("Einstellungen");
+        ModernButton settingsBtn = new ModernButton(LanguageManager.get("home.settings"));
         settingsBtn.setPreferredSize(new Dimension(200, 50));
         settingsBtn.addActionListener(e -> {
             windowController.showApp();
@@ -48,7 +49,7 @@ public class HomeScreen extends JPanel {
 
         // 3. Beenden
         gbc.gridy = 3;
-        ModernButton exitBtn = new ModernButton("Beenden");
+        ModernButton exitBtn = new ModernButton(LanguageManager.get("home.exit"));
         exitBtn.setPreferredSize(new Dimension(200, 50));
         exitBtn.addActionListener(e -> System.exit(0));
         add(exitBtn, gbc);

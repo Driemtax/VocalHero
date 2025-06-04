@@ -16,7 +16,6 @@ import model.Feedback;
 import model.Level;
 import model.AudioSettings;
 import utils.AudioUtil;
-import utils.Helper;
 
 public class TrainingController {
     private AudioManager audioManager;
@@ -49,15 +48,9 @@ public class TrainingController {
      * @param updateUiAfterRecordingCallback Callback for updating the UI after recording is complete.
      */
     public void startRecordingWithLivePitchGraph(Runnable updateUiAfterRecordingCallback) {
-        // Get the target frequency from the first reference note
-        double targetFrequency = level.getReferenceNotes().get(0).getFrequency();
 
         audioManager.startRecordingWithLivePitchGraph(
-        pitch -> {
-            // Convert frequency to cent offset before updating the pitch graph
-            double centOffset = Helper.frequencyToCentOffset(pitch, targetFrequency);
-            feedbackManager.updatePitchGraph(centOffset);
-        },
+        pitch -> {feedbackManager.updatePitchGraph(pitch);},
         () -> {
             // This callback is called when the recording is complete
             setLevelFeedback(); // Analyze the recorded audio and set feedback
@@ -110,11 +103,11 @@ public class TrainingController {
     }
 
     public List<Mixer.Info> getAvailableInputDevices() {
-        return audioUtil.getAvailableMicrophones(audioManager.getFormat());
+        return audioUtil.getAvailableMicrophones(AudioSettings.getFormat());
     }
 
     public List<Mixer.Info> getAvailableOutputDevices() {
-        return audioUtil.getAvailableSpeakers(audioManager.getFormat());
+        return audioUtil.getAvailableSpeakers(AudioSettings.getFormat());
     }
 
     private void initializeAudioSettings() {
@@ -131,7 +124,6 @@ public class TrainingController {
 
         AudioSettings.setInputDevice(input);
         AudioSettings.setOutputDevice(output);
-        audioManager = new AudioManager(input, output, null, 3); // Default recording duration of 3 seconds
         System.out.println("Audio-Einstellungen initialisiert.");
     }
 }
