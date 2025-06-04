@@ -51,9 +51,7 @@ public class TrainingController {
     public void startRecordingWithLivePitchGraph(Runnable updateUiAfterRecordingCallback) {
 
         audioManager.startRecordingWithLivePitchGraph(
-        pitch -> {
-            feedbackManager.updatePitchGraph(pitch);
-        },
+        pitch -> {feedbackManager.updatePitchGraph(pitch);},
         () -> {
             // This callback is called when the recording is complete
             setLevelFeedback(); // Analyze the recorded audio and set feedback
