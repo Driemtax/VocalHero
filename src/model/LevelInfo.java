@@ -16,7 +16,7 @@ public class LevelInfo {
 
     public LevelInfo(int levelNumber, Mode mode) {
         this.difficulty = getLevelDifficulty(levelNumber);
-        this.levelNumber = level;
+        this.levelNumber = levelNumber;
         this.mode = mode;
     }
 

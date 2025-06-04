@@ -7,19 +7,6 @@ public enum Mode {
     INTERVAL("Intervalle"),
     MELODY("Melodien");
 
-    public static Mode fromString(String mode) {
-        switch (mode) {
-            case "Einzelnote":
-                return NOTE;
-            case "Intervalle":
-                return INTERVAL;
-            case "Melodien":
-                return MELODY;
-            default:
-                throw new IllegalArgumentException("Unknown mode: " + mode);
-        }
-    }
-
     private final String name;
 
     private Mode(String name) {

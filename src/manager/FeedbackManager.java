@@ -5,6 +5,7 @@ import model.AnalysisResult;
 import model.Feedback;
 import model.MidiNote;
 import model.PitchListener;
+import utils.Helper;
 
 import java.util.List;
 
@@ -20,9 +21,11 @@ public class FeedbackManager {
         this.pitchListener = listener;
     }
 
-    public void updatePitchGraph(double pitch) {
+    public void updatePitchGraph(double pitch, double targetFrequency) {
+        // Convert frequency to cent offset before updating the pitch graph
+        double centOffset = Helper.frequencyToCentOffset(pitch, targetFrequency);
         if (pitchListener != null) {
-            pitchListener.onPitchUpdate(pitch);
+            pitchListener.onPitchUpdate(centOffset);
         }
     }
 

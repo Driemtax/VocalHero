@@ -54,9 +54,7 @@ public class TrainingController {
 
         audioManager.startRecordingWithLivePitchGraph(
         pitch -> {
-            // Convert frequency to cent offset before updating the pitch graph
-            double centOffset = Helper.frequencyToCentOffset(pitch, targetFrequency);
-            feedbackManager.updatePitchGraph(centOffset);
+            feedbackManager.updatePitchGraph(pitch, targetFrequency);
         },
         () -> {
             // This callback is called when the recording is complete
@@ -71,7 +69,7 @@ public class TrainingController {
             double pitch = audioManager.detectPitchOfRecordedAudio();
             System.out.println("TrainingController: Detected pitch: " + pitch);
             // set the Feedback Object in the Level object
-            level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, level.getReferenceNotes().get(0).frequency)); // Placeholder for Feedback object, to be implemented later
+            level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, level.getReferenceNotes().get(0).getFrequency())); // Placeholder for Feedback object, to be implemented later
         } else {
             // For MELODY mode, analyze the melody of the sung audio
             System.out.println("TrainingController: Analysing melody...");
@@ -131,7 +129,6 @@ public class TrainingController {
 
         AudioSettings.setInputDevice(input);
         AudioSettings.setOutputDevice(output);
-        audioManager = new AudioManager(input, output, null, 3); // Default recording duration of 3 seconds
         System.out.println("Audio-Einstellungen initialisiert.");
     }
 }

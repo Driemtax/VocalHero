@@ -57,9 +57,8 @@ public class LevelScreen extends JPanel {
                 // Hier könntest du weitere UI-Updates machen, z.B. Ergebnisse anzeigen
                 windowController.showResults();
             };
-        };
-            
-            windowController.startRecordingForLevel(updateUiAfterRecordingCallback); 
+
+            windowController.startRecordingForLevel(updateUiAfterRecordingCallback);
         });
 
         playReferenceButton.addActionListener(e -> {

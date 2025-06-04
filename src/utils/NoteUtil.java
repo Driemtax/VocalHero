@@ -2,7 +2,6 @@ package utils;
 
 import model.MidiNote;
 import model.Interval;
-import model.MidiNote;
 import model.Range;
 
 public class NoteUtil {
@@ -73,9 +72,5 @@ public class NoteUtil {
             }
         }
         throw new IllegalStateException("This code should be unreachable");
-    }
-
-    public static MidiNote toMidiNote(Note note, double startTime, double duration) {
-        return new MidiNote(startTime, duration, note.getFrequency());
     }
 }
