@@ -49,12 +49,10 @@ public class TrainingController {
      * @param updateUiAfterRecordingCallback Callback for updating the UI after recording is complete.
      */
     public void startRecordingWithLivePitchGraph(Runnable updateUiAfterRecordingCallback) {
-        // Get the target frequency from the first reference note
-        double targetFrequency = level.getReferenceNotes().get(0).getFrequency();
 
         audioManager.startRecordingWithLivePitchGraph(
         pitch -> {
-            feedbackManager.updatePitchGraph(pitch, targetFrequency);
+            feedbackManager.updatePitchGraph(pitch);
         },
         () -> {
             // This callback is called when the recording is complete
