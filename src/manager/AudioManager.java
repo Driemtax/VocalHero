@@ -153,17 +153,7 @@ public class AudioManager {
             return;
         }
         // System.out.println("AudioManager: Spiele Referenznote (Freq: " + frequency + ", Dauer: " + durationMs + "ms)");
-        if (referenceNotes.size() == 1) {
-            // If there is only one reference note, play it directly
-            MidiNote referenceNote = referenceNotes.get(0);
-            player.playNote(referenceNote.getFrequency(), (int) Math.ceil(referenceNote.getDuration()), updateUiAfterPlaybackCallback);
-        } else {
-            // If there are multiple notes, play the first one for now 
-            // (The Player class still does not have a funtion to play multiple notes in sequence)
-            // TODO: Update when the functionality is implemented
-            MidiNote firstNote = referenceNotes.get(0);
-            player.playNote(firstNote.getFrequency(), (int) Math.ceil(firstNote.getDuration()), updateUiAfterPlaybackCallback);
-        }
+        player.playNotes(referenceNotes, updateUiAfterPlaybackCallback);
     }
 
     /**
