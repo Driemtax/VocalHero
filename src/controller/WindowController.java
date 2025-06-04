@@ -104,7 +104,7 @@ public class WindowController extends JFrame{
         trainingController.startTrainingSession(levelInfo);
         
         contentPanel.removeAll();
-        contentPanel.add(new LevelScreen(this), BorderLayout.CENTER);
+        contentPanel.add(new LevelScreen(this, mode, level), BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
     }
@@ -116,11 +116,32 @@ public class WindowController extends JFrame{
         contentPanel.repaint();
     }
 
+    public void showCategoryScreen() {
+        contentPanel.removeAll();
+        contentPanel.add(new CategoryScreen(contentPanel), BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
     public void showLevelSelection(Mode mode) {
-        removeAll();
-        add(new LevelSelectionPanel(this, mode), BorderLayout.CENTER);
-        revalidate();
-        repaint();
+        contentPanel.removeAll();
+        contentPanel.add(new LevelSelectionPanel(this, mode), BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    public void showProgressScreen() {
+        contentPanel.removeAll();
+        contentPanel.add(new ProgressPanel(), BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    public void showTutorialsScreen() {
+        contentPanel.removeAll();
+        contentPanel.add(new TutorialsScreen(), BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
 
     public String[] getAudioInputDevices() {
@@ -195,16 +216,17 @@ public class WindowController extends JFrame{
      * @param level The level number.
      * @param score The score achieved in the level.
      */
-    public void showResults() {
+    public void showResults(Mode mode, int level) {
         Feedback feedback = trainingController.getFeedback();
         System.out.println("Score: " + feedback.score());
         System.out.println("Feedback Message: " + feedback.getFeedbackMessage());
         System.out.println("Feedback Medal: " + feedback.getFeedbackMedal());
-    //     contentPanel.removeAll();
-    //     contentPanel.add(new ResultScreen(this, category, level, score), BorderLayout.CENTER);
-    //     contentPanel.revalidate();
-    //     contentPanel.repaint();
-     }
+        FeedbackPanel feedbackPanel = new FeedbackPanel(feedback, mode, level, this);
+        contentPanel.removeAll();
+        contentPanel.add(feedbackPanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
 
     /**
      * Plays the reference note for the current level.
@@ -223,4 +245,6 @@ public class WindowController extends JFrame{
             }
         }
     }
+
+    
 }

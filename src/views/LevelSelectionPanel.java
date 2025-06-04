@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 import controller.WindowController;
+import i18n.LanguageManager;
 import model.Mode;
 
 public class LevelSelectionPanel extends JPanel {
@@ -18,13 +19,8 @@ public class LevelSelectionPanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
         for (int i = 1; i <= 10; i++) {
-            JButton levelBtn = new JButton("Level " + i);
-            levelBtn.setFont(new Font("Segoe UI", Font.BOLD, 20));
-            levelBtn.setFocusPainted(false);
-            levelBtn.setBackground(new Color(60, 60, 60));
-            levelBtn.setForeground(i <= 2 ? Color.GREEN : Color.RED);
-            levelBtn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-            levelBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            BigModernButton levelBtn = new BigModernButton(LanguageManager.get("level") + " " + i);
+            levelBtn.setLockStatus(i <= 2); // First two levels unlocked
             
             final int levelNumber = i;
             // Add click action to show LevelScreen
