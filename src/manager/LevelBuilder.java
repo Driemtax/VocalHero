@@ -5,12 +5,9 @@ package manager;
 import java.util.List;
 import java.util.ArrayList;
 
-import model.AudioSettings;
-import model.Difficulty;
 import model.Level;
 import model.LevelInfo;
 import model.MidiNote;
-import model.Note;
 import utils.IntervalUtil;
 import utils.NoteUtil;
 import model.Interval;
@@ -29,15 +26,14 @@ public class LevelBuilder {
     }
 
     private List<MidiNote> generateReferenceNotes() {
-        List<MidiNote> referenceNotes = new ArrayList<MidiNote>();
-        Note note;
-        MidiNote convertedNote;
+        // This method should generate reference notes based on the difficulty level.
+        List<MidiNote> referenceNotes = new ArrayList<>();
+        MidiNote note;
 
         switch (levelInfo.getMode()) {
             case NOTE:
                 note = NoteUtil.getRandomNoteInRange(levelInfo.getDifficulty().getDifficultyRange()); 
-                convertedNote = NoteUtil.toMidiNote(note, 0, 3);
-                referenceNotes.add(convertedNote); // a function to convert Note to MidiNote is still needed
+                referenceNotes.add(note);
                 return referenceNotes;
             case INTERVAL:
                 // Generate a random note and interval based on difficulty
