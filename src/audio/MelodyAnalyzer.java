@@ -49,14 +49,14 @@ public class MelodyAnalyzer {
 
     private double[] calculateTimeWindow(MidiNote note) {
         return new double[]{
-            note.startTime - timingTolerance,
-            note.startTime + note.duration + timingTolerance
+            note.getStartTime() - timingTolerance,
+            note.getStartTime() + note.getDuration() + timingTolerance
         };
     }
 
     private NoteResult compareNote(MidiNote note, double detectedFreq, double detectedOnset) {
-        double pitchDiff = Math.abs(detectedFreq - note.frequency);
-        double timeDiff = Math.abs(detectedOnset - note.startTime);
+        double pitchDiff = Math.abs(detectedFreq - note.getFrequency());
+        double timeDiff = Math.abs(detectedOnset - note.getStartTime());
         
         boolean pitchOK = pitchDiff <= pitchTolerance;
         boolean timingOK = timeDiff <= timingTolerance;
