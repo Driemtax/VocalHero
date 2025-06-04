@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import model.*;
-import Util.Helper;
+import utils.Helper;
 
 public class MelodyAnalyzer {
     private final PitchDetector pitchDetector;
@@ -49,14 +49,14 @@ public class MelodyAnalyzer {
 
     private double[] calculateTimeWindow(MidiNote note) {
         return new double[]{
-            note.startTime - timingTolerance,
-            note.startTime + note.duration + timingTolerance
+            note.getStartTime() - timingTolerance,
+            note.getStartTime() + note.getDuration() + timingTolerance
         };
     }
 
     private NoteResult compareNote(MidiNote note, double detectedFreq, double detectedOnset) {
-        double pitchDiff = Math.abs(detectedFreq - note.frequency);
-        double timeDiff = Math.abs(detectedOnset - note.startTime);
+        double pitchDiff = Math.abs(detectedFreq - note.getFrequency());
+        double timeDiff = Math.abs(detectedOnset - note.getStartTime());
         
         boolean pitchOK = pitchDiff <= pitchTolerance;
         boolean timingOK = timeDiff <= timingTolerance;

@@ -10,6 +10,8 @@ import audio.Player;
 import audio.Recorder;
 import model.MidiNote;
 import model.AnalysisResult;
+import model.AudioSettings;
+
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -31,9 +33,10 @@ public class AudioManager {
     private Player player;
     private PitchDetector pitchDetector;
     private MelodyAnalyzer melodyAnalyzer;
-    private static final double SAMPLE_RATE = 44100.0;
+    private double SAMPLE_RATE;
     byte[] audioData;
-    private AudioFormat format = new AudioFormat((float)SAMPLE_RATE, 16, 2, true, false);
+    private List<MidiNote> referenceNotes;
+    private AudioFormat format;
 
     public AudioManager(Mixer.Info selectedMic, Mixer.Info selectedSpeaker, List<MidiNote> referenceNotes, int recordingDuration) {
         this.recordingDuration = recordingDuration;
@@ -42,8 +45,11 @@ public class AudioManager {
         this.audioData = null; // initially null, will be set after recording
         this.recorder = new Recorder();
         this.player = new Player();
+        this.SAMPLE_RATE = AudioSettings.getSampleRate();
+        this.format = AudioSettings.getFormat();
         this.pitchDetector = new PitchDetector(2048, SAMPLE_RATE);
-        this.melodyAnalyzer = new MelodyAnalyzer(referenceNotes, SAMPLE_RATE, audioData);
+        this.referenceNotes = referenceNotes;
+
     }
 
     public AudioFormat getFormat() {
@@ -57,23 +63,50 @@ public class AudioManager {
      * 
      * example usage in TrainingController:
      * 
-     * audioManager.startRecordingWithLivePitch(3, pitch -> {
+     * audioManager.startRecordingWithLivePitch(pitch -> {
      *      feedbackManager.updatePitchGraph(pitch);
      *     });
      */
-    public void startRecordingWithLivePitchGraph(Consumer<Double> pitchListener) {
+    public void startRecordingWithLivePitchGraph(Consumer<Double> pitchListener, Runnable updateUiAfterRecordingCallback) {
         recorder.setAudioChunkListener(chunk -> {
             double pitch = pitchDetector.getDominantFrequency(chunk);
             pitchListener.accept(pitch);
         });
 
+        startRecording(updateUiAfterRecordingCallback);
+
+    }
+
+    /**
+     * Starts recording audio for a specified duration.
+     */
+    public void startRecording(Runnable updateUiAfterRecordingCallback) {
+        if (recorder == null) {
+            System.err.println("AudioManager: Recorder ist null!");
+            // Still need to invoke the callback to avoid deadlock in GUI
+            if (updateUiAfterRecordingCallback != null) SwingUtilities.invokeLater(updateUiAfterRecordingCallback);
+            return;
+        }
+        if (selectedMic == null) {
+            System.err.println("AudioManager: Kein Mikrofon ausgewählt!");
+             if (updateUiAfterRecordingCallback != null) SwingUtilities.invokeLater(updateUiAfterRecordingCallback);
+            return;
+        }
+        if (format == null) { // Zusätzlicher Check
+            System.err.println("AudioManager: AudioFormat ist nicht gesetzt!");
+            if (updateUiAfterRecordingCallback != null) SwingUtilities.invokeLater(updateUiAfterRecordingCallback);
+            return;
+        }
         try {
-            // Remove this after we finished implementing the live feedback, this Runnable is just 
-            // to not have a compile error
-            Runnable onRecordingFinishedCallback = () -> {
-            };
-            recorder.startRecording(recordingDuration, selectedMic, onRecordingFinishedCallback);
-            audioData = recorder.getAudioData();
+            recorder.startRecording(recordingDuration, selectedMic, () -> {
+                // This callback is executed after the recording is finished
+                audioData = recorder.getAudioData();
+                // Execute the UI callback when processing is done
+                if (updateUiAfterRecordingCallback != null) {
+                    System.out.println("TrainingController: Führe UI-Update-Callback aus der View aus.");
+                    updateUiAfterRecordingCallback.run(); 
+                }
+            });
         } catch (LineUnavailableException e) {
             // TODO: Handle exception through GUI
             e.printStackTrace();
@@ -81,32 +114,10 @@ public class AudioManager {
     }
 
     /**
-     * Starts recording audio for a specified duration.
-     * @param duration
+     * Stops the current recording.
      */
-    public void startRecording(int duration, Runnable onRecordingFinishedCallback) {
-        if (recorder == null) {
-            System.err.println("AudioManager: Recorder ist null!");
-            // Still need to invoke the callback to avoid deadlock in GUI
-            if (onRecordingFinishedCallback != null) SwingUtilities.invokeLater(onRecordingFinishedCallback);
-            return;
-        }
-        if (selectedMic == null) {
-            System.err.println("AudioManager: Kein Mikrofon ausgewählt!");
-             if (onRecordingFinishedCallback != null) SwingUtilities.invokeLater(onRecordingFinishedCallback);
-            return;
-        }
-        if (format == null) { // Zusätzlicher Check
-            System.err.println("AudioManager: AudioFormat ist nicht gesetzt!");
-            if (onRecordingFinishedCallback != null) SwingUtilities.invokeLater(onRecordingFinishedCallback);
-            return;
-        }
-        try {
-            recorder.startRecording(duration, selectedMic, onRecordingFinishedCallback);
-        } catch (LineUnavailableException e) {
-            // TODO: Handle exception through GUI
-            e.printStackTrace();
-        }
+    public void stopRecording() {
+        recorder.stopRecording();
     }
 
     /**
@@ -117,13 +128,6 @@ public class AudioManager {
     public byte[] getRecordedAudioData() {
         if (recorder == null) return new byte[0];
         return recorder.getAudioData();
-    }
-
-    /**
-     * Stops the current recording.
-     */
-    public void stopRecording() {
-        recorder.stopRecording();
     }
 
     /**
@@ -140,21 +144,20 @@ public class AudioManager {
 
     /**
      * Plays a frequency using the synthesizer to generate an instrument sound.
-     * @param frequency the frequency to play
-     * @param durationMs the duration in milliseconds
+     * @param referenceNotes List of reference notes to play
      * @param onPlaybackFinishedCallback callback to execute when playback is finished
      */
-    public void playReferenceNote(double frequency, int durationMs, Runnable onPlaybackFinishedCallback) {
+    public void playReference(List<MidiNote> referenceNotes, Runnable updateUiAfterPlaybackCallback) {
         if (player == null) {
             System.err.println("AudioManager: Player ist nicht initialisiert!");
             // still execute the callback to avoid deadlock in GUI
-            if (onPlaybackFinishedCallback != null) {
-                SwingUtilities.invokeLater(onPlaybackFinishedCallback);
+            if (updateUiAfterPlaybackCallback != null) {
+                SwingUtilities.invokeLater(updateUiAfterPlaybackCallback);
             }
             return;
         }
-        System.out.println("AudioManager: Spiele Referenznote (Freq: " + frequency + ", Dauer: " + durationMs + "ms)");
-        player.playNote(frequency, durationMs, onPlaybackFinishedCallback);
+        // System.out.println("AudioManager: Spiele Referenznote (Freq: " + frequency + ", Dauer: " + durationMs + "ms)");
+        player.playNotes(referenceNotes, updateUiAfterPlaybackCallback);
     }
 
     /**
@@ -163,6 +166,7 @@ public class AudioManager {
      * @return AnalysisResult
      */
     public AnalysisResult analyzeMelody() {
+        this.melodyAnalyzer = new MelodyAnalyzer(referenceNotes, SAMPLE_RATE, audioData);
         try {
             return melodyAnalyzer.analyze();
         } catch (Exception e) {
@@ -177,8 +181,16 @@ public class AudioManager {
      * Detects the pitch of the recorded audio data using the PitchDetector.
      * @return double dominant frequency
      */
-    public double detectPitch() {
+    public double detectPitchOfRecordedAudio() {
+        if (audioData == null || audioData.length == 0) {
+            System.err.println("AudioManager: Keine Audiodaten zum Analysieren vorhanden.");
+            return -1; 
+        }
+        
         try {
+            // TODO: Improve accuracy
+            // Right now, even if I sing a note all over the place (e.g. I cant hold it steady)
+            // it still returns me an excellent result with the dominant frequency.
             return pitchDetector.getDominantFrequency(audioData);
         } catch (Exception e) {
             // TODO: Handle exception appropriately

@@ -4,42 +4,43 @@ package views;
 
 import javax.swing.*;
 import java.awt.*;
-import utils.ScoreEvaluation;
 import controller.WindowController;
+import model.Feedback;
+import model.Mode;
 
 public class FeedbackPanel extends JPanel {
     private static final int MIN_SCORE = 60; // Mindestscore für Bestehen
     
-    private ScoreEvaluation evaluation;
     private JLabel scoreLabel;
     private JLabel medalLabel;
     private ModernButton continueButton;
     private ModernButton retryButton;
     private ModernButton menuButton;
-    private String category;
+    private Mode mode;
     private int level;
     private WindowController windowController;
+    private Feedback feedback;
     
-    public FeedbackPanel(int score, String category, int level, WindowController controller) {
-        this.category = category;
+    public FeedbackPanel(Feedback feedback, Mode mode, int level, WindowController controller) {
+        this.mode = mode;
         this.level = level;
         this.windowController = controller;
+        this.feedback = feedback;
         setBackground(new Color(50, 50, 50));
-        evaluation = new ScoreEvaluation(score);
         initializeComponents();
         setupLayout();
         setupListeners();
     }
     
     private void initializeComponents() {
-        scoreLabel = new JLabel("Score: " + evaluation.getScore() + "%");
-        medalLabel = new JLabel("Medal: " + evaluation.getMedal());
+        scoreLabel = new JLabel("Score: " + feedback.score() + "%");
+        medalLabel = new JLabel("Medal: " + feedback.getFeedbackMedal());
         
         // Buttons erstellen
         retryButton = new ModernButton("Retry");
         menuButton = new ModernButton("Menu");
         
-        if (evaluation.getScore() >= MIN_SCORE) {
+        if (feedback.score() >= MIN_SCORE) {
             continueButton = new ModernButton("Continue");
         }
         
@@ -48,7 +49,7 @@ public class FeedbackPanel extends JPanel {
         scoreLabel.setForeground(Color.WHITE);
         
         medalLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        medalLabel.setForeground(getMedalColor(evaluation.getMedal()));
+        medalLabel.setForeground(getMedalColor(feedback.getFeedbackMedal()));
     }
     
     private Color getMedalColor(String medal) {
@@ -97,7 +98,7 @@ public class FeedbackPanel extends JPanel {
     
     private void setupListeners() {
         retryButton.addActionListener(e -> {
-            windowController.showLevelScreen(category, level);
+            windowController.showLevelScreen(mode, level);
         });
         
         menuButton.addActionListener(e -> {
@@ -121,9 +122,5 @@ public class FeedbackPanel extends JPanel {
     
     public JButton getMenuButton() {
         return menuButton;
-    }
-    
-    public ScoreEvaluation getEvaluation() {
-        return evaluation;
     }
 }

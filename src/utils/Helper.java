@@ -1,4 +1,4 @@
-package Util;
+package utils;
 
 public class Helper {
     public static float[] byteArrayToFloatArray(byte[] audioData) {
@@ -13,5 +13,10 @@ public class Helper {
       signal[i] = sample / 32768f;
     }
     return signal;
+  }
+
+  public static double frequencyToCentOffset(double frequency, double targetFrequency) {
+      if (frequency <= 0 || targetFrequency <= 0) return 0;
+      return 1200 * Math.log(frequency / targetFrequency) / Math.log(2);
   }
 }

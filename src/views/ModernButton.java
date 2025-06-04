@@ -8,11 +8,16 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class ModernButton extends JButton {
+    private final Color ENABLED_BACKGROUND = new Color(40, 40, 40);
+    private final Color HOVER_BACKGROUND = new Color(60, 60, 60);
+    private final Color ENABLED_FOREGROUND = Color.WHITE;
+
+
     public ModernButton(String text) {
         super(text);
         setFont(new Font("Segoe UI", Font.BOLD, 16));
-        setForeground(Color.WHITE);
-        setBackground(new Color(40, 40, 40));
+        setForeground(ENABLED_FOREGROUND);
+        setBackground(ENABLED_BACKGROUND);
         setFocusPainted(false);
         setBorderPainted(false);
         setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -21,10 +26,10 @@ public class ModernButton extends JButton {
 
         addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
-                setBackground(new Color(60, 60, 60));
+                setBackground(HOVER_BACKGROUND);
             }
             public void mouseExited(MouseEvent e) {
-                setBackground(new Color(40, 40, 40));
+                setBackground(ENABLED_BACKGROUND);
             }
         });
     }

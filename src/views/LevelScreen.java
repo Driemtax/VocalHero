@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 
 import controller.WindowController;
+import model.Mode;
 
 public class LevelScreen extends JPanel {
     private WindowController windowController;
@@ -15,15 +16,15 @@ public class LevelScreen extends JPanel {
     private ScorePanel scorePanel;
 
     // Maybe show this information in the UI later.
-    private String currentCategory;
+    private Mode currentMode;
     private int currentLevel;
 
-    public LevelScreen(WindowController controller, String category, int level) {
+    public LevelScreen(WindowController controller, Mode mode, int level) {
         this.windowController = controller;
-        this.currentCategory = category;
+        this.currentMode = mode;
         this.currentLevel = level;
 
-        System.out.println("LevelScreen: Initializing for category: " + category + ", level: " + level);
+        System.out.println("LevelScreen: Initializing for category: " + currentMode.getName() + ", level: " + currentLevel);
 
         setLayout(new BorderLayout());
 
@@ -40,7 +41,7 @@ public class LevelScreen extends JPanel {
         topPanel.add(buttonPanel, BorderLayout.CENTER);
 
         // Help Button erstellen und rechts ausrichten
-        ModernHelpButton helpButton = new ModernHelpButton(category);
+        ModernHelpButton helpButton = new ModernHelpButton(currentMode);
         JPanel helpButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         helpButtonPanel.setBackground(new Color(20, 20, 20));
         helpButtonPanel.add(helpButton);
@@ -49,6 +50,7 @@ public class LevelScreen extends JPanel {
         // Create main content panel
         JPanel contentPanel = new JPanel(new GridLayout(2, 1));
         pitchPanel = new PitchGraphPanel();
+        windowController.setPitchListener(pitchPanel); // Set the pitch listener for live updates
         scorePanel = new ScorePanel();
         contentPanel.add(pitchPanel);
         contentPanel.add(scorePanel);
@@ -59,39 +61,34 @@ public class LevelScreen extends JPanel {
 
         // Add button listeners (empty for now, will be connected to TrainingController later)
         startRecordingButton.addActionListener(e -> {
-            // TODO: Do we need visual changes for the buttons to look disabled?
             startRecordingButton.setEnabled(false);
             startRecordingButton.setRecording(true);
             playReferenceButton.setEnabled(false);
 
             // Callback for when recording is finished
-            // TODO: return a feedback here and show in UI
-            Runnable onRecordingFinishedCallback = () -> {
+            Runnable updateUiAfterRecordingCallback = () -> {
                 startRecordingButton.setEnabled(true);
                 startRecordingButton.setRecording(false);
                 playReferenceButton.setEnabled(true);
                 System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
-                // Hier könntest du weitere UI-Updates machen, z.B. Ergebnisse anzeigen
-                int testScore = 100;
-                windowController.showResults(testScore, currentCategory, currentLevel);
+                windowController.showResults(currentMode, currentLevel);
             };
             
-            windowController.startRecordingForLevel(onRecordingFinishedCallback); 
+            windowController.startRecordingForLevel(updateUiAfterRecordingCallback); 
         });
 
         playReferenceButton.addActionListener(e -> {
-            // TODO: Do we need visual changes for the buttons to look disabled?
             playReferenceButton.setEnabled(false);
             startRecordingButton.setEnabled(false);
 
             // Callback for when playback is finished
-            Runnable onPlaybackFinishedCallback = () -> {
+            Runnable updateUiAfterPlaybackCallback = () -> {
                 playReferenceButton.setEnabled(true);
                 startRecordingButton.setEnabled(true);
             };
 
             // Play the reference note for the current level
-            windowController.playReferenceNote(onPlaybackFinishedCallback);
+            windowController.playReference(updateUiAfterPlaybackCallback);
         });
     }
 

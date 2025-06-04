@@ -1,3 +1,5 @@
+// Authors: Lars Beer, Inaas Hammoush
+
 package test;
 
 import javax.sound.sampled.*;
@@ -7,8 +9,8 @@ import java.util.List;
 
 import audio.PitchDetector;
 import audio.Recorder;
-import model.Note;
-import utils.AudioPreferences;
+import model.MidiNote;
+import utils.AudioUtil;
 import audio.Player;
 
 public class TestRecorderPlayer {
@@ -16,6 +18,7 @@ public class TestRecorderPlayer {
     private PitchDetector analyzer;
     private Player player;
     private AudioFormat format;
+    private AudioUtil audioUtil = new AudioUtil();
 
     private JComboBox<Mixer.Info> speakerComboBox;
 
@@ -46,18 +49,18 @@ public class TestRecorderPlayer {
         JButton playTargetNoteButton = new JButton("Zielnote abspielen");
 
         // Mikrofone laden
-        List<Mixer.Info> mics = AudioPreferences.getAvailableMicrophones(format);
+        List<Mixer.Info> mics = audioUtil.getAvailableMicrophones(format);
         mics.forEach(micComboBox::addItem);
 
         // Load speaker
-        List<Mixer.Info> speakers = AudioPreferences.getAvailableSpeakers(format);
+        List<Mixer.Info> speakers = audioUtil.getAvailableSpeakers(format);
         speakers.forEach(speakerComboBox::addItem);
 
         // Action Listener
         recordButton.addActionListener(e -> startRecording(micComboBox, statusLabel, detectedNoteLabel));
         playButton.addActionListener(e -> playRecording(statusLabel));
         noteComboBox.addActionListener(e -> targetNoteLabel.setText("Zielnote: " + noteComboBox.getSelectedItem()));
-        playTargetNoteButton.addActionListener(e -> playTargetNote(Note.A4));
+        playTargetNoteButton.addActionListener(e -> playTargetNote(MidiNote.Note.A4));
 
 
         // Layout
@@ -160,7 +163,7 @@ public class TestRecorderPlayer {
         SwingUtilities.invokeLater(() -> label.setText(text));
     }
 
-    private void playTargetNote(Note note) {
+    private void playTargetNote(MidiNote.Note note) {
         new Thread(() -> {
             double frequency = note.getFrequency();
             if (frequency > 0) {

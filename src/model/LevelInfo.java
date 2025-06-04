@@ -1,41 +1,46 @@
-// Authors: Inaas Hammoush
+// Authors: Inaas Hammoush, Jonas Rumpf
 
 package model;
 
-import javax.sound.sampled.Mixer;
-
+/**
+ * A DTO that represents the configuration for a training level, including difficulty and mode.
+ * 
+ * @author Inaas Hammoush
+ * @version 1.0
+ */
 public class LevelInfo {
 
-    // These fields are still not confirmed, we need to discuss further to finalize the design
-    private Mixer.Info selectedMic;
-    private Mixer.Info selectedSpeaker;
-    private int recordingDuration;
     private Mode mode;
     private Difficulty difficulty;
+    private int levelNumber; 
 
-    public LevelInfo(Mixer.Info selectedMic, Mixer.Info selectedSpeaker, int recordingDuration) {
-        this.selectedMic = selectedMic;
-        this.selectedSpeaker = selectedSpeaker;
-        this.recordingDuration = recordingDuration;
+    public LevelInfo(int levelNumber, Mode mode) {
+        this.difficulty = getLevelDifficulty(levelNumber);
+        this.levelNumber = levelNumber;
+        this.mode = mode;
     }
 
-    public Mixer.Info getSelectedMic() {
-        return selectedMic;
+    // Getters and Setters
+
+    public Difficulty getDifficulty() {return difficulty;}
+
+    public void setDifficulty(Difficulty difficulty) {this.difficulty = difficulty;}
+
+    // Method to determine difficulty based on level number
+    // Later I think it might be better to read the difficulty from a file
+    public Difficulty getLevelDifficulty(int levelNumber) {
+        if (levelNumber <= 3) {
+            return Difficulty.easy;
+        } else if (levelNumber > 3 && levelNumber <= 6) {
+            return Difficulty.medium;
+        } else {
+            return Difficulty.hard;
+        }
     }
 
-    public Mixer.Info getSelectedSpeaker() {
-        return selectedSpeaker;
-    }
+    public Mode getMode() {return mode;}
 
-    public int getRecordingDuration() {
-        return recordingDuration;
-    }
+    public void setMode(Mode mode) {this.mode = mode;}
 
-    public Difficulty getDifficulty() {
-        return difficulty;
-    }
-
-    public Mode getMode() {
-        return mode;
-    }
+    public int getLevelNumber() {return levelNumber;}
 }

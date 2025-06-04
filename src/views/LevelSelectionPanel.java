@@ -6,10 +6,11 @@ import javax.swing.*;
 import java.awt.*;
 
 import controller.WindowController;
+import model.Mode;
 
 public class LevelSelectionPanel extends JPanel {
     private WindowController windowController;
-    public LevelSelectionPanel(WindowController controller, String category) {
+    public LevelSelectionPanel(WindowController controller, Mode mode) {
         this.windowController = controller;
 
         setLayout(new GridLayout(3, 4, 20, 20));
@@ -24,11 +25,16 @@ public class LevelSelectionPanel extends JPanel {
             // Add click action to show LevelScreen
             levelBtn.addActionListener(e -> {
                 windowController.showApp();
-                windowController.showLevelScreen(category, levelNumber);
+                windowController.showLevelScreen(mode, levelNumber);
             });
             
             add(levelBtn);
         }
+
+        // TODO: add function to create a LevelInfo Object for each level
+        // windowController.startTrainingSession(LevelIno)
+        // The LevelInfo should contain the Mode and the Difficulty 
+        // (and any other necessary parameters e.g. data needed to track progress)
     }
 }
 

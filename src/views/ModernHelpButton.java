@@ -3,17 +3,20 @@
 package views;
 
 import javax.swing.*;
+
+import model.Mode;
+
 import java.awt.*;
 import java.awt.geom.*;
 
 public class ModernHelpButton extends JButton {
     private Color normalBg = new Color(60, 60, 60);
     private Color hoverBg = new Color(90, 90, 90);
-    private final String category;
+    private final Mode mode;
 
-    public ModernHelpButton(String category) {
+    public ModernHelpButton(Mode mode) {
         super("?");
-        this.category = category;
+        this.mode = mode;
         setFont(new Font("Segoe UI", Font.BOLD, 14));
         setForeground(Color.WHITE);
         setBackground(normalBg);
@@ -41,28 +44,28 @@ public class ModernHelpButton extends JButton {
     }
 
     private void showCategoryHelpDialog() {
-        String message = getHelpTextForCategory(category);
+        String message = getHelpTextForCategory(mode);
         showDarkInfoDialog(this, message, "How to Play");
     }
 
-    private String getHelpTextForCategory(String category) {
-        switch (category) {
-            case "Intervalle":
-                return "Interval Training:\n\n"
+    private String getHelpTextForCategory(Mode mode) {
+        switch (mode) {
+            case INTERVAL:
+                return mode.getName() + " Training:\n\n"
                      + "1. Click 'Play Reference' to hear the interval\n"
                      + "2. Click 'Start Recording' and sing the interval\n"
                      + "3. The graph will show your pitch in real-time\n"
                      + "4. After 3 seconds, you'll get feedback on your performance\n\n"
                      + "Try to match the interval as closely as possible!";
-            case "Melodien":
-                return "Melody Training:\n\n"
+            case MELODY:
+                return mode.getName() + " Training:\n\n"
                      + "1. Click 'Play Reference' to hear the melody\n"
                      + "2. Click 'Start Recording' and sing the melody\n"
                      + "3. The graph will show your pitch in real-time\n"
                      + "4. After 3 seconds, you'll get feedback on your performance\n\n"
                      + "Try to match the melody as closely as possible!";
             default:
-                return "How to play this level:\n\n"
+                return mode.getName() + " Training\n\n"
                      + "1. Click 'Play Reference' to hear the target note\n"
                      + "2. Click 'Start Recording' and sing the note\n"
                      + "3. The graph will show your pitch in real-time\n"

@@ -3,6 +3,9 @@
 package views;
 
 import javax.swing.*;
+
+import model.Mode;
+
 import java.awt.*;
 
 public class CategoryScreen extends JPanel {
@@ -17,14 +20,18 @@ public class CategoryScreen extends JPanel {
         categoryContainer.setBackground(new Color(50, 50, 50));
         categoryContainer.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
         
-        String[] categories = {"Einzeltöne", "Intervalle", "Melodien"};
+        Mode[] options = {
+            Mode.NOTE,
+            Mode.INTERVAL,
+            Mode.MELODY
+        };
         
-        for (String category : categories) {
-            BigModernButton categoryBtn = new BigModernButton(category);
+        for (Mode mode : options) {
+            BigModernButton categoryBtn = new BigModernButton(mode.getName());
             
             // Add click action to show LevelSelection
             categoryBtn.addActionListener(e -> {
-                contentPanel.showLevelSelection(category);
+                contentPanel.showLevelSelection(mode);
             });
             
             categoryContainer.add(categoryBtn);

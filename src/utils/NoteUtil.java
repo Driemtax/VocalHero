@@ -1,22 +1,29 @@
-package model.Util;
+package utils;
 
-import model.Note;
+import model.MidiNote;
 import model.Interval;
+import model.Range;
 
 public class NoteUtil {
     /**
      * generate a random note in the range from and to
      * 
-     * @param from lowest possible note (inclusive)
-     * @param to   highest possible note (inclusive)
+     * @param range the range in which the note should be generated, which holds from and to
      * @return a random note in the range from and to
      */
-    public static Note getRandomNoteInRange(Note from, Note to) {
-        Note[] notes = Note.values();
-        int start = from.ordinal();
-        int end = to.ordinal();
+    public static MidiNote getRandomNoteInRange(Range range) {
+        // TODO: Check edge cases for range
+        MidiNote midiNote;
+        MidiNote.Note[] notes = MidiNote.Note.getAllNotes();
+        int start = range.min();
+        int end = range.max();
         int index = start + (int) (Math.random() * (end - start + 1));
-        return notes[index];
+        if (index < 0 || index >= notes.length) {
+            throw new IndexOutOfBoundsException("Index out of bounds for note array: " + index);
+        }
+
+        midiNote = new MidiNote(notes[index]);
+        return midiNote;
     }
 
     // public static Note getNoteFromFrequency(double frequency){
@@ -32,8 +39,8 @@ public class NoteUtil {
      * @return the note the interval after the startnote, or startnote TODO replace
      *         with exception
      */
-    public static Note getNoteFromInterval(Note startNote, Interval interval) {
-        return getNoteFromInterval(startNote, interval, false);
+    public static MidiNote getNoteFromInterval(MidiNote startNote, Interval interval) {
+        return getNoteFromInterval(startNote.getNoteDefinition(), interval, false);
     }
 
     /**
@@ -45,11 +52,11 @@ public class NoteUtil {
      * @return the note the interval after the startnote, or startnote TODO replace
      *         with exception
      */
-    public static Note getNoteFromInterval(Note startNote, Interval interval, Boolean descending) {
+    public static MidiNote getNoteFromInterval(MidiNote.Note startNote, Interval interval, Boolean descending) {
         int noteIndex = 0;
         int newIndex = 0;
-        Note intervalNote = startNote;
-        for (Note note : Note.values()) {
+        MidiNote.Note intervalNote = startNote;
+        for (MidiNote.Note note : MidiNote.Note.getAllNotes()) {
             if (note == startNote) {
                 noteIndex = note.ordinal();
                 if (descending) {
@@ -57,11 +64,11 @@ public class NoteUtil {
                 } else {
                     newIndex = noteIndex + interval.getSemitones();
                 }
-                if (newIndex < 0 || newIndex > (Note.values().length - 1)) {
+                if (newIndex < 0 || newIndex > (MidiNote.Note.getAllNotes().length - 1)) {
                     throw new IndexOutOfBoundsException("No Note for index: " + newIndex);
                 }
-                intervalNote = Note.values()[newIndex];
-                return intervalNote;
+                intervalNote = MidiNote.Note.getAllNotes()[newIndex];
+                return new MidiNote(intervalNote);
             }
         }
         throw new IllegalStateException("This code should be unreachable");
