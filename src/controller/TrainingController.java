@@ -16,7 +16,6 @@ import model.Feedback;
 import model.Level;
 import model.AudioSettings;
 import utils.AudioUtil;
-import utils.Helper;
 
 public class TrainingController {
     private AudioManager audioManager;
