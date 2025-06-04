@@ -6,10 +6,11 @@ import javax.swing.*;
 import java.awt.*;
 
 import controller.WindowController;
+import model.Mode;
 
 public class LevelSelectionPanel extends JPanel {
     private WindowController windowController;
-    public LevelSelectionPanel(WindowController controller, String category) {
+    public LevelSelectionPanel(WindowController controller, Mode mode) {
         this.windowController = controller;
 
         setLayout(new GridLayout(3, 4, 20, 20));
@@ -29,7 +30,7 @@ public class LevelSelectionPanel extends JPanel {
             // Add click action to show LevelScreen
             levelBtn.addActionListener(e -> {
                 windowController.showApp();
-                windowController.showLevelScreen(category, levelNumber);
+                windowController.showLevelScreen(mode, levelNumber);
             });
             
             add(levelBtn);

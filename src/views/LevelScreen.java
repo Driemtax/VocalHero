@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 
 import controller.WindowController;
+import model.LevelInfo;
 
 public class LevelScreen extends JPanel {
     private WindowController windowController;
@@ -18,10 +19,8 @@ public class LevelScreen extends JPanel {
     private String currentCategory;
     private int currentLevel;
 
-    public LevelScreen(WindowController controller, String category, int level) {
+    public LevelScreen(WindowController controller) {
         this.windowController = controller;
-        this.currentCategory = category;
-        this.currentLevel = level;
 
         setLayout(new BorderLayout());
 
@@ -47,25 +46,19 @@ public class LevelScreen extends JPanel {
 
         // Add button listeners (empty for now, will be connected to TrainingController later)
         startRecordingButton.addActionListener(e -> {
-            // TODO: Do we need visual changes for the buttons to look disabled?
             startRecordingButton.setEnabled(false);
             playReferenceButton.setEnabled(false);
 
             // Callback for when recording is finished
-            // TODO: return a feedback here and show in UI
             Runnable updateUiAfterRecordingCallback = () -> {
             startRecordingButton.setEnabled(true);
             playReferenceButton.setEnabled(true);
-            System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
-            // Hier könntest du weitere UI-Updates machen, z.B. Ergebnisse anzeigen
-            // windowController.showResults();
         };
             
             windowController.startRecordingForLevel(updateUiAfterRecordingCallback); 
         });
 
         playReferenceButton.addActionListener(e -> {
-            // TODO: Do we need visual changes for the buttons to look disabled?
             playReferenceButton.setEnabled(false);
             startRecordingButton.setEnabled(false);
 

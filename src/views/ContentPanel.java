@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 import controller.WindowController;
+import model.Mode;
 
 public class ContentPanel extends JPanel {
     private WindowController windowController;
@@ -22,9 +23,9 @@ public class ContentPanel extends JPanel {
         repaint();
     }
 
-    public void showLevelSelection(String category) {
+    public void showLevelSelection(Mode mode) {
         removeAll();
-        add(new LevelSelectionPanel(windowController, category), BorderLayout.CENTER);
+        add(new LevelSelectionPanel(windowController, mode), BorderLayout.CENTER);
         revalidate();
         repaint();
     }

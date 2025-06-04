@@ -7,6 +7,8 @@ import views.SplashScreen;
 import java.awt.*;
 import javax.swing.*;
 import model.LevelInfo;
+import model.Mode;
+
 import java.util.List;
 
 import javax.sound.sampled.*;
@@ -93,9 +95,13 @@ public class WindowController extends JFrame{
     }
 
     //TODO: need to somehow notify trainingController and LevelBuilder about training method and level
-    public void showLevelScreen(String category, int level) {
+    public void showLevelScreen(Mode mode, int level) {
+        // We need to notify trainingController about the level to start here right?
+        LevelInfo levelInfo = new LevelInfo(level, mode);
+        trainingController.startTrainingSession(levelInfo);
+        
         contentPanel.removeAll();
-        contentPanel.add(new LevelScreen(this, category, level), BorderLayout.CENTER);
+        contentPanel.add(new LevelScreen(this), BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
     }
@@ -107,9 +113,9 @@ public class WindowController extends JFrame{
         contentPanel.repaint();
     }
 
-    public void showLevelSelection(String category) {
+    public void showLevelSelection(Mode mode) {
         removeAll();
-        add(new LevelSelectionPanel(this, category), BorderLayout.CENTER);
+        add(new LevelSelectionPanel(this, mode), BorderLayout.CENTER);
         revalidate();
         repaint();
     }
