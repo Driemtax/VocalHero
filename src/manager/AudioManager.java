@@ -188,6 +188,9 @@ public class AudioManager {
         }
         
         try {
+            // TODO: Improve accuracy
+            // Right now, even if I sing a note all over the place (e.g. I cant hold it steady)
+            // it still returns me an excellent result with the dominant frequency.
             return pitchDetector.getDominantFrequency(audioData);
         } catch (Exception e) {
             // TODO: Handle exception appropriately

@@ -51,11 +51,14 @@ public class LevelScreen extends JPanel {
 
             // Callback for when recording is finished
             Runnable updateUiAfterRecordingCallback = () -> {
-            startRecordingButton.setEnabled(true);
-            playReferenceButton.setEnabled(true);
-        };
-            
-            windowController.startRecordingForLevel(updateUiAfterRecordingCallback); 
+                startRecordingButton.setEnabled(true);
+                playReferenceButton.setEnabled(true);
+                System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
+                // Hier könntest du weitere UI-Updates machen, z.B. Ergebnisse anzeigen
+                windowController.showResults();
+            };
+
+            windowController.startRecordingForLevel(updateUiAfterRecordingCallback);
         });
 
         playReferenceButton.addActionListener(e -> {
