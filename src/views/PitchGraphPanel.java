@@ -22,8 +22,17 @@ public class PitchGraphPanel extends JPanel {
     }
 
     /** Diese Methode wird von der Audio-Verarbeitung aufgerufen (liefert Cent-Abweichung) */
-    // Überarbeitung nötig
     public void addPitchValue(double centOffset) {
+        // 1. Clipping: Begrenze auf sichtbaren Bereich
+        centOffset = Math.max(-MAX_VISIBLE_CENTS, Math.min(MAX_VISIBLE_CENTS, centOffset));
+
+        // 2. (Optional) Glättung: Moving Average über die letzten 3 Werte
+        if (pitchData.size() >= 2) {
+            double prev1 = pitchData.getLast();
+            double prev2 = pitchData.size() >= 2 ? pitchData.get(pitchData.size() - 2) : prev1;
+            centOffset = (centOffset + prev1 + prev2) / 3.0;
+        }
+
         pitchData.addLast(centOffset);
         if (pitchData.size() > MAX_POINTS) {
             pitchData.removeFirst();

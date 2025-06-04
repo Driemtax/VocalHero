@@ -65,6 +65,7 @@ public class AudioManager {
     public void startRecordingWithLivePitchGraph(Consumer<Double> pitchListener, Runnable updateUiAfterRecordingCallback) {
         recorder.setAudioChunkListener(chunk -> {
             double pitch = pitchDetector.getDominantFrequency(chunk);
+            System.out.println("AudioManager: Detected pitch: " + pitch);
             pitchListener.accept(pitch);
         });
 

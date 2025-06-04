@@ -40,7 +40,6 @@ public class PitchDetector {
     }
 
   public double getDominantFrequency(byte[] audioData) {
-    // convert byte data to float array
     float[] audioDataFloat = Helper.byteArrayToFloatArray(audioData);
     float[] spectrum = new float[frameSize / 2];
 
@@ -48,28 +47,42 @@ public class PitchDetector {
     int frameCount = 0;
 
     for (int offset = 0; offset + frameSize <= audioDataFloat.length; offset += frameSize) {
-      float[] frame = Arrays.copyOfRange(audioDataFloat, offset, offset + frameSize);
-      calculateSpectrum(frame, spectrum);
+        float[] frame = Arrays.copyOfRange(audioDataFloat, offset, offset + frameSize);
+        calculateSpectrum(frame, spectrum);
 
-      // Peak-Detection: find strongest frequency in the spectrum
-      int maxIndex = 0;
-      float maxValue = 0;
-      for (int i = 1; i < spectrum.length; i++) {
-        if (spectrum[i] > maxValue) {
-          maxValue = spectrum[i];
-          maxIndex = i;
+        // Peak-Detection: find strongest frequency in the spectrum
+        int maxIndex = 0;
+        float maxValue = 0;
+        for (int i = 1; i < spectrum.length - 1; i++) {
+            if (spectrum[i] > maxValue) {
+                maxValue = spectrum[i];
+                maxIndex = i;
+            }
         }
-      }
-      // calculate frequency
-      double frequency = maxIndex * sampleRate / frameSize;
-      detectedFrequencies[frameCount++] = frequency;
-    }
-    // only consider the values that are actually filled
-    double[] validFrequencies = Arrays.copyOf(detectedFrequencies, frameCount);
-    Arrays.sort(validFrequencies);
-    double medianFrequency = validFrequencies[validFrequencies.length / 2];
 
-    return medianFrequency;
+        // Parabolic Interpolation for better frequency estimation
+        double trueIndex = maxIndex;
+        if (maxIndex > 0 && maxIndex < spectrum.length - 1) {
+            float alpha = spectrum[maxIndex - 1];
+            float beta = spectrum[maxIndex];
+            float gamma = spectrum[maxIndex + 1];
+            double p = 0.5 * (alpha - gamma) / (alpha - 2 * beta + gamma);
+            trueIndex = maxIndex + p;
+        }
+
+        double frequency = trueIndex * sampleRate / frameSize;
+        detectedFrequencies[frameCount++] = frequency;
+    }
+
+    // Moving Average Glättung
+    double smoothed = 0;
+    int window = Math.min(5, frameCount); // Fenstergröße 5 oder weniger
+    for (int i = frameCount - window; i < frameCount; i++) {
+        smoothed += detectedFrequencies[i];
+    }
+    smoothed /= window;
+
+    return smoothed;
   }
 
   public double getNoteStability(double[] frequencies) {
