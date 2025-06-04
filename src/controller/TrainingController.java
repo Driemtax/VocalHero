@@ -65,7 +65,7 @@ public class TrainingController {
             double pitch = audioManager.detectPitchOfRecordedAudio();
             System.out.println("TrainingController: Detected pitch: " + pitch);
             // set the Feedback Object in the Level object
-            level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, level.getReferenceNotes().get(0).getFrequency())); // Placeholder for Feedback object, to be implemented later
+            level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, level.getReferenceNotes().get(0).getFrequency()));
         } else {
             // For MELODY mode, analyze the melody of the sung audio
             System.out.println("TrainingController: Analysing melody...");
