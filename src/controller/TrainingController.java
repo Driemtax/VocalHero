@@ -71,7 +71,7 @@ public class TrainingController {
             System.out.println("TrainingController: Analysing melody...");
             analysisResult = audioManager.analyzeMelody();
             // set the Feedback Object in the Level object
-            level.setFeedback(feedbackManager.calculateFeedbackForRecordedMelody(analysisResult)); // Placeholder for Feedback object, to be implemented later
+            level.setFeedback(feedbackManager.calculateFeedbackForRecordedMelody(analysisResult));
         }
     }
 
