@@ -3,9 +3,9 @@ package model;
 
 public enum Mode {
 
-    NOTE,
-    INTERVAL,
-    MELODY;
+    NOTE("Einzelnoten"),
+    INTERVAL("Intervalle"),
+    MELODY("Melodien");
 
     public static Mode fromString(String mode) {
         switch (mode) {
@@ -20,4 +20,13 @@ public enum Mode {
         }
     }
 
+    private final String name;
+
+    private Mode(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

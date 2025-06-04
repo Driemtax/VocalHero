@@ -10,6 +10,8 @@ import audio.Player;
 import audio.Recorder;
 import model.MidiNote;
 import model.AnalysisResult;
+import model.AudioSettings;
+
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -31,10 +33,10 @@ public class AudioManager {
     private Player player;
     private PitchDetector pitchDetector;
     private MelodyAnalyzer melodyAnalyzer;
-    private static final double SAMPLE_RATE = 44100.0;
+    private double SAMPLE_RATE;
     byte[] audioData;
     private List<MidiNote> referenceNotes;
-    private AudioFormat format = new AudioFormat((float)SAMPLE_RATE, 16, 2, true, false);
+    private AudioFormat format;
 
     public AudioManager(Mixer.Info selectedMic, Mixer.Info selectedSpeaker, List<MidiNote> referenceNotes, int recordingDuration) {
         this.recordingDuration = recordingDuration;
@@ -45,6 +47,9 @@ public class AudioManager {
         this.player = new Player();
         this.pitchDetector = new PitchDetector(2048, SAMPLE_RATE);
         this.referenceNotes = referenceNotes;
+
+        this.SAMPLE_RATE = AudioSettings.getSampleRate();
+        this.format = AudioSettings.getFormat();
     }
 
     public AudioFormat getFormat() {

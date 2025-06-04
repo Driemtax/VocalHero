@@ -6,6 +6,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
+import model.Mode;;
+
 public class ExercisesMenu extends JPanel {
     private JPopupMenu popupMenu;
     private ModernButton mainButton;
@@ -22,10 +24,14 @@ public class ExercisesMenu extends JPanel {
         popupMenu.setBackground(new Color(40, 40, 40));
         popupMenu.setBorder(new EmptyBorder(5, 0, 5, 0));
 
-        String[] options = {"Einzelnote", "Intervalle", "Melodien"};
-        for (String option : options) {
-            JMenuItem menuItem = createStyledMenuItem(option);
-            menuItem.addActionListener(ev -> contentPanel.showLevelSelection(option));
+        Mode[] options = {
+            Mode.NOTE,
+            Mode.INTERVAL,
+            Mode.MELODY
+        };
+        for (Mode mode : options) {
+            JMenuItem menuItem = createStyledMenuItem(mode.getName());
+            menuItem.addActionListener(ev -> contentPanel.showLevelSelection(mode));
             popupMenu.add(menuItem);
         }
 

@@ -110,11 +110,11 @@ public class TrainingController {
     }
 
     public List<Mixer.Info> getAvailableInputDevices() {
-        return audioUtil.getAvailableMicrophones(audioManager.getFormat());
+        return audioUtil.getAvailableMicrophones(AudioSettings.getFormat());
     }
 
     public List<Mixer.Info> getAvailableOutputDevices() {
-        return audioUtil.getAvailableSpeakers(audioManager.getFormat());
+        return audioUtil.getAvailableSpeakers(AudioSettings.getFormat());
     }
 
     private void initializeAudioSettings() {
