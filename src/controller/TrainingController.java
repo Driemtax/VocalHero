@@ -8,6 +8,7 @@ import javax.sound.sampled.Mixer;
 
 import manager.*;
 import model.LevelInfo;
+import model.MidiNote;
 import model.Mode;
 import model.PitchListener;
 import utils.AudioPreferences;
@@ -81,6 +82,21 @@ public class TrainingController {
      */
     public Feedback getFeedback() {
         return level.getFeedback();
+    }
+
+    /**
+     * Returns the reference notes for the current level.
+     * This will be called by the LevelScreen to get the reference notes for the current level.
+     *
+     * @return List of MidiNote objects representing the reference notes for the current level.
+     */
+    public List<MidiNote> getReferenceNotesForCurrentLevel() {
+        if (level != null && level.getReferenceNotes() != null) {
+            return level.getReferenceNotes();
+        } else {
+            System.err.println("TrainingController: Keine Referenznoten für das aktuelle Level verfügbar.");
+            return List.of(); // Return an empty list if no notes are available
+        }
     }
 
 

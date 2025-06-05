@@ -1,8 +1,11 @@
-// Author: Jonas Rumpf
+// Author: Jonas Rumpf, Inaas Hammoush
 
 package views;
 
 import javax.swing.*;
+
+import model.MidiNote;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,13 +28,14 @@ public class ScorePanel extends JPanel {
         }
     }
 
-    public ScorePanel() {
+    public ScorePanel(List<MidiNote> referenceNotes) {
         setBackground(new Color(80, 80, 80));
         clef = new ImageIcon(getClass().getResource("/assets/clef.png")).getImage();
-        notes = new ArrayList<>();
+        clearNotes();
+        notes = midiNotesToUiNotes(referenceNotes);
         scoreUtils = new ScoreUtils();
 
-        addTestNotes();
+        //addTestNotes();
     }
 
     // Method to set new notes (e.g., for a new exercise)
@@ -50,6 +54,22 @@ public class ScorePanel extends JPanel {
     public void clearNotes() {
         notes.clear();
         repaint();
+    }
+
+    public List<Note> midiNotesToUiNotes(List<MidiNote> notes) {
+        if (notes == null || notes.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Note> uiNotes = new ArrayList<>();
+        int StartX = 200; // Starting x position for notes
+        int spacing = 60; // Spacing between notes
+        int counter = 0;
+        for (MidiNote midiNote : notes) {
+            int xPosition = StartX + counter * spacing;
+            counter++;
+            uiNotes.add(new Note(xPosition, midiNote.getNoteDefinition().getMidiNumber()));
+        }
+        return uiNotes;
     }
 
     // Method to add test notes (C major scale)
