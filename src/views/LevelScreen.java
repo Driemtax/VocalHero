@@ -22,6 +22,9 @@ public class LevelScreen extends JPanel {
     private Mode currentMode;
     private int currentLevel;
 
+    private final int[] countdown = {3};
+    private Timer timer = new Timer(1000, null);
+
     public LevelScreen(WindowController controller, Mode mode, int level) {
         this.windowController = controller;
         this.currentMode = mode;
@@ -76,54 +79,54 @@ public class LevelScreen extends JPanel {
             startRecordingButton.setRecording(true);
             playReferenceButton.setEnabled(false);
 
-            for (int i = 3; i < 0; i--) {
-                statusLabel.setText("Aufnahme startet in: " + i);
-                try {
-                    Thread.sleep(1000);
+            // Set timer for recording countdown
+            timer.addActionListener(ev -> {
+                if (countdown[0] > 0) {
+                    statusLabel.setText("Aufnahme startet in: " + countdown[0]);
+                    countdown[0]--;
+                } else {
+                    timer.stop();
+                    statusLabel.setText("🎙️ Aufnahme läuft...");
+
+                    RecordingFinishedCallback updateUiAfterRecordingCallback = (boolean success) -> {
+                        if (success) {
+                            statusLabel.setText("Aufnahme beendet.");
+                            startRecordingButton.setEnabled(true);
+                            startRecordingButton.setRecording(false);
+                            playReferenceButton.setEnabled(true);
+                            System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
+                            windowController.showResults(currentMode, currentLevel);
+                        }
+                    };
                     
-                } catch (Exception ex) {
-                    statusLabel.setText("❌ Aufnahmefehler!");
-                    return;
-                } 
-            }
-
-            statusLabel.setText("🎙️ Aufnahme läuft...");
-
-            // Callback for when recording is finished
-            RecordingFinishedCallback updateUiAfterRecordingCallback = (boolean success) -> {
-                if (success) {
-                    statusLabel.setText("Aufnahme beendet.");
-                    startRecordingButton.setEnabled(true);
-                    startRecordingButton.setRecording(false);
-                    playReferenceButton.setEnabled(true);
-                    System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
-                    windowController.showResults(currentMode, currentLevel);
+                    boolean success = windowController.startRecordingForLevel(updateUiAfterRecordingCallback); 
+                    if (!success) {
+                        statusLabel.setText("❌ Aufnahmefehler!");
+                        startRecordingButton.setEnabled(true);
+                        startRecordingButton.setRecording(false);
+                        playReferenceButton.setEnabled(true);
+                        System.out.println("LevelScreen: Aufnahme konnte nicht gestartet werden.");
+                    }
                 }
-            };
-            
-            boolean success = windowController.startRecordingForLevel(updateUiAfterRecordingCallback); 
-            if (!success) {
-                statusLabel.setText("❌ Aufnahmefehler!");
-                startRecordingButton.setEnabled(true);
-                startRecordingButton.setRecording(false);
-                playReferenceButton.setEnabled(true);
-                System.out.println("LevelScreen: Aufnahme konnte nicht gestartet werden.");
-            }
+            });
+        timer.setInitialDelay(0);
+        timer.start();
         });
-
+        
+        // action listener for play reference button
         playReferenceButton.addActionListener(e -> {
             playReferenceButton.setEnabled(false);
             startRecordingButton.setEnabled(false);
-
+    
             // Callback for when playback is finished
             Runnable updateUiAfterPlaybackCallback = () -> {
                 playReferenceButton.setEnabled(true);
                 startRecordingButton.setEnabled(true);
             };
-
+    
             // Play the reference note for the current level
             windowController.playReference(updateUiAfterPlaybackCallback);
-        });
+        });   
     }
 
     public void stop() {
