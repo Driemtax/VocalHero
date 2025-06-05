@@ -10,6 +10,7 @@ import manager.*;
 import model.LevelInfo;
 import model.Mode;
 import model.PitchListener;
+import model.RecordingFinishedCallback;
 import utils.AudioPreferences;
 import model.AnalysisResult;
 import model.Feedback;
@@ -47,14 +48,14 @@ public class TrainingController {
      * Starts recording audio for a specified duration and provides live pitch graphing.
      * @param updateUiAfterRecordingCallback Callback for updating the UI after recording is complete.
      */
-    public void startRecordingWithLivePitchGraph(Runnable updateUiAfterRecordingCallback) {
+    public boolean startRecordingWithLivePitchGraph(RecordingFinishedCallback updateUiAfterRecordingCallback) {
 
-        audioManager.startRecordingWithLivePitchGraph(
+        return audioManager.startRecordingWithLivePitchGraph(
         pitch -> {feedbackManager.updatePitchGraph(pitch);},
-        () -> {
+        (boolean success) -> {
             // This callback is called when the recording is complete
             setLevelFeedback(); // Analyze the recorded audio and set feedback
-            updateUiAfterRecordingCallback.run(); // Update the UI after recording
+            updateUiAfterRecordingCallback.onRecordingFinished(success); // Update the UI after recording
         });
     }
 

@@ -7,6 +7,7 @@ import java.awt.*;
 import controller.WindowController;
 import i18n.LanguageManager;
 import model.Mode;
+import model.RecordingFinishedCallback;
 
 public class LevelScreen extends JPanel {
     private WindowController windowController;
@@ -15,6 +16,7 @@ public class LevelScreen extends JPanel {
     private ModernButton playReferenceButton;
     private PitchGraphPanel pitchPanel;
     private ScorePanel scorePanel;
+    private JLabel statusLabel;
 
     // Maybe show this information in the UI later.
     private Mode currentMode;
@@ -48,6 +50,14 @@ public class LevelScreen extends JPanel {
         helpButtonPanel.add(helpButton);
         topPanel.add(helpButtonPanel, BorderLayout.EAST);
 
+        // Status label to show status of recording/playback
+        JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        statusPanel.setBackground(new Color(20, 20, 20));
+        statusLabel = new JLabel("Bereit", SwingConstants.CENTER);
+        statusLabel.setForeground(Color.WHITE);
+        statusPanel.add(statusLabel);
+        topPanel.add(statusPanel, BorderLayout.SOUTH);
+
         // Create main content panel
         JPanel contentPanel = new JPanel(new GridLayout(2, 1));
         pitchPanel = new PitchGraphPanel();
@@ -66,16 +76,39 @@ public class LevelScreen extends JPanel {
             startRecordingButton.setRecording(true);
             playReferenceButton.setEnabled(false);
 
+            for (int i = 3; i < 0; i--) {
+                statusLabel.setText("Aufnahme startet in: " + i);
+                try {
+                    Thread.sleep(1000);
+                    
+                } catch (Exception ex) {
+                    statusLabel.setText("❌ Aufnahmefehler!");
+                    return;
+                } 
+            }
+
+            statusLabel.setText("🎙️ Aufnahme läuft...");
+
             // Callback for when recording is finished
-            Runnable updateUiAfterRecordingCallback = () -> {
+            RecordingFinishedCallback updateUiAfterRecordingCallback = (boolean success) -> {
+                if (success) {
+                    statusLabel.setText("Aufnahme beendet.");
+                    startRecordingButton.setEnabled(true);
+                    startRecordingButton.setRecording(false);
+                    playReferenceButton.setEnabled(true);
+                    System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
+                    windowController.showResults(currentMode, currentLevel);
+                }
+            };
+            
+            boolean success = windowController.startRecordingForLevel(updateUiAfterRecordingCallback); 
+            if (!success) {
+                statusLabel.setText("❌ Aufnahmefehler!");
                 startRecordingButton.setEnabled(true);
                 startRecordingButton.setRecording(false);
                 playReferenceButton.setEnabled(true);
-                System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
-                windowController.showResults(currentMode, currentLevel);
-            };
-            
-            windowController.startRecordingForLevel(updateUiAfterRecordingCallback); 
+                System.out.println("LevelScreen: Aufnahme konnte nicht gestartet werden.");
+            }
         });
 
         playReferenceButton.addActionListener(e -> {
