@@ -1,11 +1,19 @@
 package utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.sound.sampled.*;
+import java.io.File;
+
+import model.AudioSettings;
 
 public class FileUtils {
+
+private final static String RECORDING_PATH = "recordings";
     
     // CSV-Ladefunktion
     public static Map<String, int[]> loadProgressFromCSV(String filePath) {
@@ -24,5 +32,32 @@ public class FileUtils {
             e.printStackTrace();
         }
         return progressData;
+    }
+
+    /**
+     * Saves the audio data to a WAV file in a specified path.
+     * @param fileName the name of the  WAV file 
+     * @param audioData the audio data as a byte array
+     * @throws IOException
+     * @throws UnsupportedAudioFileException
+     */
+    public static void saveRecordingToWAV(String fileName, byte[] audioData)
+        throws IOException, UnsupportedAudioFileException {
+        AudioFormat format = AudioSettings.getFormat();
+        String projectRoot = System.getProperty("user.dir");
+        String filePath = projectRoot + File.separator + RECORDING_PATH + File.separator + fileName;
+
+        // make sure the directory exists or create it
+        File file = new File(filePath);
+        file.getParentFile().mkdirs();
+
+        // Put byte array into AudioInputStream
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(audioData);
+             AudioInputStream ais = new AudioInputStream(bais, format, audioData.length / (format.getSampleSizeInBits() / 8))) {
+                AudioSystem.write(ais, AudioFileFormat.Type.WAVE, file);
+             }
+    }
+
+    public static void loadRecordingFromWAV(String filePath) {
     }
 }
