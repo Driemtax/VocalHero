@@ -17,10 +17,20 @@ public class ProgressManager {
 
     String levelUrl = System.getProperty("user.dir") + "/VocalHero/src/assets/level.csv";
 
+    /** 
+     * Get the level.csv file as a List of Strings
+     * 
+     * @return a List of each line of the file as a String
+     */
     public List<String> readLevels() throws IOException {
         return Files.readAllLines(Paths.get(levelUrl));
     }
 
+    /** 
+     * parses the level.csv and return the data inside as LevelState objects
+     * 
+     * @return a List of each line of the file as a {@link LevelState} Object
+     */
     public List<LevelState> parseLevels() throws IOException, IllegalArgumentException {
         List<LevelState> levelStates = new ArrayList<>();
         try {
@@ -45,6 +55,9 @@ public class ProgressManager {
 
                     levelStates.add(new LevelState(mode, levelNumber, Score, isUnlocked));
                 }
+                else {
+                    throw new IllegalStateException();
+                }
             }
             return levelStates;
         } catch (IOException e) {
@@ -54,6 +67,13 @@ public class ProgressManager {
         }
     }
 
+    /** 
+     * updates the level.csv file after the end of a level
+     * 
+     * @param level the number of the level
+     * @param mode the mode of the level
+     * @param feedback a {@link Feedback} object, contains the score with which the level was completed
+     */
     public void updateLevel(int level, Mode mode, Feedback feedback) {
         try {
             boolean newLevelUnlocked = false;
