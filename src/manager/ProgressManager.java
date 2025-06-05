@@ -15,10 +15,10 @@ import model.Mode;
 
 public class ProgressManager {
 
-    String levelUrl = System.getProperty("user.dir") + "/assets/level.csv";
+    String levelUrl = System.getProperty("user.dir") + "/VocalHero/src/assets/level.csv";
 
-    List<String> readLevels() throws IOException {
-        return Files.readAllLines(Paths.get(URI.create(levelUrl)));
+    public List<String> readLevels() throws IOException {
+        return Files.readAllLines(Paths.get(levelUrl));
     }
 
     public List<LevelState> parseLevels() throws IOException, IllegalArgumentException {
@@ -34,9 +34,9 @@ public class ProgressManager {
 
                 if (parts.length == 4) {
                     Mode mode = switch (parts[0]) {
-                        case "Note" -> Mode.NOTE;
-                        case "Interval" -> Mode.INTERVAL;
-                        case "Melody" -> Mode.MELODY;
+                        case "Einzelnoten" -> Mode.NOTE;
+                        case "Intervalle" -> Mode.INTERVAL;
+                        case "Melodien" -> Mode.MELODY;
                         default -> throw new IllegalArgumentException("Unknown mode: " + parts[0]);
                     };
                     int levelNumber = Integer.parseInt(parts[1]);
@@ -54,9 +54,40 @@ public class ProgressManager {
         }
     }
 
-    public void updateLevel(int Level, Mode mode, Feedback feedback) {
+    public void updateLevel(int level, Mode mode, Feedback feedback) {
         try {
+            boolean newLevelUnlocked = false;
             List<LevelState> lines = parseLevels();
+            try (FileWriter writer = new FileWriter(levelUrl)) {
+
+                writer.write("Mode,Level,Completion,unlocked\n");
+
+                for (LevelState levelState : lines) {
+                    boolean unlock;
+                    if (newLevelUnlocked && level != 1) {
+                        unlock = true;
+                    } else {
+                        unlock = levelState.isUnlocked();
+                    }
+
+                    if (levelState.mode() == mode && levelState.Level() == level) {
+                        levelState = new LevelState(levelState.mode(), levelState.Level(), feedback.score(),
+                                levelState.isUnlocked());
+
+                        // TODO: find reasonable score to unlock next level
+                        if (feedback.score() >= 80) {
+                            newLevelUnlocked = true;
+                        }
+                    } else {
+                        newLevelUnlocked = false;
+                    }
+
+                    writer.write(levelState.mode().getName()
+                            + ',' + Integer.toString(levelState.Level())
+                            + ',' + Float.toString(levelState.completion())
+                            + ',' + Boolean.toString(unlock) + '\n');
+                }
+            }
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
