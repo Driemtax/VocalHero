@@ -1,4 +1,4 @@
-// Authors:David Herrmann
+// Authors:David Herrmann, Jonas Rumpf
 package model;
 
 public enum Mode {

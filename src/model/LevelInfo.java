@@ -1,4 +1,4 @@
-// Authors: Inaas Hammoush
+// Authors: Inaas Hammoush, Jonas Rumpf
 
 package model;
 
@@ -12,10 +12,11 @@ public class LevelInfo {
 
     private Mode mode;
     private Difficulty difficulty;
-    private int levelNumber; // Unique identifier for the level, can be used for progress tracking (tbd)
+    private int levelNumber; 
 
-    public LevelInfo(int level, Mode mode) {
-        this.levelNumber = level;
+    public LevelInfo(int levelNumber, Mode mode) {
+        this.difficulty = getLevelDifficulty(levelNumber);
+        this.levelNumber = levelNumber;
         this.mode = mode;
     }
 
@@ -24,6 +25,18 @@ public class LevelInfo {
     public Difficulty getDifficulty() {return difficulty;}
 
     public void setDifficulty(Difficulty difficulty) {this.difficulty = difficulty;}
+
+    // Method to determine difficulty based on level number
+    // Later I think it might be better to read the difficulty from a file
+    public Difficulty getLevelDifficulty(int levelNumber) {
+        if (levelNumber <= 3) {
+            return Difficulty.easy;
+        } else if (levelNumber > 3 && levelNumber <= 6) {
+            return Difficulty.medium;
+        } else {
+            return Difficulty.hard;
+        }
+    }
 
     public Mode getMode() {return mode;}
 

@@ -14,4 +14,9 @@ public class Helper {
     }
     return signal;
   }
+
+  public static double frequencyToCentOffset(double frequency, double targetFrequency) {
+      if (frequency <= 0 || targetFrequency <= 0) return 0;
+      return 1200 * Math.log(frequency / targetFrequency) / Math.log(2);
+  }
 }
