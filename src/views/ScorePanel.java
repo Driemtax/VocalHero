@@ -31,7 +31,6 @@ public class ScorePanel extends JPanel {
     public ScorePanel(List<MidiNote> referenceNotes) {
         setBackground(new Color(80, 80, 80));
         clef = new ImageIcon(getClass().getResource("/assets/clef.png")).getImage();
-        clearNotes();
         notes = midiNotesToUiNotes(referenceNotes);
         scoreUtils = new ScoreUtils();
 

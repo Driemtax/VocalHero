@@ -24,17 +24,4 @@ public class IntervalUtil {
         }
         return result;
     }
-
-    public static Interval getRandomIntervalInRange(int maxSemitones) {
-        if (maxSemitones < 1 || maxSemitones > 12) {
-            throw new IllegalArgumentException("maxSemitones must be between 1 and 12");
-        }
-        int semitones = 1 + (int) (Math.random() * maxSemitones);
-        Interval result = Interval.getIntervalBySemitones(semitones);
-
-        if (result == null) {
-            throw new IllegalStateException("No interval found for semitones: " + semitones);
-        }
-        return result;
-    }
 }
