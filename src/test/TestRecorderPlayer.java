@@ -139,18 +139,18 @@ public class TestRecorderPlayer {
             return;
         }
 
-        new Thread(() -> {
-            try {
-                updateStatus(statusLabel, "▶️ Wiedergabe läuft...");
-                Player recordingPlayer = new Player();
-                recordingPlayer.play(selectedSpeaker, recorder.getAudioData(), format);
-            } catch (LineUnavailableException ex) {
-                System.out.println(ex.getMessage());
-                ex.printStackTrace();
-                updateStatus(statusLabel, "❌ Wiedergabefehler!");
-            }
-            updateStatus(statusLabel, "✅ Wiedergabe beendet.");
-        }).start();
+        // new Thread(() -> {
+        //     try {
+        //         updateStatus(statusLabel, "▶️ Wiedergabe läuft...");
+        //         Player recordingPlayer = new Player();
+        //         //recordingPlayer.play(selectedSpeaker, recorder.getAudioData(), format);
+        //     } catch (LineUnavailableException ex) {
+        //         System.out.println(ex.getMessage());
+        //         ex.printStackTrace();
+        //         updateStatus(statusLabel, "❌ Wiedergabefehler!");
+        //     }
+        //     updateStatus(statusLabel, "✅ Wiedergabe beendet.");
+        // }).start();
     }
 
     // Mock-Methode für Noteerkennung

@@ -135,7 +135,7 @@ public class AudioManager {
      */
     public void playAudio() {
         try {
-            player.play(selectedSpeaker, audioData, format);
+            player.play(audioData);
         } catch (LineUnavailableException e) {
             // TODO: Handle exception through GUI
             e.printStackTrace();

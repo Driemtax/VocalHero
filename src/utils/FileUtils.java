@@ -2,8 +2,11 @@ package utils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sound.sampled.*;
@@ -58,6 +61,18 @@ private final static String RECORDING_PATH = "recordings";
              }
     }
 
-    public static void loadRecordingFromWAV(String filePath) {
+    public static byte[] loadRecordingFromWAV(String fileName) throws IOException, UnsupportedAudioFileException {
+        String projectRoot = System.getProperty("user.dir");
+        String filePath = projectRoot + File.separator + RECORDING_PATH + File.separator + fileName;
+        File file = new File(filePath);
+        
+        if (!file.exists()) {
+            throw new IOException("Recording file not found: " + filePath);
+        }
+
+        byte[] wavBytes = Files.readAllBytes(Paths.get(filePath));
+
+        return wavBytes;
+        
     }
 }
