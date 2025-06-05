@@ -48,5 +48,9 @@ public class LevelBuilder {
             default:
                 throw new IllegalArgumentException("Unsupported mode: " + levelInfo.getMode());
         }
-    }        
+    }     
+        
+    public LevelInfo getLevelInfo(){
+        return levelInfo;
+    }   
 }

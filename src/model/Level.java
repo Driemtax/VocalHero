@@ -1,4 +1,4 @@
-// Authors:Inaas Hammoush
+// Authors:Inaas Hammoush, David Herrmann
 package model;
 
 import java.util.List;

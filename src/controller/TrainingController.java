@@ -22,6 +22,7 @@ public class TrainingController {
     private FeedbackManager feedbackManager;
     private LevelBuilder levelBuilder;
     Level level;
+    LevelInfo levelInfo;
     private ProgressManager progressManager;
     private AnalysisResult analysisResult;
     private static AudioUtil audioUtil = new AudioUtil();
@@ -32,6 +33,7 @@ public class TrainingController {
     }
 
     public void startTrainingSession(LevelInfo levelInfo) {
+        this.levelInfo = levelInfo; 
         this.levelBuilder = new LevelBuilder(levelInfo);
         this.level = levelBuilder.buildLevel();
         // RecordingDuration still needs to be set in the Level object (default is 3 seconds and more for melodies) 
@@ -72,6 +74,7 @@ public class TrainingController {
             // set the Feedback Object in the Level object
             level.setFeedback(feedbackManager.calculateFeedbackForRecordedMelody(analysisResult));
         }
+         progressManager.updateLevel(levelInfo.getLevelNumber(), level.getMode(), level.getFeedback());
     }
 
     /**
