@@ -16,6 +16,7 @@ import model.Feedback;
 import model.Level;
 import model.AudioSettings;
 import utils.AudioUtil;
+import model.MidiNote;
 
 public class TrainingController {
     private AudioManager audioManager;
@@ -99,7 +100,12 @@ public class TrainingController {
             }
             return;
         }
-        audioManager.playReference(level.getReferenceNotes(), updateUiAfterPlaybackCallback);
+        if (level.getMode() == Mode.INTERVAL) {
+            List<MidiNote> intervalReferenceNote = List.of(level.getReferenceNotes().get(0));
+            audioManager.playReference(intervalReferenceNote, updateUiAfterPlaybackCallback);
+        } else {
+            audioManager.playReference(level.getReferenceNotes(), updateUiAfterPlaybackCallback);
+        }
     }
 
     public List<Mixer.Info> getAvailableInputDevices() {

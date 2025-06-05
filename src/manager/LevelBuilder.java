@@ -38,9 +38,17 @@ public class LevelBuilder {
             case INTERVAL:
                 // Generate a random note and interval based on difficulty
                 note = NoteUtil.getRandomNoteInRange(levelInfo.getDifficulty().getDifficultyRange());
-                // Here the logic seems to be faulty, maybe a range should be passed instead of interval
-                Interval interval = IntervalUtil.getRandomIntervalInRange(null, null); 
+                
+                // according to the level number, we can set a maximum range for the interval
+                // For level 1-2 we can use a maximum of 4 semitones, for level 3-4 a maximum of 8 semitones,
+                // and for levels 5-6 a maximum of 12 semitones
+                int maxSemitones = levelInfo.getLevelNumber() <= 2 ? 4 : levelInfo.getLevelNumber() <= 4 ? 8 : 12;
+                
+                Interval interval = IntervalUtil.getRandomIntervalInRange(maxSemitones); 
+                
+                referenceNotes.add(note);
                 referenceNotes.add(NoteUtil.getNoteFromInterval(note, interval));
+                
                 return referenceNotes;
             case MELODY:
                 // Here we can get a random melody from a predefined pool

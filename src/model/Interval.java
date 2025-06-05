@@ -1,8 +1,5 @@
-// Authors:David Herrmann
+// Authors:David Herrmann, Inaas Hammoush
 package model;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public enum Interval {
     P1("P1", 0),
@@ -35,15 +32,12 @@ public enum Interval {
         return semitones;
     }
 
-    private static final Map<Integer, Interval> BY_SEMITONES = new HashMap<>();
-
-    static {
-        for (Interval i : values()) {
-            BY_SEMITONES.put(i.getSemitones(), i);
+    public static Interval getIntervalBySemitones(int semitones) {
+        for (Interval interval : values()) {
+            if (interval.getSemitones() == semitones) {
+                return interval;
+            }
         }
-    }
-
-    public static Interval fromSemitones(int semitones) {
-        return BY_SEMITONES.get(semitones);
+        return null;
     }
 }
