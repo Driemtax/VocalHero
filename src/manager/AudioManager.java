@@ -9,6 +9,7 @@ import audio.PitchDetector;
 import audio.Player;
 import audio.Recorder;
 import model.MidiNote;
+import model.RecordingFinishedCallback;
 import model.AnalysisResult;
 import model.AudioSettings;
 
@@ -67,49 +68,54 @@ public class AudioManager {
      *      feedbackManager.updatePitchGraph(pitch);
      *     });
      */
-    public void startRecordingWithLivePitchGraph(Consumer<Double> pitchListener, Runnable updateUiAfterRecordingCallback) {
+    public boolean startRecordingWithLivePitchGraph(Consumer<Double> pitchListener, RecordingFinishedCallback updateUiAfterRecordingCallback) {
         recorder.setAudioChunkListener(chunk -> {
             double pitch = pitchDetector.getDominantFrequency(chunk);
             pitchListener.accept(pitch);
         });
 
-        startRecording(updateUiAfterRecordingCallback);
+        boolean success = startRecording(updateUiAfterRecordingCallback);
+        return success;
 
     }
 
     /**
      * Starts recording audio for a specified duration.
      */
-    public void startRecording(Runnable updateUiAfterRecordingCallback) {
+    public boolean startRecording(RecordingFinishedCallback updateUiAfterRecordingCallback) {
         if (recorder == null) {
             System.err.println("AudioManager: Recorder ist null!");
             // Still need to invoke the callback to avoid deadlock in GUI
-            if (updateUiAfterRecordingCallback != null) SwingUtilities.invokeLater(updateUiAfterRecordingCallback);
-            return;
+            if (updateUiAfterRecordingCallback != null) SwingUtilities.invokeLater(
+                () -> updateUiAfterRecordingCallback.onRecordingFinished(false));
+            return false;
         }
         if (selectedMic == null) {
             System.err.println("AudioManager: Kein Mikrofon ausgewählt!");
-             if (updateUiAfterRecordingCallback != null) SwingUtilities.invokeLater(updateUiAfterRecordingCallback);
-            return;
+             if (updateUiAfterRecordingCallback != null) SwingUtilities.invokeLater(
+                () -> updateUiAfterRecordingCallback.onRecordingFinished(false));
+            return false;
         }
         if (format == null) { // Zusätzlicher Check
             System.err.println("AudioManager: AudioFormat ist nicht gesetzt!");
-            if (updateUiAfterRecordingCallback != null) SwingUtilities.invokeLater(updateUiAfterRecordingCallback);
-            return;
+            if (updateUiAfterRecordingCallback != null) SwingUtilities.invokeLater(
+                () -> updateUiAfterRecordingCallback.onRecordingFinished(false));
+            return false;
         }
         try {
-            recorder.startRecording(recordingDuration, selectedMic, () -> {
+            return recorder.startRecording(recordingDuration, selectedMic, (boolean success) -> {
                 // This callback is executed after the recording is finished
                 audioData = recorder.getAudioData();
                 // Execute the UI callback when processing is done
                 if (updateUiAfterRecordingCallback != null) {
                     System.out.println("TrainingController: Führe UI-Update-Callback aus der View aus.");
-                    updateUiAfterRecordingCallback.run(); 
+                    updateUiAfterRecordingCallback.onRecordingFinished(success); 
                 }
             });
         } catch (LineUnavailableException e) {
             // TODO: Handle exception through GUI
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -135,7 +141,7 @@ public class AudioManager {
      */
     public void playAudio() {
         try {
-            player.play(selectedSpeaker, audioData, format);
+            player.play(audioData);
         } catch (LineUnavailableException e) {
             // TODO: Handle exception through GUI
             e.printStackTrace();

@@ -1,5 +1,6 @@
 package audio;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -8,6 +9,7 @@ import javax.sound.midi.*;
 import javax.sound.sampled.*;
 import javax.swing.SwingUtilities;
 
+import model.AudioSettings;
 import model.MidiNote;
 
 public class Player {
@@ -32,22 +34,38 @@ public class Player {
      * @param format the audio format of the data
      * @throws LineUnavailableException
      */
-    public void play(Mixer.Info mixerInfo, byte[] audioData, AudioFormat format) throws LineUnavailableException {
-        if (audioData == null) {
+    public void play(byte[] wavBytes) throws LineUnavailableException {
+        if (wavBytes == null) {
             System.err.println("Keine Audiodaten zum Abspielen vorhanden.");
             return;
         }
 
-        DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, format);
-        
-        // Try to get the data line from the selected mixer to write the audio data to
-        // We could use the default mixer if the selected one is not available
-        try (SourceDataLine line = (SourceDataLine) AudioSystem.getLine(dataLineInfo)) {
-             line.open(format);
-             line.start();
-             line.write(audioData, 0, audioData.length);
-             line.drain(); // awaits the end of the audio data
+        Mixer.Info selectedSpeaker = AudioSettings.getOutputDevice();
+        Mixer speaker = AudioSystem.getMixer(selectedSpeaker);
+        AudioFormat format; 
+        byte[] audioData;
+
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(wavBytes);
+            AudioInputStream ais = AudioSystem.getAudioInputStream(bais);
+    
+            format = ais.getFormat();
+            audioData = ais.readAllBytes();
+            
+            DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, format);
+            
+            // Try to get the data line from the selected mixer to write the audio data to
+            // We could use the default mixer if the selected one is not available
+            try (SourceDataLine line = (SourceDataLine) speaker.getLine(dataLineInfo)) {
+                 line.open(format);
+                 line.start();
+                 line.write(audioData, 0, audioData.length);
+                 line.drain(); // awaits the end of the audio data
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
         }
+
     }
 
     /**
