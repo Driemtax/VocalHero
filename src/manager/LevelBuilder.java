@@ -3,13 +3,14 @@
 package manager;
 
 import java.util.List;
-import java.util.ArrayList;
 
 import model.Level;
 import model.LevelInfo;
 import model.MidiNote;
 import model.Mode;
+import utils.FileUtils;
 import utils.IntervalUtil;
+import utils.MidiParser;
 import utils.NoteUtil;
 import model.Difficulty;
 import model.Interval;
@@ -26,13 +27,15 @@ public class LevelBuilder {
         Mode mode = levelInfo.getMode();
         Difficulty difficulty = levelInfo.getDifficulty();
         if (mode == Mode.MELODY) {
-            // For melody mode, we can generate a random melody from a predefined pool
-            // List<MidiNote> referenceNotes = getMelodyReferenceNotes(); // we get this from a melody collection
-            // return new Level(levelInfo.getMode(), levelInfo.getDifficulty(), referenceNotes);
+            // For melody mode, we can choose a random melody from a predefined pool
+            String melodyPath = FileUtils.chooseMelody(difficulty);
+            List<MidiNote> referenceNotes = MidiParser.parseMidiFile(melodyPath); // we get this from a melody collection
             // Don't forget to set the recording duration for melodies, which is usually longer than 3 seconds
-
-            // Placeholder for melody mode, as we need a melody collection to implement this
-            return new Level(mode, difficulty, new ArrayList<MidiNote>()); 
+            int melodyLength = (int) MidiParser.getLengthOfMelody(referenceNotes);
+            Level level = new Level(levelInfo.getMode(), levelInfo.getDifficulty(), referenceNotes);
+            level.setRecordingDuration(melodyLength);
+            
+            return level;
         } else {
             // For note and interval modes, we generate reference notes based on the difficulty level
             MidiNote note = NoteUtil.getRandomNoteInRange(difficulty.getDifficultyRange(baseVoice)); 

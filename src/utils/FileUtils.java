@@ -2,7 +2,6 @@ package utils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,16 +13,19 @@ import java.util.List;
 import java.util.Map;
 import javax.sound.sampled.*;
 import java.io.File;
-import java.io.FileNotFoundException;
 
 import model.AudioSettings;
+import model.Difficulty;
 
 public class FileUtils {
 
     private final static String SRC_PATH = "src";
-    private final static String RECORDING_PATH = "recordings";
     private final static String ASSETS_PATH = "assets";
-
+    private final static String RECORDING_PATH = "recordings";
+    private final static String EASY_MELODY = "major-scale.mid";
+    private final static String MEDIUM_MELODY = "alle_meine_entchen.mid";
+    private final static String HARD_MELODY = "let_it_be.mid";
+    
     // CSV-Ladefunktion
     public static Map<String, int[]> loadProgressFromCSV(String filePath) {
         Map<String, int[]> progressData = new HashMap<>();
@@ -91,7 +93,7 @@ public class FileUtils {
         String path = projectRoot + File.separator + ASSETS_PATH + File.separator + fileName;
         try {
             Files
-                    .readAllLines(Paths.get(projectRoot + File.separator + SRC_PATH + File.separator + ASSETS_PATH + File.separator + fileName)).forEach(line -> VoiceData.add(line));
+                    .readAllLines(Paths.get(path)).forEach(line -> VoiceData.add(line));
         } catch (IOException e) {
             VoiceData.add("C4");
             VoiceData.add("false");
@@ -108,5 +110,29 @@ public class FileUtils {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    public static String chooseMelody(Difficulty difficulty) {
+        String melodyName = "";
+        
+        // Please parse the melody path and look for all midi files
+
+        switch (difficulty) {
+            case easy:
+                melodyName = EASY_MELODY;
+                break;
+            case medium:
+                // Alle meine Entchen
+                melodyName = MEDIUM_MELODY;
+                break;
+            case hard:
+                // Let it be
+                melodyName = HARD_MELODY;
+                break;
+            default:
+                break;
+        }
+
+        return melodyName;
     }
 }
