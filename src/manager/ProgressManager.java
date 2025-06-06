@@ -1,6 +1,7 @@
 // Authors:David Herrmann
 package manager;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
@@ -15,7 +16,7 @@ import model.Mode;
 
 public class ProgressManager {
 
-    String levelUrl = System.getProperty("user.dir") + "/VocalHero/src/assets/level.csv";
+    String levelUrl = System.getProperty("user.dir") + File.separator + "src" + File.separator + "assets" + File.separator + "level.csv";
 
     /** 
      * Get the level.csv file as a List of Strings
@@ -23,6 +24,7 @@ public class ProgressManager {
      * @return a List of each line of the file as a String
      */
     public List<String> readLevels() throws IOException {
+        System.out.println("Level.csv Url: " + levelUrl);
         return Files.readAllLines(Paths.get(levelUrl));
     }
 
