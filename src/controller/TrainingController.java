@@ -60,13 +60,15 @@ public class TrainingController {
      * 
      * @param updateUiAfterRecordingCallback Callback for updating the UI after
      *                                       recording is complete.
+     * @param onTooQuiet Callback for notifying the UI that the audio is too quiet.
      */
-    public boolean startRecordingWithLivePitchGraph(RecordingFinishedCallback updateUiAfterRecordingCallback) {
+    public boolean startRecordingWithLivePitchGraph(RecordingFinishedCallback updateUiAfterRecordingCallback, Runnable onTooQuiet) {
 
         return audioManager.startRecordingWithLivePitchGraph(
                 pitch -> {
                     feedbackManager.updatePitchGraph(pitch);
                 },
+                onTooQuiet,
                 (boolean success) -> {
                     // This callback is called when the recording is complete
                     setLevelFeedback(); // Analyze the recorded audio and set feedback
