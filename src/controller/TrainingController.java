@@ -135,7 +135,7 @@ public class TrainingController {
      * @param updateUiAfterPlaybackCallback Callback zur Aktualisierung der View
      *                                      nach der Wiedergabe.
      */
-    public void playReference(Runnable updateUiAfterPlaybackCallback) {
+    public boolean playReference(Runnable updateUiAfterPlaybackCallback) {
 
         // The Level object contains a list of reference MidiNotes
         // for now, the audioManager only plays one note and not the whole list
@@ -145,9 +145,9 @@ public class TrainingController {
             if (updateUiAfterPlaybackCallback != null) {
                 updateUiAfterPlaybackCallback.run(); // Reactivate UI buttons even if no notes are available
             }
-            return;
+            return false;
         }
-        audioManager.playReference(level.getReferenceNotes(), updateUiAfterPlaybackCallback);
+        return audioManager.playReference(level.getReferenceNotes(), updateUiAfterPlaybackCallback);
     }
 
     public List<Mixer.Info> getAvailableInputDevices() {
@@ -192,5 +192,15 @@ public class TrainingController {
         } catch (IOException e) {
             throw e;
         }
+    }
+
+    /**
+     * call this function on exiting the programm to close the current synthesizer to avoid weird states
+     */
+    public void cleanup() {
+        if (audioManager != null) {
+            audioManager.cleanup();
+        }
+            
     }
 }

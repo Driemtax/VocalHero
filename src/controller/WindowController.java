@@ -262,19 +262,25 @@ public class WindowController extends JFrame{
      * The callback will be executed after the playback is finished.
      * @param updateUiAfterPlaybackCallback
      */
-    public void playReference(Runnable updateUiAfterPlaybackCallback) {
+    public boolean playReference(Runnable updateUiAfterPlaybackCallback) {
         if (trainingController != null) {
-            trainingController.playReference(updateUiAfterPlaybackCallback);
+            return trainingController.playReference(updateUiAfterPlaybackCallback);
         } else {
             System.err.println("WindowController: TrainingController ist null. Referenzton kann nicht abgespielt werden.");
             // reactivate UI buttons, even if the playback cannot be started
             if (updateUiAfterPlaybackCallback != null) {
                 SwingUtilities.invokeLater(updateUiAfterPlaybackCallback);
             }
+
+            return false;
         }
     }
 
     public Level getCurrentLevel() {
         return currentLevel;
+    }
+
+    public void cleanup() {
+        trainingController.cleanup();
     }
 }
