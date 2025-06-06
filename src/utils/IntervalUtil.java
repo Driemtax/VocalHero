@@ -17,7 +17,7 @@ public class IntervalUtil {
             throw new IllegalArgumentException("Start interval must be less than or equal to end interval");
         }
         int semitones = start + (int) (Math.random() * (end - start + 1));
-        Interval result = Interval.fromSemitones(semitones);
+        Interval result = Interval.getIntervalBySemitones(semitones);
 
         if (result == null) {
             throw new IllegalStateException("No interval found for semitones: " + semitones);

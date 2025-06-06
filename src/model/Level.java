@@ -1,4 +1,4 @@
-// Authors:Inaas Hammoush
+// Authors:Inaas Hammoush, David Herrmann
 package model;
 
 import java.util.List;
@@ -17,6 +17,8 @@ public class Level {
     private int recordingDuration = 3; // Default recording duration for single notes and Intervals, can be adjusted for melodies
     private final Mode mode;
     private final Difficulty difficulty;
+    private MidiNote targetIntervalNote; // Target note for interval training, can be null if not applicable
+    private String intervalName; // Name of the interval, can be used for display purposes
     private Feedback feedback; // Feedback object to provide feedback on the training session
     // private final int levelNumber; // Unique identifier for the level, can be used for progress tracking
 
@@ -42,4 +44,12 @@ public class Level {
     public Feedback getFeedback() {return feedback;}
 
     public void setFeedback(Feedback feedback) {this.feedback = feedback;}
+
+    public MidiNote getTargetIntervalNote() {return targetIntervalNote;}
+
+    public void setTargetIntervalNote(MidiNote targetIntervalNote) {this.targetIntervalNote = targetIntervalNote;}
+
+    public String getIntervalName() {return intervalName;}
+
+    public void setIntervalName(String intervalName) {this.intervalName = intervalName;}
 }
