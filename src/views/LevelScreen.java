@@ -1,4 +1,4 @@
-// Authors: Jonas Rumpf, Lars Beer
+// Authors: Jonas Rumpf, Lars Beer, Inaas Hammoush
 package views;
 
 import javax.swing.*;
@@ -8,6 +8,8 @@ import controller.WindowController;
 import i18n.LanguageManager;
 import model.Mode;
 import model.RecordingFinishedCallback;
+import model.MidiNote;
+import java.util.List;
 
 public class LevelScreen extends JPanel {
     private WindowController windowController;
@@ -61,12 +63,33 @@ public class LevelScreen extends JPanel {
         statusPanel.add(statusLabel);
         topPanel.add(statusPanel, BorderLayout.SOUTH);
 
+        // Task Panel
+        JPanel taskPanel = new JPanel();
+        taskPanel.setBackground(new Color(80, 80, 80));
+        JLabel taskLabel = null;
+        if (currentMode == Mode.INTERVAL) {
+            String intervalName = windowController.getCurrentLevel().getIntervalName();
+            taskLabel = new JLabel(LanguageManager.get("task.interval.1") + intervalName + LanguageManager.get("task.interval.2"));
+        } else if (currentMode == Mode.MELODY) {
+            taskLabel = new JLabel(LanguageManager.get("task.melody"));
+        } else {
+            taskLabel = new JLabel(LanguageManager.get("task.single_note"));
+        }
+        taskLabel.setForeground(Color.WHITE);
+        taskLabel.setFont(new Font("Segoe UI", Font.BOLD, 40));
+        taskLabel.setBackground(new Color(20, 20, 20));
+        taskLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        taskLabel.setVerticalAlignment(SwingConstants.CENTER);
+        taskPanel.add(taskLabel);
+
         // Create main content panel
-        JPanel contentPanel = new JPanel(new GridLayout(2, 1));
+        JPanel contentPanel = new JPanel(new GridLayout(3, 1));
         pitchPanel = new PitchGraphPanel();
         windowController.setPitchListener(pitchPanel); // Set the pitch listener for live updates
-        scorePanel = new ScorePanel();
+        List<MidiNote> referenceNotes = windowController.getReferenceNotesForCurrentLevel();
+        scorePanel = new ScorePanel(referenceNotes);
         contentPanel.add(pitchPanel);
+        contentPanel.add(taskPanel);
         contentPanel.add(scorePanel);
 
         // Add panels to main layout

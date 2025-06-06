@@ -10,11 +10,12 @@ import javax.swing.*;
 import manager.FeedbackManager;
 import model.Feedback;
 import model.LevelInfo;
+import model.Level;
 import model.Mode;
 import model.RecordingFinishedCallback;
+import model.MidiNote;
 
 import java.util.List;
-import java.util.logging.Level;
 
 import javax.sound.sampled.*;
 
@@ -23,6 +24,10 @@ public class WindowController extends JFrame{
     private TrainingController trainingController;
 
     private SplashScreen splashScreen;
+    private HomeScreen homeScreen;
+    private LevelScreen levelScreen;
+    private SettingsScreen settingsScreen;
+    private Level currentLevel;
 
     private JPanel rootPanel;
     private CardLayout cardLayout;
@@ -99,7 +104,7 @@ public class WindowController extends JFrame{
     public void showLevelScreen(Mode mode, int level) {
         // We need to notify trainingController about the level to start here
         LevelInfo levelInfo = new LevelInfo(level, mode);
-        trainingController.startTrainingSession(levelInfo);
+        startTrainingSession(levelInfo);
         
         contentPanel.removeAll();
         contentPanel.add(new LevelScreen(this, mode, level), BorderLayout.CENTER);
@@ -182,11 +187,26 @@ public class WindowController extends JFrame{
     public void startTrainingSession(LevelInfo levelInfo) {
         if (trainingController != null) {
             trainingController.startTrainingSession(levelInfo);
-            // showLevelScreen(category, level);
+            this.currentLevel = trainingController.getLevel();
         } else {
             System.err.println("WindowController: TrainingController ist null. Training kann nicht gestartet werden.");
         }
-    }    
+    }   
+    
+    /**
+     * Returns the reference notes for the current level.
+     * This will be called by the LevelScreen to get the reference notes for the current level.
+     *
+     * @return List of MidiNote objects representing the reference notes for the current level.
+     */
+    public List<MidiNote> getReferenceNotesForCurrentLevel() {
+        if (trainingController != null) {
+            return trainingController.getReferenceNotesForCurrentLevel();
+        } else {
+            System.err.println("WindowController: TrainingController ist null. Referenznoten können nicht abgerufen werden.");
+            return List.of(); // Return an empty list if the controller is null
+        }
+    }
 
     /**
      * Starts the recording with a live pitch graph.
@@ -250,5 +270,7 @@ public class WindowController extends JFrame{
         }
     }
 
-    
+    public Level getCurrentLevel() {
+        return currentLevel;
+    }
 }

@@ -29,9 +29,9 @@ public class LevelInfo {
     // Method to determine difficulty based on level number
     // Later I think it might be better to read the difficulty from a file
     public Difficulty getLevelDifficulty(int levelNumber) {
-        if (levelNumber <= 3) {
+        if (levelNumber <= 2) {
             return Difficulty.easy;
-        } else if (levelNumber > 3 && levelNumber <= 6) {
+        } else if (levelNumber > 2 && levelNumber <= 4) {
             return Difficulty.medium;
         } else {
             return Difficulty.hard;

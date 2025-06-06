@@ -8,6 +8,7 @@ import javax.sound.sampled.Mixer;
 
 import manager.*;
 import model.LevelInfo;
+import model.MidiNote;
 import model.Mode;
 import model.PitchListener;
 import model.RecordingFinishedCallback;
@@ -65,7 +66,17 @@ public class TrainingController {
             double pitch = audioManager.detectPitchOfRecordedAudio();
             System.out.println("TrainingController: Detected pitch: " + pitch);
             // set the Feedback Object in the Level object
-            level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, level.getReferenceNotes().get(0).getFrequency()));
+            if (level.getMode() == Mode.INTERVAL) {
+                // For INTERVAL mode, we need to compare the pitch with the target interval note
+                double targetFrequency = level.getTargetIntervalNote().getFrequency();
+                System.out.println("TrainingController: Target frequency for interval: " + targetFrequency);
+                level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, targetFrequency));
+            } else {
+                // For NOTE mode, we compare with the reference note
+                double referenceFrequency = level.getReferenceNotes().get(0).getFrequency();
+                System.out.println("TrainingController: Target frequency for note: " + referenceFrequency);
+                level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, referenceFrequency));
+            }
         } else {
             // For MELODY mode, analyze the melody of the sung audio
             System.out.println("TrainingController: Analysing melody...");
@@ -81,6 +92,25 @@ public class TrainingController {
      */
     public Feedback getFeedback() {
         return level.getFeedback();
+    }
+
+    public Level getLevel() {
+        return level;
+    }
+
+    /**
+     * Returns the reference notes for the current level.
+     * This will be called by the LevelScreen to get the reference notes for the current level.
+     *
+     * @return List of MidiNote objects representing the reference notes for the current level.
+     */
+    public List<MidiNote> getReferenceNotesForCurrentLevel() {
+        if (level != null && level.getReferenceNotes() != null) {
+            return level.getReferenceNotes();
+        } else {
+            System.err.println("TrainingController: Keine Referenznoten für das aktuelle Level verfügbar.");
+            return List.of(); // Return an empty list if no notes are available
+        }
     }
 
 
