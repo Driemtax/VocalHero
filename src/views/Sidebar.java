@@ -18,14 +18,17 @@ public class Sidebar extends JPanel {
         ModernButton tutorialsButton = new ModernButton(LanguageManager.get("sidebar.tutorials"));
         ModernButton exercisesButton = new ModernButton(LanguageManager.get("sidebar.exercises"));
         ModernButton progressButton = new ModernButton(LanguageManager.get("sidebar.progress"));
+        ModernButton recordingsButton = new ModernButton(LanguageManager.get("sidebar.recordings"));
 
         tutorialsButton.addActionListener(e -> controller.showTutorialsScreen());
         exercisesButton.addActionListener(e -> controller.showCategoryScreen());
         progressButton.addActionListener(e -> controller.showProgressScreen());
+        recordingsButton.addActionListener(e -> controller.showRecordingsScreen());
 
         add(tutorialsButton);
         add(exercisesButton);
         add(progressButton);
+        add(recordingsButton);
         add(Box.createVerticalGlue());
 
         ModernButton backToMenu = new ModernButton("⟵ " + LanguageManager.get("sidebar.menu"));

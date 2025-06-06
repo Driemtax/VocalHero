@@ -6,10 +6,12 @@ import views.SplashScreen;
 
 import java.awt.*;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.*;
 
-import manager.FeedbackManager;
 import model.Feedback;
 import model.LevelInfo;
 import model.Level;
@@ -125,12 +127,12 @@ public class WindowController extends JFrame{
         contentPanel.repaint();
     }
 
+    // TODO: Remove since it is not used anywhere
     public void showLevelSelection(Mode mode) {
         contentPanel.removeAll();
         try {
             contentPanel.add(new LevelSelectionPanel(this, mode ,trainingController.getLevels(mode)), BorderLayout.CENTER);
         } catch (IOException e) {
-            // TODO show error
             e.printStackTrace();
         }
         contentPanel.revalidate();
@@ -147,6 +149,13 @@ public class WindowController extends JFrame{
     public void showTutorialsScreen() {
         contentPanel.removeAll();
         contentPanel.add(new TutorialsScreen(), BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    public void showRecordingsScreen() {
+        contentPanel.removeAll();
+        contentPanel.add(new RecordingsPanel(this), BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
     }
@@ -257,6 +266,58 @@ public class WindowController extends JFrame{
     }
 
     /**
+     * Saves the recording to a file.
+     * This will be called by the FeedbackPanel to save the recording after the training session.
+     * 
+     * @return true if the recording was saved successfully, false otherwise.
+     */
+    public boolean saveRecording() {
+        if (trainingController != null) {
+            try {
+                return trainingController.saveRecording(createRecordingFileName());
+            } catch (Exception e) {
+                System.err.println("WindowController: Fehler beim Speichern der Aufnahme: " + e.getMessage());
+                return false;
+            }
+        } else {
+            System.err.println("WindowController: TrainingController ist null. Aufnahme kann nicht gespeichert werden.");
+            return false;
+        }
+    }
+
+    /**
+     * Creates a unique filename for the recording based on the current level and timestamp.
+     * The filename will be in the format: level_<levelNumber>_<mode>_<timestamp>.wav
+     * where <timestamp> is formatted as yyyy-MM-dd_HH-mm-ss to ensure it is safe for filenames.
+     *
+     * @return A string representing the unique filename for the recording.
+     */
+    public String createRecordingFileName() {
+        Instant now = Instant.now();
+
+        // Format Instant to a safe filename
+        String safeTimestamp = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
+                .withZone(ZoneId.systemDefault())
+                .format(now);
+
+        return "level_" + currentLevel.getLevelNumber() + "_" + currentLevel.getMode().toString() + "_" + safeTimestamp + ".wav";
+    }
+
+    /**
+     * Returns a list of saved recordings.
+     * This will be called by the RecordingsPanel to get the list of saved recordings.
+     * @return List of recording file names
+     */
+    public List<String> getSavedRecordings() {
+        if (trainingController != null) {
+            return trainingController.getAvailableRecordings();
+        } else {
+            System.err.println("WindowController: TrainingController ist null. Aufnahmen können nicht abgerufen werden.");
+            return List.of(); // Return an empty list if the controller is null
+        }
+    }
+
+    /**
      * Plays the reference note for the current level.
      * This will be called by the LevelScreen to play the reference note.
      * The callback will be executed after the playback is finished.
@@ -274,6 +335,49 @@ public class WindowController extends JFrame{
         }
     }
 
+    /**
+     * Plays the recorded audio data.
+     * This will be called by the FeedbackPanel to play the recorded audio after a recording is finished.
+     */
+    public void playRecordedAudio() {
+        if (trainingController != null) {
+            trainingController.playRecordedAudio();
+        } else {
+            System.err.println("WindowController: TrainingController ist null. Aufgenommene Audiodaten können nicht abgespielt werden.");
+        }
+    }
+
+    /**
+     * Plays a WAV file from the given file name.
+     * @param fileName
+     */
+    public void playWavFile(String fileName) {
+        if (trainingController != null) {
+            trainingController.playWavFile(fileName);
+        } else {
+            System.err.println("WindowController: TrainingController ist null. WAV-Daten können nicht abgespielt werden.");
+        }
+    }
+
+    /**
+     * Deletes a recording file.
+     * This will be called by the RecordingsPanel to delete a recording.
+     * @param fileName
+     */
+    public boolean deleteRecording(String fileName) {
+        if (trainingController != null) {
+            return trainingController.deleteRecording(fileName);
+        } else {
+            System.err.println("WindowController: TrainingController ist null. Aufnahme kann nicht gelöscht werden.");
+            return false;
+        }
+    }
+
+    /**
+     * Returns the current level of the training session.
+     *
+     * @return The current Level object.
+     */
     public Level getCurrentLevel() {
         return currentLevel;
     }

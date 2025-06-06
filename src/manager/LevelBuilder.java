@@ -25,6 +25,7 @@ public class LevelBuilder {
     public Level buildLevel() {
         Mode mode = levelInfo.getMode();
         Difficulty difficulty = levelInfo.getDifficulty();
+        int levelNumber = levelInfo.getLevelNumber();
         if (mode == Mode.MELODY) {
             // For melody mode, we can generate a random melody from a predefined pool
             // List<MidiNote> referenceNotes = getMelodyReferenceNotes(); // we get this from a melody collection
@@ -32,13 +33,13 @@ public class LevelBuilder {
             // Don't forget to set the recording duration for melodies, which is usually longer than 3 seconds
 
             // Placeholder for melody mode, as we need a melody collection to implement this
-            return new Level(mode, difficulty, new ArrayList<MidiNote>()); 
+            return new Level(mode, difficulty, new ArrayList<MidiNote>(), levelNumber); 
         } else {
             // For note and interval modes, we generate reference notes based on the difficulty level
             MidiNote note = NoteUtil.getRandomNoteInRange(difficulty.getDifficultyRange()); 
             List<MidiNote> referenceNotes = List.of(note);
 
-            Level level = new Level(mode, difficulty, referenceNotes);
+            Level level = new Level(mode, difficulty, referenceNotes, levelNumber);
 
             if (mode == Mode.INTERVAL) {
                 // according to the level difficulty, we can set a maximum range for the interval

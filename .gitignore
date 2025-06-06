@@ -25,3 +25,6 @@ replay_pid*
 
 #save data files
 level.csv
+
+# audio files
+*.wav
