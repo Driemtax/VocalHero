@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -49,10 +48,8 @@ public class TrainingController {
         this.levelInfo = levelInfo;
         this.levelBuilder = new LevelBuilder(levelInfo);
         this.level = levelBuilder.buildLevel(getPlayerVoice());
-        // RecordingDuration still needs to be set in the Level object (default is 3
-        // seconds and more for melodies)
-        audioManager = new AudioManager(AudioSettings.getInputDevice(), AudioSettings.getOutputDevice(),
-                level.getReferenceNotes(), level.getRecordingDuration());
+        // RecordingDuration still needs to be set in the Level object (default is 3 seconds and more for melodies)
+        audioManager = new AudioManager(AudioSettings.getInputDevice(), level.getReferenceNotes(), level.getRecordingDuration());
         feedbackManager = new FeedbackManager(level.getReferenceNotes());
     }
 
@@ -126,6 +123,30 @@ public class TrainingController {
     }
 
     /**
+     * Saves the recorded audio to a file.
+     * This method will be called by the WindowController to save the recording.
+     * @param fileName 
+     * @return true if the recording was saved successfully, false otherwise.
+     */
+    public boolean saveRecording(String fileName) {
+        try {
+            return audioManager.saveRecording(fileName);
+        } catch (Exception e) {
+            System.err.println("TrainingController: Fehler beim Speichern der Aufnahme: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Returns a list of available recordings.
+     * This will be called by the WindowController to get the list of available recordings.
+     * @return List of recording file names
+     */
+    public List<String> getAvailableRecordings() {
+        return FileUtils.listRecordings();
+    }
+
+    /**
      * Returns the reference notes for the current level.
      * This will be called by the LevelScreen to get the reference notes for the
      * current level.
@@ -161,6 +182,42 @@ public class TrainingController {
             return false;
         }
         return audioManager.playReference(level.getReferenceNotes(), updateUiAfterPlaybackCallback);
+    }
+
+    /**
+     * Plays the recorded audioData.
+     */
+    public void playRecordedAudio() {
+        audioManager.playRecordedAudio();
+    }
+
+    /**
+     * Plays a WAV file from the given byte array.
+     * This method is used to play audio data that has been loaded from a file.
+     * @param wavBytes byte array of the WAV file
+     */
+    public void playWavFile(String fileName) {
+        byte[] wavBytes;
+        try {
+            wavBytes = FileUtils.loadRecordingFromWAV(fileName);
+        } catch (Exception e) {
+            System.err.println("TrainingController: Fehler beim Laden der WAV-Datei: " + e.getMessage());
+            return;
+        }
+
+        AudioManager audioManager = new AudioManager(AudioSettings.getOutputDevice(), null, 0);
+        audioManager.playWavBytes(wavBytes);
+    }
+
+
+    public boolean deleteRecording(String fileName) {
+        if (FileUtils.deleteRecording(fileName)) {
+            System.out.println("TrainingController: Aufnahme erfolgreich gelöscht: " + fileName);
+            return true;
+        } else {
+            System.err.println("TrainingController: Fehler beim Löschen der Aufnahme: " + fileName);
+            return false;
+        }
     }
 
     public List<Mixer.Info> getAvailableInputDevices() {
@@ -219,7 +276,7 @@ public class TrainingController {
     }
 
     public Note getPlayerVoice() {
-        audioManager = new AudioManager(null, null, getReferenceNotesForCurrentLevel(), 0);
+        audioManager = new AudioManager(null, getReferenceNotesForCurrentLevel(), 0);
         return audioManager.getPlayerVoice();
     }
 
@@ -236,7 +293,7 @@ public class TrainingController {
     public void recordForBaseVoice(Runnable updateUICallback) {
         Mixer.Info input = AudioSettings.getInputDevice();
 
-        audioManager = new AudioManager(input, null, new ArrayList<>(), 0);
+        audioManager = new AudioManager(input, new ArrayList<>(), 0);
         audioManager.startRecordingForBaseVoice(updateUICallback, (double pitch) -> {
             Note note = NoteUtil.getNoteFromPitch(pitch);
             audioManager.setBaseVoice(note);
