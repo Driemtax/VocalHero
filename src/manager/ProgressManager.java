@@ -96,8 +96,7 @@ public class ProgressManager {
                         levelState = new LevelState(levelState.mode(), levelState.level(), feedback.score(),
                                 levelState.isUnlocked());
 
-                        // TODO: find reasonable score to unlock next level
-                        if (feedback.score() >= 0) {
+                        if (feedback.score() >= 50) {
                             newLevelUnlocked = true;
                         }
                     } else {
