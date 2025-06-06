@@ -58,7 +58,7 @@ public class LevelScreen extends JPanel {
         // Status label to show status of recording/playback
         JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         statusPanel.setBackground(new Color(20, 20, 20));
-        statusLabel = new JLabel("Bereit", SwingConstants.CENTER);
+        statusLabel = new JLabel(LanguageManager.get("levelscreen.ready"), SwingConstants.CENTER);
         statusLabel.setForeground(Color.WHITE);
         statusPanel.add(statusLabel);
         topPanel.add(statusPanel, BorderLayout.SOUTH);
@@ -87,8 +87,8 @@ public class LevelScreen extends JPanel {
         pitchPanel = new PitchGraphPanel();
         windowController.setPitchListener(pitchPanel); // Set the pitch listener for live updates
         pitchPanel.setPitchActivityListener(() -> {
-            if ("🔇 Audio zu leise! Bitte näher ans Mikrofon.".equals(statusLabel.getText())) {
-                statusLabel.setText("🎙️ Aufnahme läuft...");
+            if (LanguageManager.get("levelscreen.too_quiet").equals(statusLabel.getText())) {
+                statusLabel.setText(LanguageManager.get("levelscreen.recording"));
             }
         });
         List<MidiNote> referenceNotes = windowController.getReferenceNotesForCurrentLevel();
@@ -110,15 +110,15 @@ public class LevelScreen extends JPanel {
             // Set timer for recording countdown
             timer.addActionListener(ev -> {
                 if (countdown[0] > 0) {
-                    statusLabel.setText("Aufnahme startet in: " + countdown[0]);
+                    statusLabel.setText(LanguageManager.get("levelscreen.countdown") + " " + countdown[0]);
                     countdown[0]--;
                 } else {
                     timer.stop();
-                    statusLabel.setText("🎙️ Aufnahme läuft...");
+                    statusLabel.setText(LanguageManager.get("levelscreen.recording"));
 
                     RecordingFinishedCallback updateUiAfterRecordingCallback = (boolean success) -> {
                         if (success) {
-                            statusLabel.setText("Aufnahme beendet.");
+                            statusLabel.setText(LanguageManager.get("levelscreen.finished"));
                             startRecordingButton.setEnabled(true);
                             startRecordingButton.setRecording(false);
                             playReferenceButton.setEnabled(true);
@@ -129,13 +129,13 @@ public class LevelScreen extends JPanel {
 
                     // Callback für "Audio zu leise"
                     Runnable onTooQuiet = () -> {
-                        statusLabel.setText("🔇 Audio zu leise! Bitte näher ans Mikrofon.");
+                        statusLabel.setText(LanguageManager.get("levelscreen.too_quiet"));
                     };
 
                     // Starte die Aufnahme mit beiden Callbacks
                     boolean success = windowController.startRecordingForLevel(updateUiAfterRecordingCallback, onTooQuiet);
                     if (!success) {
-                        statusLabel.setText("❌ Aufnahmefehler!");
+                        statusLabel.setText(LanguageManager.get("levelscreen.error"));
                         startRecordingButton.setEnabled(true);
                         startRecordingButton.setRecording(false);
                         playReferenceButton.setEnabled(true);
@@ -143,8 +143,8 @@ public class LevelScreen extends JPanel {
                     }
                 }
             });
-        timer.setInitialDelay(0);
-        timer.start();
+            timer.setInitialDelay(0);
+            timer.start();
         });
         
         // action listener for play reference button
