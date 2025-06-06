@@ -153,17 +153,17 @@ public class AudioManager {
      * @param referenceNotes List of reference notes to play
      * @param onPlaybackFinishedCallback callback to execute when playback is finished
      */
-    public void playReference(List<MidiNote> referenceNotes, Runnable updateUiAfterPlaybackCallback) {
+    public boolean playReference(List<MidiNote> referenceNotes, Runnable updateUiAfterPlaybackCallback) {
         if (player == null) {
             System.err.println("AudioManager: Player ist nicht initialisiert!");
             // still execute the callback to avoid deadlock in GUI
             if (updateUiAfterPlaybackCallback != null) {
                 SwingUtilities.invokeLater(updateUiAfterPlaybackCallback);
             }
-            return;
+            return false;
         }
         // System.out.println("AudioManager: Spiele Referenznote (Freq: " + frequency + ", Dauer: " + durationMs + "ms)");
-        player.playNotes(referenceNotes, updateUiAfterPlaybackCallback);
+        return player.playNotes(referenceNotes, updateUiAfterPlaybackCallback);
     }
 
     /**
@@ -208,8 +208,7 @@ public class AudioManager {
     // Beim Beenden der Anwendung den Player-Synthesizer schließen
     public void cleanup() {
         if (player != null) {
-            // TODO: Implement proper cleanup for the player
-            //player.closeSynthesizer();
+            player.close();
         }
     }
 }
