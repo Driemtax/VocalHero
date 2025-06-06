@@ -86,6 +86,11 @@ public class LevelScreen extends JPanel {
         JPanel contentPanel = new JPanel(new GridLayout(3, 1));
         pitchPanel = new PitchGraphPanel();
         windowController.setPitchListener(pitchPanel); // Set the pitch listener for live updates
+        pitchPanel.setPitchActivityListener(() -> {
+            if ("🔇 Audio zu leise! Bitte näher ans Mikrofon.".equals(statusLabel.getText())) {
+                statusLabel.setText("🎙️ Aufnahme läuft...");
+            }
+        });
         List<MidiNote> referenceNotes = windowController.getReferenceNotesForCurrentLevel();
         scorePanel = new ScorePanel(referenceNotes);
         contentPanel.add(pitchPanel);
@@ -121,8 +126,14 @@ public class LevelScreen extends JPanel {
                             windowController.showResults(currentMode, currentLevel);
                         }
                     };
-                    
-                    boolean success = windowController.startRecordingForLevel(updateUiAfterRecordingCallback); 
+
+                    // Callback für "Audio zu leise"
+                    Runnable onTooQuiet = () -> {
+                        statusLabel.setText("🔇 Audio zu leise! Bitte näher ans Mikrofon.");
+                    };
+
+                    // Starte die Aufnahme mit beiden Callbacks
+                    boolean success = windowController.startRecordingForLevel(updateUiAfterRecordingCallback, onTooQuiet);
                     if (!success) {
                         statusLabel.setText("❌ Aufnahmefehler!");
                         startRecordingButton.setEnabled(true);

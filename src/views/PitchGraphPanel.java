@@ -14,8 +14,11 @@ public class PitchGraphPanel extends JPanel {
     private static final int SCROLL_SPEED = 2;  // Pixel pro Frame
     private static final double MAX_VISIBLE_CENTS = 400.0; // ±400 Cent sichtbar
 
-    //private String targetNote = "C4"; // Standard-Zielnote
-    //private double targetFrequency = noteToFrequency(targetNote);
+    // Toleranz in Cent, ab wann eingerastet wird
+    private static final double SNAP_TOLERANCE = 15.0;
+
+    // Hilfslinien, auf die eingerastet werden kann
+    private static final int[] SNAP_LINES = {-400, -300, -200, -100, 0, 100, 200, 300, 400};
 
     public PitchGraphPanel() {
         setBackground(new Color(80, 80, 80));
@@ -33,11 +36,23 @@ public class PitchGraphPanel extends JPanel {
             centOffset = (centOffset + prev1 + prev2) / 3.0;
         }
 
+        // 3. Snap auf Hilfslinien, falls nahe genug
+        for (int snap : SNAP_LINES) {
+            if (Math.abs(centOffset - snap) < SNAP_TOLERANCE) {
+                centOffset = snap;
+                break;
+            }
+        }
+
         pitchData.addLast(centOffset);
         if (pitchData.size() > MAX_POINTS) {
             pitchData.removeFirst();
         }
         repaint();
+        // Benachrichtige Listener, dass ein Pitch erkannt wurde
+        if (pitchActivityListener != null) {
+            pitchActivityListener.onPitchActivity();
+        }
     }
 
     /** Umrechnen von Cent-Abweichung (±100) in Pixelposition */
@@ -77,23 +92,47 @@ public class PitchGraphPanel extends JPanel {
         g2.setColor(Color.GREEN);
         g2.fillRect(0, centerY - barHeight / 2, w, barHeight);
 
-        // Blauer Verlauf
+        // Blauer Verlauf mit durchgehend runder Kurve (Cubic Bézier)
         g2.setColor(Color.BLUE);
         g2.setStroke(new BasicStroke(2f));
-        Path2D path = new Path2D.Double();
         int startX = centerX - pitchData.size() * SCROLL_SPEED;
-        int x = startX;
+        int n = pitchData.size();
 
-        for (double pitchOffset : pitchData) {
-            double y = centToY(pitchOffset);
-            if (x == startX) {
-                path.moveTo(x, y);
-            } else {
-                path.lineTo(x, y);
+        if (n > 2) {
+            Path2D path = new Path2D.Double();
+            double x0 = startX;
+            double y0 = centToY(pitchData.get(0));
+            path.moveTo(x0, y0);
+
+            for (int i = 1; i < n - 1; i++) {
+                int x1 = startX + i * SCROLL_SPEED;
+                int x2 = startX + (i + 1) * SCROLL_SPEED;
+                double y1 = centToY(pitchData.get(i));
+                double y2 = centToY(pitchData.get(i + 1));
+
+                // Kontrolle: Mittelwert der Nachbarpunkte für die Kontrolle
+                double xc = (x0 + x2) / 2.0;
+                double yc = (y0 + y2) / 2.0;
+
+                path.curveTo(x0, y0, x1, y1, xc, yc);
+
+                x0 = xc;
+                y0 = yc;
             }
-            x += SCROLL_SPEED;
+            // Letzten Punkt verbinden
+            int xLast = startX + (n - 1) * SCROLL_SPEED;
+            double yLast = centToY(pitchData.get(n - 1));
+            path.lineTo(xLast, yLast);
+
+            g2.draw(path);
+        } else if (n == 2) {
+            // Nur zwei Punkte: einfache Linie
+            int x1 = startX;
+            int x2 = startX + SCROLL_SPEED;
+            double y1 = centToY(pitchData.get(0));
+            double y2 = centToY(pitchData.get(1));
+            g2.drawLine(x1, (int) y1, x2, (int) y2);
         }
-        g2.draw(path);
 
         // Blauer Punkt in der Mitte
         if (!pitchData.isEmpty()) {
@@ -103,4 +142,13 @@ public class PitchGraphPanel extends JPanel {
         }
     }
 
+    private PitchActivityListener pitchActivityListener;
+
+    public void setPitchActivityListener(PitchActivityListener listener) {
+        this.pitchActivityListener = listener;
+    }
+
+    public interface PitchActivityListener {
+        void onPitchActivity();
+    }
 }

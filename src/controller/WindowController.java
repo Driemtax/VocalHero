@@ -213,16 +213,16 @@ public class WindowController extends JFrame{
     }
 
     /**
-     * Starts the recording with a live pitch graph.
+     * Starts the recording with a live pitch graph and notifies if audio is too quiet.
      * This will be called by the LevelScreen to start the recording with live feedback.
      *
-     * @param updateUiAfterRecordingCallback
+     * @param updateUiAfterRecordingCallback Callback for UI update after recording.
+     * @param onTooQuiet Callback for notifying the UI that the audio is too quiet.
      */
-    public boolean startRecordingForLevel(RecordingFinishedCallback updateUiAfterRecordingCallback) {
-        boolean success = false;;
-        
+    public boolean startRecordingForLevel(RecordingFinishedCallback updateUiAfterRecordingCallback, Runnable onTooQuiet) {
+        boolean success = false;
         if (trainingController != null) {
-            success = trainingController.startRecordingWithLivePitchGraph(updateUiAfterRecordingCallback);
+            success = trainingController.startRecordingWithLivePitchGraph(updateUiAfterRecordingCallback, onTooQuiet);
             return success;
         } else {
             final boolean finalSuccess = success;

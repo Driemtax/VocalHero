@@ -68,8 +68,18 @@ public class AudioManager {
      *      feedbackManager.updatePitchGraph(pitch);
      *     });
      */
-    public boolean startRecordingWithLivePitchGraph(Consumer<Double> pitchListener, RecordingFinishedCallback updateUiAfterRecordingCallback) {
+    private static final double MIN_RMS = 0.02; // Schwellenwert anpassen
+
+    public boolean startRecordingWithLivePitchGraph(Consumer<Double> pitchListener, Runnable onTooQuiet, RecordingFinishedCallback updateUiAfterRecordingCallback) {
         recorder.setAudioChunkListener(chunk -> {
+            double rms = pitchDetector.calculateRMS(chunk);
+            if (rms < MIN_RMS) {
+                // Zu leise: Graph pausieren, UI informieren
+                if (onTooQuiet != null) {
+                    SwingUtilities.invokeLater(onTooQuiet);
+                }
+                return;
+            }
             double pitch = pitchDetector.getDominantFrequency(chunk);
             System.out.println("AudioManager: Detected pitch: " + pitch);
             pitchListener.accept(pitch);

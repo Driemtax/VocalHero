@@ -1,4 +1,4 @@
-// Authors: Lars Beer
+// Authors: Lars Beer, Jonas Rumpf
 package audio;
 
 import java.util.Arrays;
@@ -154,4 +154,20 @@ public class PitchDetector {
     for (int i = 0; i < frameSize / 2; i++)
       spectrum[i] = (float) Math.sqrt(re[i] * re[i] + im[i] * im[i]);
   }
+
+  /***
+   * Berechnet den RMS-Wert (Root Mean Square) der Audiodaten.
+   * Der RMS-Wert ist ein Maß für die durchschnittliche Leistung des Signals.
+   * @param audioData Audiodaten als Byte-Array
+   * @return der berechnete RMS-Wert
+   */
+  public double calculateRMS(byte[] audioData) {
+      float[] audioDataFloat = utils.Helper.byteArrayToFloatArray(audioData);
+      double sum = 0;
+      for (float sample : audioDataFloat) {
+          sum += sample * sample;
+      }
+      return Math.sqrt(sum / audioDataFloat.length);
+  }
+
 }
