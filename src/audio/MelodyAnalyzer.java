@@ -42,16 +42,24 @@ public class MelodyAnalyzer {
     }
 
     private byte[] extractAudioChunk(byte[] audioData, double[] window) {
-        int start = (int)(window[0] * sampleRate);
-        int end = (int)(window[1] * sampleRate);
+        // Double check that start is not lower then 0 and end is not bigger then the actual audioData to avoid
+        // IndexOutOfBoundsExceptions
+        int start = Math.max(0, (int) (window[0] * sampleRate));
+        int end = Math.min(audioData.length, (int) (window[1] * sampleRate));
+
+        if (start >= end) {
+            // Return an empty Array if the window is invalid
+            return new byte[0];
+        }
+
         return Arrays.copyOfRange(audioData, start, end);
     }
 
     private double[] calculateTimeWindow(MidiNote note) {
-        return new double[]{
-            note.getStartTime() - timingTolerance,
-            note.getStartTime() + note.getDuration() + timingTolerance
-        };
+        // We need to make sure, that start doesnt get negative if startTime is lower then timingTolerance
+        double start = Math.max(0.0, note.getStartTime() - timingTolerance);
+        double end = note.getStartTime() + note.getDuration() + timingTolerance;
+        return new double[]{start, end};
     }
 
     private NoteResult compareNote(MidiNote note, double detectedFreq, double detectedOnset) {
