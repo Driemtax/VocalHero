@@ -19,6 +19,7 @@ public class FeedbackPanel extends JPanel {
     private ModernButton continueButton;
     private ModernButton retryButton;
     private ModernButton menuButton;
+    private ModernButton playRecordingButton;
     private ModernButton saveButton;
     private Mode mode;
     private int level;
@@ -45,6 +46,7 @@ public class FeedbackPanel extends JPanel {
         // Buttons erstellen
         retryButton = new ModernButton(LanguageManager.get("feedback.retry"));
         menuButton = new ModernButton(LanguageManager.get("feedback.menu"));
+        playRecordingButton = new ModernButton(LanguageManager.get("feedback.play"));
         
         if (feedback.score() >= MIN_SCORE) {
             continueButton = new ModernButton(LanguageManager.get("feedback.continue"));
@@ -86,6 +88,7 @@ public class FeedbackPanel extends JPanel {
         medalLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         retryButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         menuButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        playRecordingButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         saveLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         saveButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         confirmationLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -98,13 +101,15 @@ public class FeedbackPanel extends JPanel {
         add(scoreLabel);
         add(Box.createVerticalStrut(30));
         add(medalLabel);
-        //add(Box.createVerticalStrut(50));
+        add(Box.createVerticalStrut(50));
         
         // Button Panel für horizontale Anordnung
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
         buttonPanel.setBackground(new Color(50, 50, 50));
         
+        buttonPanel.add(playRecordingButton);
+        buttonPanel.add(Box.createHorizontalStrut(20));
         buttonPanel.add(retryButton);
         buttonPanel.add(Box.createHorizontalStrut(20));
         if (continueButton != null) {
@@ -154,6 +159,10 @@ public class FeedbackPanel extends JPanel {
             } else {
                 confirmationLabel.setText(LanguageManager.get("feedback.save_failure"));
             }
+        });
+
+        playRecordingButton.addActionListener(e -> {
+            windowController.playRecordedAudio();
         });
     }
 
