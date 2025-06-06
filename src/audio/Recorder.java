@@ -4,6 +4,8 @@ package audio;
 import javax.sound.sampled.*;
 import javax.swing.SwingUtilities;
 
+import model.RecordingFinishedCallback;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -37,9 +39,10 @@ public class Recorder {
      * @param mixerInfo specifies which microphone to use for the recording
      * @throws LineUnavailableException
      */
-    public void startRecording(int durationSeconds, Mixer.Info mixerInfo, Runnable getRecordedDataCallback) throws LineUnavailableException {
+    public boolean startRecording(int durationSeconds, Mixer.Info mixerInfo, RecordingFinishedCallback getRecordedDataCallback) throws LineUnavailableException {
         this.selectedMixer = mixerInfo;
         Mixer mixer = AudioSystem.getMixer(mixerInfo);
+        boolean success = true;
 
         // close old line if still open
         if (targetLine != null && targetLine.isOpen()) {
@@ -47,12 +50,24 @@ public class Recorder {
             targetLine.close();
         }
         
-        targetLine = (TargetDataLine) mixer.getLine(new DataLine.Info(TargetDataLine.class, format));
-        targetLine.open(format);
-        targetLine.start();
+        try {
+            targetLine = (TargetDataLine) mixer.getLine(new DataLine.Info(TargetDataLine.class, format));
+            targetLine.open(format);
+            targetLine.start();
+            
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+
+            // Recording could not be started
+            success = false;
+        }
         
+
         audioBuffer = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];
+
+        // Need a final to pass it to the thread
+        final boolean finalSuccess = success;
         
         new Thread(() -> {
             long startTime = System.currentTimeMillis();
@@ -76,10 +91,13 @@ public class Recorder {
 
                 // Important: run callback on the Event Dispatch Thread (EDT), cause UI updates must be done on the EDT
                 if (getRecordedDataCallback != null) {
-                    SwingUtilities.invokeLater(getRecordedDataCallback);
+                    SwingUtilities.invokeLater(() -> getRecordedDataCallback.onRecordingFinished(finalSuccess));
                 }
             }
         }).start();
+
+        // If this is reached thread was startet, thus recording was started successfully
+        return success;
     }
 
     /**

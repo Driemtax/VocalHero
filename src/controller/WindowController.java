@@ -12,6 +12,7 @@ import model.Feedback;
 import model.LevelInfo;
 import model.Level;
 import model.Mode;
+import model.RecordingFinishedCallback;
 import model.MidiNote;
 
 import java.util.List;
@@ -213,15 +214,21 @@ public class WindowController extends JFrame{
      *
      * @param updateUiAfterRecordingCallback
      */
-    public void startRecordingForLevel(Runnable updateUiAfterRecordingCallback) {
+    public boolean startRecordingForLevel(RecordingFinishedCallback updateUiAfterRecordingCallback) {
+        boolean success = false;;
+        
         if (trainingController != null) {
-            trainingController.startRecordingWithLivePitchGraph(updateUiAfterRecordingCallback);
+            success = trainingController.startRecordingWithLivePitchGraph(updateUiAfterRecordingCallback);
+            return success;
         } else {
+            final boolean finalSuccess = success;
             System.err.println("WindowController: TrainingController ist null. Aufnahme kann nicht gestartet werden.");
             // reactivate UI buttons, even if the recording cannot be started
             if (updateUiAfterRecordingCallback != null) {
-                SwingUtilities.invokeLater(updateUiAfterRecordingCallback);
+                SwingUtilities.invokeLater(
+                    () -> updateUiAfterRecordingCallback.onRecordingFinished(finalSuccess));
             }
+            return false;
         }
     }
 

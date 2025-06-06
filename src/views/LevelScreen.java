@@ -7,6 +7,7 @@ import java.awt.*;
 import controller.WindowController;
 import i18n.LanguageManager;
 import model.Mode;
+import model.RecordingFinishedCallback;
 import model.MidiNote;
 import java.util.List;
 
@@ -17,10 +18,14 @@ public class LevelScreen extends JPanel {
     private ModernButton playReferenceButton;
     private PitchGraphPanel pitchPanel;
     private ScorePanel scorePanel;
+    private JLabel statusLabel;
 
     // Maybe show this information in the UI later.
     private Mode currentMode;
     private int currentLevel;
+
+    private final int[] countdown = {3};
+    private Timer timer = new Timer(1000, null);
 
     public LevelScreen(WindowController controller, Mode mode, int level) {
         this.windowController = controller;
@@ -50,6 +55,14 @@ public class LevelScreen extends JPanel {
         helpButtonPanel.add(helpButton);
         topPanel.add(helpButtonPanel, BorderLayout.EAST);
 
+        // Status label to show status of recording/playback
+        JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        statusPanel.setBackground(new Color(20, 20, 20));
+        statusLabel = new JLabel("Bereit", SwingConstants.CENTER);
+        statusLabel.setForeground(Color.WHITE);
+        statusPanel.add(statusLabel);
+        topPanel.add(statusPanel, BorderLayout.SOUTH);
+
         // Task Panel
         JPanel taskPanel = new JPanel();
         taskPanel.setBackground(new Color(80, 80, 80));
@@ -68,7 +81,6 @@ public class LevelScreen extends JPanel {
         taskLabel.setHorizontalAlignment(SwingConstants.CENTER);
         taskLabel.setVerticalAlignment(SwingConstants.CENTER);
         taskPanel.add(taskLabel);
-        
 
         // Create main content panel
         JPanel contentPanel = new JPanel(new GridLayout(3, 1));
@@ -90,31 +102,54 @@ public class LevelScreen extends JPanel {
             startRecordingButton.setRecording(true);
             playReferenceButton.setEnabled(false);
 
-            // Callback for when recording is finished
-            Runnable updateUiAfterRecordingCallback = () -> {
-                startRecordingButton.setEnabled(true);
-                startRecordingButton.setRecording(false);
-                playReferenceButton.setEnabled(true);
-                System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
-                windowController.showResults(currentMode, currentLevel);
-            };
-            
-            windowController.startRecordingForLevel(updateUiAfterRecordingCallback); 
-        });
+            // Set timer for recording countdown
+            timer.addActionListener(ev -> {
+                if (countdown[0] > 0) {
+                    statusLabel.setText("Aufnahme startet in: " + countdown[0]);
+                    countdown[0]--;
+                } else {
+                    timer.stop();
+                    statusLabel.setText("🎙️ Aufnahme läuft...");
 
+                    RecordingFinishedCallback updateUiAfterRecordingCallback = (boolean success) -> {
+                        if (success) {
+                            statusLabel.setText("Aufnahme beendet.");
+                            startRecordingButton.setEnabled(true);
+                            startRecordingButton.setRecording(false);
+                            playReferenceButton.setEnabled(true);
+                            System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
+                            windowController.showResults(currentMode, currentLevel);
+                        }
+                    };
+                    
+                    boolean success = windowController.startRecordingForLevel(updateUiAfterRecordingCallback); 
+                    if (!success) {
+                        statusLabel.setText("❌ Aufnahmefehler!");
+                        startRecordingButton.setEnabled(true);
+                        startRecordingButton.setRecording(false);
+                        playReferenceButton.setEnabled(true);
+                        System.out.println("LevelScreen: Aufnahme konnte nicht gestartet werden.");
+                    }
+                }
+            });
+        timer.setInitialDelay(0);
+        timer.start();
+        });
+        
+        // action listener for play reference button
         playReferenceButton.addActionListener(e -> {
             playReferenceButton.setEnabled(false);
             startRecordingButton.setEnabled(false);
-
+    
             // Callback for when playback is finished
             Runnable updateUiAfterPlaybackCallback = () -> {
                 playReferenceButton.setEnabled(true);
                 startRecordingButton.setEnabled(true);
             };
-
+    
             // Play the reference note for the current level
             windowController.playReference(updateUiAfterPlaybackCallback);
-        });
+        });   
     }
 
     public void stop() {
