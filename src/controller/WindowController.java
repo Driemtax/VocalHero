@@ -10,11 +10,11 @@ import javax.swing.*;
 import manager.FeedbackManager;
 import model.Feedback;
 import model.LevelInfo;
+import model.Level;
 import model.Mode;
 import model.MidiNote;
 
 import java.util.List;
-import java.util.logging.Level;
 
 import javax.sound.sampled.*;
 
@@ -26,6 +26,7 @@ public class WindowController extends JFrame{
     private HomeScreen homeScreen;
     private LevelScreen levelScreen;
     private SettingsScreen settingsScreen;
+    private Level currentLevel;
 
     private JPanel rootPanel;
     private CardLayout cardLayout;
@@ -102,7 +103,7 @@ public class WindowController extends JFrame{
     public void showLevelScreen(Mode mode, int level) {
         // We need to notify trainingController about the level to start here
         LevelInfo levelInfo = new LevelInfo(level, mode);
-        trainingController.startTrainingSession(levelInfo);
+        startTrainingSession(levelInfo);
         
         contentPanel.removeAll();
         contentPanel.add(new LevelScreen(this, mode, level), BorderLayout.CENTER);
@@ -185,7 +186,7 @@ public class WindowController extends JFrame{
     public void startTrainingSession(LevelInfo levelInfo) {
         if (trainingController != null) {
             trainingController.startTrainingSession(levelInfo);
-            // showLevelScreen(category, level);
+            this.currentLevel = trainingController.getLevel();
         } else {
             System.err.println("WindowController: TrainingController ist null. Training kann nicht gestartet werden.");
         }
@@ -262,5 +263,7 @@ public class WindowController extends JFrame{
         }
     }
 
-    
+    public Level getCurrentLevel() {
+        return currentLevel;
+    }
 }

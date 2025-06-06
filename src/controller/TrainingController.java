@@ -65,7 +65,17 @@ public class TrainingController {
             double pitch = audioManager.detectPitchOfRecordedAudio();
             System.out.println("TrainingController: Detected pitch: " + pitch);
             // set the Feedback Object in the Level object
-            level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, level.getReferenceNotes().get(0).getFrequency()));
+            if (level.getMode() == Mode.INTERVAL) {
+                // For INTERVAL mode, we need to compare the pitch with the target interval note
+                double targetFrequency = level.getTargetIntervalNote().getFrequency();
+                System.out.println("TrainingController: Target frequency for interval: " + targetFrequency);
+                level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, targetFrequency));
+            } else {
+                // For NOTE mode, we compare with the reference note
+                double referenceFrequency = level.getReferenceNotes().get(0).getFrequency();
+                System.out.println("TrainingController: Target frequency for note: " + referenceFrequency);
+                level.setFeedback(feedbackManager.calculateFeedbackForRecordedNote(pitch, referenceFrequency));
+            }
         } else {
             // For MELODY mode, analyze the melody of the sung audio
             System.out.println("TrainingController: Analysing melody...");
@@ -81,6 +91,10 @@ public class TrainingController {
      */
     public Feedback getFeedback() {
         return level.getFeedback();
+    }
+
+    public Level getLevel() {
+        return level;
     }
 
     /**
