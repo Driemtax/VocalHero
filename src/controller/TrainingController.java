@@ -1,13 +1,18 @@
-// Authors: Inaas Hammoush, Lars Beer
+// Authors: Inaas Hammoush, Lars Beer, David Herrmann
 package controller;
 
-
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.sound.sampled.Mixer;
 
 import manager.*;
 import model.LevelInfo;
+import model.LevelState;
 import model.MidiNote;
 import model.Mode;
 import model.PitchListener;
@@ -24,6 +29,7 @@ public class TrainingController {
     private FeedbackManager feedbackManager;
     private LevelBuilder levelBuilder;
     Level level;
+    LevelInfo levelInfo;
     private ProgressManager progressManager;
     private AnalysisResult analysisResult;
     private static AudioUtil audioUtil = new AudioUtil();
@@ -34,30 +40,38 @@ public class TrainingController {
     }
 
     public void startTrainingSession(LevelInfo levelInfo) {
+        this.levelInfo = levelInfo;
         this.levelBuilder = new LevelBuilder(levelInfo);
         this.level = levelBuilder.buildLevel();
-        // RecordingDuration still needs to be set in the Level object (default is 3 seconds and more for melodies) 
-        audioManager = new AudioManager(AudioSettings.getInputDevice(), AudioSettings.getOutputDevice(), level.getReferenceNotes(), level.getRecordingDuration());
+        // RecordingDuration still needs to be set in the Level object (default is 3
+        // seconds and more for melodies)
+        audioManager = new AudioManager(AudioSettings.getInputDevice(), AudioSettings.getOutputDevice(),
+                level.getReferenceNotes(), level.getRecordingDuration());
         feedbackManager = new FeedbackManager(level.getReferenceNotes());
     }
 
-    public void setPitchListener( PitchListener pitchListener) {
+    public void setPitchListener(PitchListener pitchListener) {
         feedbackManager.setPitchListener(pitchListener);
     }
 
     /**
-     * Starts recording audio for a specified duration and provides live pitch graphing.
-     * @param updateUiAfterRecordingCallback Callback for updating the UI after recording is complete.
+     * Starts recording audio for a specified duration and provides live pitch
+     * graphing.
+     * 
+     * @param updateUiAfterRecordingCallback Callback for updating the UI after
+     *                                       recording is complete.
      */
     public boolean startRecordingWithLivePitchGraph(RecordingFinishedCallback updateUiAfterRecordingCallback) {
 
-        return audioManager.startRecordingWithLivePitchGraph(
-        pitch -> {feedbackManager.updatePitchGraph(pitch);},
-        (boolean success) -> {
-            // This callback is called when the recording is complete
-            setLevelFeedback(); // Analyze the recorded audio and set feedback
-            updateUiAfterRecordingCallback.onRecordingFinished(success); // Update the UI after recording
-        });
+        audioManager.startRecordingWithLivePitchGraph(
+                pitch -> {
+                    feedbackManager.updatePitchGraph(pitch);
+                },
+                () -> {
+                    // This callback is called when the recording is complete
+                    setLevelFeedback(); // Analyze the recorded audio and set feedback
+                    updateUiAfterRecordingCallback.run(); // Update the UI after recording
+                });
     }
 
     public void setLevelFeedback() {
@@ -84,10 +98,12 @@ public class TrainingController {
             // set the Feedback Object in the Level object
             level.setFeedback(feedbackManager.calculateFeedbackForRecordedMelody(analysisResult));
         }
+        progressManager.updateLevel(levelInfo.getLevelNumber(), level.getMode(), level.getFeedback());
     }
 
     /**
      * Returns the Level Feedback (should be called by WindowController).
+     * 
      * @return The current Level Feedback.
      */
     public Feedback getFeedback() {
@@ -113,14 +129,15 @@ public class TrainingController {
         }
     }
 
-
     /**
      * Spielt den Referenzton für ein bestimmtes Level ab.
-     * @param updateUiAfterPlaybackCallback Callback zur Aktualisierung der View nach der Wiedergabe.
+     * 
+     * @param updateUiAfterPlaybackCallback Callback zur Aktualisierung der View
+     *                                      nach der Wiedergabe.
      */
     public void playReference(Runnable updateUiAfterPlaybackCallback) {
 
-        // The Level object contains a list of reference MidiNotes 
+        // The Level object contains a list of reference MidiNotes
         // for now, the audioManager only plays one note and not the whole list
 
         if (level.getReferenceNotes() == null || level.getReferenceNotes().isEmpty()) {
@@ -156,5 +173,24 @@ public class TrainingController {
         AudioSettings.setInputDevice(input);
         AudioSettings.setOutputDevice(output);
         System.out.println("Audio-Einstellungen initialisiert.");
+    }
+
+    public List<LevelState> getLevels(Mode mode) throws IOException {
+        try {
+            List<LevelState> levels = progressManager.parseLevels();
+            Iterator<LevelState> iterator = levels.iterator();
+            while (iterator.hasNext()) {
+                LevelState levelState = iterator.next();
+                if (levelState.mode() != mode) {
+                    iterator.remove();
+                }
+            }
+            Collections.sort(levels);
+            return levels;
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (IOException e) {
+            throw e;
+        }
     }
 }

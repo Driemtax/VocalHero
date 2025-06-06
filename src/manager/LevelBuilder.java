@@ -53,5 +53,9 @@ public class LevelBuilder {
 
             return level;
         }
-    }       
+    }     
+        
+    public LevelInfo getLevelInfo(){
+        return levelInfo;
+    }   
 }

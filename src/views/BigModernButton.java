@@ -1,4 +1,4 @@
-// Author: Jonas Rumpf
+// Author: Jonas Rumpf, David Herrmann
 
 package views;
 
@@ -10,6 +10,25 @@ public class BigModernButton extends JButton {
     public BigModernButton(String text) {
         super(text);
         setupStyle();
+        boolean isUnlocked;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setFont(getFont());
+
+        g2.setColor(getForeground());
+
+        FontMetrics fm = g2.getFontMetrics();
+        String text = getText();
+        int x = (getWidth() - fm.stringWidth(text)) / 2;
+        int y = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
+
+        g2.drawString(text, x, y);
+        g2.dispose();
     }
     
     private void setupStyle() {
@@ -36,6 +55,8 @@ public class BigModernButton extends JButton {
     
     // Method to set button as completed/unlocked (green) or locked (red)
     public void setLockStatus(boolean unlocked) {
+        setEnabled(unlocked);
         setForeground(unlocked ? Color.GREEN : Color.RED);
+        repaint();
     }
 }

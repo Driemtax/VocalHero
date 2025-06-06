@@ -5,6 +5,8 @@ import views.*;
 import views.SplashScreen;
 
 import java.awt.*;
+import java.io.IOException;
+
 import javax.swing.*;
 
 import manager.FeedbackManager;
@@ -128,7 +130,12 @@ public class WindowController extends JFrame{
 
     public void showLevelSelection(Mode mode) {
         contentPanel.removeAll();
-        contentPanel.add(new LevelSelectionPanel(this, mode), BorderLayout.CENTER);
+        try {
+            contentPanel.add(new LevelSelectionPanel(this, mode ,trainingController.getLevels(mode)), BorderLayout.CENTER);
+        } catch (IOException e) {
+            // TODO show error
+            e.printStackTrace();
+        }
         contentPanel.revalidate();
         contentPanel.repaint();
     }
