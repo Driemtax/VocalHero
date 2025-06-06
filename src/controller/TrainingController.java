@@ -205,6 +205,7 @@ public class TrainingController {
             return;
         }
 
+        // a new AudioManager is created to play the WAV file in case the page is accessed before the training session is started
         AudioManager audioManager = new AudioManager(AudioSettings.getOutputDevice(), null, 0);
         audioManager.playWavBytes(wavBytes);
     }

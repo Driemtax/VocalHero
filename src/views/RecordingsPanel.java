@@ -72,8 +72,8 @@ public class RecordingsPanel extends JPanel {
             boolean deleted = windowController.deleteRecording(recordingName);
             if (deleted) refreshRecordings();
             return deleted;
+            });
         });
-});
 
         panel.add(nameLabel);
         panel.add(Box.createHorizontalGlue());
