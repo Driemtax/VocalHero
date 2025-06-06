@@ -63,14 +63,14 @@ public class TrainingController {
      */
     public boolean startRecordingWithLivePitchGraph(RecordingFinishedCallback updateUiAfterRecordingCallback) {
 
-        audioManager.startRecordingWithLivePitchGraph(
+        return audioManager.startRecordingWithLivePitchGraph(
                 pitch -> {
                     feedbackManager.updatePitchGraph(pitch);
                 },
-                () -> {
+                (boolean success) -> {
                     // This callback is called when the recording is complete
                     setLevelFeedback(); // Analyze the recorded audio and set feedback
-                    updateUiAfterRecordingCallback.run(); // Update the UI after recording
+                    updateUiAfterRecordingCallback.onRecordingFinished(success);; // Update the UI after recording
                 });
     }
 

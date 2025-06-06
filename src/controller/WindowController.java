@@ -26,9 +26,6 @@ public class WindowController extends JFrame{
     private TrainingController trainingController;
 
     private SplashScreen splashScreen;
-    private HomeScreen homeScreen;
-    private LevelScreen levelScreen;
-    private SettingsScreen settingsScreen;
     private Level currentLevel;
 
     private JPanel rootPanel;
