@@ -90,12 +90,12 @@ public class ProgressManager {
                         unlock = levelState.isUnlocked();
                     }
 
-                    if (levelState.mode() == mode && levelState.Level() == level) {
-                        levelState = new LevelState(levelState.mode(), levelState.Level(), feedback.score(),
+                    if (levelState.mode() == mode && levelState.level() == level) {
+                        levelState = new LevelState(levelState.mode(), levelState.level(), feedback.score(),
                                 levelState.isUnlocked());
 
                         // TODO: find reasonable score to unlock next level
-                        if (feedback.score() >= 80) {
+                        if (feedback.score() >= 0) {
                             newLevelUnlocked = true;
                         }
                     } else {
@@ -103,7 +103,7 @@ public class ProgressManager {
                     }
 
                     writer.write(levelState.mode().getName()
-                            + ',' + Integer.toString(levelState.Level())
+                            + ',' + Integer.toString(levelState.level())
                             + ',' + Float.toString(levelState.completion())
                             + ',' + Boolean.toString(unlock) + '\n');
                 }
