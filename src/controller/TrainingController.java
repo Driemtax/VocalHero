@@ -164,16 +164,11 @@ public class TrainingController {
     }
 
     /**
-     * Spielt den Referenzton für ein bestimmtes Level ab.
+     * Plays the reference notes for the current level
      * 
-     * @param updateUiAfterPlaybackCallback Callback zur Aktualisierung der View
-     *                                      nach der Wiedergabe.
+     * @param updateUiAfterPlaybackCallback callback to update the ui after playback has finished
      */
     public boolean playReference(Runnable updateUiAfterPlaybackCallback) {
-
-        // The Level object contains a list of reference MidiNotes
-        // for now, the audioManager only plays one note and not the whole list
-
         if (level.getReferenceNotes() == null || level.getReferenceNotes().isEmpty()) {
             System.err.println("TrainingController: Keine Referenznoten für das Level verfügbar.");
             if (updateUiAfterPlaybackCallback != null) {
