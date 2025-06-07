@@ -281,28 +281,34 @@ public class WindowController extends JFrame{
         return currentLevel;
     }
 
+    /**
+     * Returns the current difficulty level of the training session.
+     * This will be called by the LevelScreen to get the current difficulty level.
+     *
+     * @return The current difficulty level as an integer (1 for Easy, 2 for Medium, 3 for Hard).
+     */
     public int getCurrentDifficulty() {
         if (currentLevel != null) {
             Level currentLevel = trainingController.getLevel();
             if (currentLevel == null) {
                 System.err.println("WindowController: Current Level is null. Cannot get difficulty.");
-                return -1; // or throw an exception, depending on your error handling strategy
+                return -1;
             }
             
             switch (currentLevel.getDifficulty()) {
                 case Difficulty.EASY:
-                    return 1; // Easy difficulty level
+                    return 1;
                 case Difficulty.MEDIUM:
-                    return 2; // Medium difficulty level
+                    return 2;
                 case Difficulty.HARD:
-                    return 3; // Hard difficulty level            
+                    return 3;            
                 default:
                     System.err.println("WindowController: Unknown difficulty level: " + currentLevel.getDifficulty());
-                    return -1; // or throw an exception, depending on your error handling strategy
+                    return -1;
             }
         } else {
             System.err.println("WindowController: Current Level is null. Cannot get difficulty.");
-            return -1; // or throw an exception, depending on your error handling strategy
+            return -1;
         }
     }
 
