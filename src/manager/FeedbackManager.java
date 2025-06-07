@@ -31,20 +31,25 @@ public class FeedbackManager {
     }
 
     public Feedback calculateFeedbackForRecordedNote(double recordedPitch, double targetPitch) {
-
         System.out.println("Recorded Pitch: " + recordedPitch + " Hz, Target Pitch: " + targetPitch + " Hz");
 
-        // Calculate the absolute difference in cents between the recorded and target pitch
-        double centsDifference = 1200 * Math.log(recordedPitch / targetPitch) / Math.log(2);
+        // MIDI-Nummern berechnen
+        int recordedMidi = (int) Math.round(69 + 12 * Math.log(recordedPitch / 440.0) / Math.log(2));
+        int targetMidi = (int) Math.round(69 + 12 * Math.log(targetPitch / 440.0) / Math.log(2));
 
-        // Score calculation: 100 if perfect, linearly decreasing with cents difference
-        // For example, -50 points at 100 cents (1 semitone) off, 0 at 200 cents (2 semitones) or more
         float score;
+        double centsDifference = 1200 * Math.log(recordedPitch / targetPitch) / Math.log(2);
         double absCents = Math.abs(centsDifference);
-        if (absCents >= 200) {
-            score = 0f;
+
+        if (recordedMidi == targetMidi) {
+            // 100 Punkte bei exakt, linear runter bis 90 bei ±50 Cent
+            score = (float) Math.max(90, 100 - (absCents / 5));
         } else {
-            score = (float) Math.max(0, 100 - (absCents / 2));
+            if (absCents >= 200) {
+                score = 0f;
+            } else {
+                score = (float) Math.max(0, 100 - (absCents / 2));
+            }
         }
         return new Feedback(score);
     }
