@@ -144,7 +144,6 @@ public class WindowController extends JFrame {
         contentPanel.repaint();
     }
 
-    // TODO: Remove since it is not used anywhere
     public void showLevelSelection(Mode mode) {
         contentPanel.removeAll();
         try {
