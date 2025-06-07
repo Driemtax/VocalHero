@@ -12,6 +12,7 @@ import model.MidiNote;
 import model.RecordingFinishedCallback;
 import model.AnalysisResult;
 import model.AudioSettings;
+import utils.FileUtils;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -28,7 +29,6 @@ import java.util.function.Consumer;
 public class AudioManager {
     
     private Mixer.Info selectedMic;
-    private Mixer.Info selectedSpeaker;
     private int recordingDuration;
     private Recorder recorder;
     private Player player;
@@ -39,10 +39,9 @@ public class AudioManager {
     private List<MidiNote> referenceNotes;
     private AudioFormat format;
 
-    public AudioManager(Mixer.Info selectedMic, Mixer.Info selectedSpeaker, List<MidiNote> referenceNotes, int recordingDuration) {
+    public AudioManager(Mixer.Info selectedMic, List<MidiNote> referenceNotes, int recordingDuration) {
         this.recordingDuration = recordingDuration;
         this.selectedMic = selectedMic;
-        this.selectedSpeaker = selectedSpeaker;
         this.audioData = null; // initially null, will be set after recording
         this.recorder = new Recorder();
         this.player = new Player();
@@ -150,14 +149,27 @@ public class AudioManager {
     /**
      * Plays the recorded audio data.
      */
-    public void playAudio() {
+    public void playRecordedAudio() {
         try {
-            player.play(audioData);
-        } catch (LineUnavailableException e) {
+            player.playAudioData(audioData, format);
+        } catch (Exception e) {
             // TODO: Handle exception through GUI
             e.printStackTrace();
         }
     }
+
+    /**
+     * Plays a WAV file from the given byte array.
+     * This method is used to play audio data that has been loaded from a file.
+     * @param wavBytes
+     */
+    public void playWavBytes(byte[] wavBytes) {
+        try {
+            player.play(wavBytes);
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }    
 
     /**
      * Plays a frequency using the synthesizer to generate an instrument sound.
@@ -213,6 +225,23 @@ public class AudioManager {
             // TODO: Handle exception appropriately
             e.printStackTrace();
             return -1;
+        }
+    }
+
+    /**
+     * Saves the recorded audio data to a WAV file.
+     * @param fileName the name of the file to save the recording
+     * @return boolean indicating success or failure
+     */
+    public boolean saveRecording(String fileName) {
+        try {
+            // Save the recorded audio data to a WAV file
+            FileUtils.saveRecordingToWAV(fileName, audioData);
+            System.out.println("AudioManager: Aufnahme erfolgreich gespeichert.");
+            return true;
+        } catch (Exception e) {
+            System.err.println("AudioManager: Fehler beim Speichern der Aufnahme: " + e.getMessage());
+            return false;
         }
     }
 
