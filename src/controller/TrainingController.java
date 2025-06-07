@@ -158,10 +158,7 @@ public class TrainingController {
      *                                      nach der Wiedergabe.
      */
     public boolean playReference(Runnable updateUiAfterPlaybackCallback) {
-
-        // The Level object contains a list of reference MidiNotes
-        // for now, the audioManager only plays one note and not the whole list
-
+        
         if (level.getReferenceNotes() == null || level.getReferenceNotes().isEmpty()) {
             System.err.println("TrainingController: Keine Referenznoten für das Level verfügbar.");
             if (updateUiAfterPlaybackCallback != null) {
