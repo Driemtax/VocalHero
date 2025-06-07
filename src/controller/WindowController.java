@@ -16,6 +16,7 @@ import model.Level;
 import model.Mode;
 import model.RecordingFinishedCallback;
 import model.MidiNote;
+import model.Difficulty;
 
 import java.util.List;
 
@@ -278,6 +279,31 @@ public class WindowController extends JFrame{
 
     public Level getCurrentLevel() {
         return currentLevel;
+    }
+
+    public int getCurrentDifficulty() {
+        if (currentLevel != null) {
+            Level currentLevel = trainingController.getLevel();
+            if (currentLevel == null) {
+                System.err.println("WindowController: Current Level is null. Cannot get difficulty.");
+                return -1; // or throw an exception, depending on your error handling strategy
+            }
+            
+            switch (currentLevel.getDifficulty()) {
+                case Difficulty.EASY:
+                    return 1; // Easy difficulty level
+                case Difficulty.MEDIUM:
+                    return 2; // Medium difficulty level
+                case Difficulty.HARD:
+                    return 3; // Hard difficulty level            
+                default:
+                    System.err.println("WindowController: Unknown difficulty level: " + currentLevel.getDifficulty());
+                    return -1; // or throw an exception, depending on your error handling strategy
+            }
+        } else {
+            System.err.println("WindowController: Current Level is null. Cannot get difficulty.");
+            return -1; // or throw an exception, depending on your error handling strategy
+        }
     }
 
     public void cleanup() {

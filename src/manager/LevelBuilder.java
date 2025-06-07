@@ -44,8 +44,8 @@ public class LevelBuilder {
                 // according to the level difficulty, we can set a maximum range for the interval
                 // For easy levels we can use a maximum of 4 semitones, for medium levels a maximum of 8 semitones,
                 // and for hard levels a maximum of 12 semitones
-                Interval startingInterval = difficulty == Difficulty.easy ? Interval.m2 : difficulty == Difficulty.medium ? Interval.P4 : Interval.M6;
-                Interval maxInterval = difficulty == Difficulty.easy ? Interval.M3 : difficulty == Difficulty.medium ? Interval.m6 : Interval.P8;
+                Interval startingInterval = difficulty == Difficulty.EASY ? Interval.m2 : difficulty == Difficulty.MEDIUM ? Interval.P4 : Interval.M6;
+                Interval maxInterval = difficulty == Difficulty.EASY ? Interval.M3 : difficulty == Difficulty.MEDIUM ? Interval.m6 : Interval.P8;
                 Interval interval = IntervalUtil.getRandomIntervalInRange(startingInterval, maxInterval); 
                 level.setIntervalName(interval.getName()); // Set the name of the interval for display purposes
                 level.setTargetIntervalNote(NoteUtil.getNoteFromInterval(note, interval));
