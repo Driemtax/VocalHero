@@ -148,7 +148,22 @@ public class LevelScreen extends JPanel {
             };
     
             // Play the reference note for the current level
-            windowController.playReference(updateUiAfterPlaybackCallback);
+            boolean success = windowController.playReference(updateUiAfterPlaybackCallback);
+
+            if (!success) {
+                final String originalText = statusLabel.getText();
+                statusLabel.setText("MIDI-Wiedergabe nicht möglich. Bitte überprüfen Sie Ihre System-Soundeinstellungen.");
+
+                // We need a timer to wait until the statusLabel will be resetted.
+                Timer revertTimer = new Timer(2000, wait -> {
+                    statusLabel.setText(originalText);
+                });
+
+                revertTimer.setRepeats(false);
+                revertTimer.start();
+            }
+
+
         });   
     }
 
