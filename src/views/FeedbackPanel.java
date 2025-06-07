@@ -10,7 +10,7 @@ import model.Feedback;
 import model.Mode;
 
 public class FeedbackPanel extends JPanel {
-    private static final int MIN_SCORE = 60; // Mindestscore für Bestehen
+    private static final int MIN_SCORE = 50; // Mindestscore für Bestehen
     
     private JLabel scoreLabel;
     private JLabel medalLabel;
