@@ -10,7 +10,7 @@ import model.Feedback;
 import model.Mode;
 
 public class FeedbackPanel extends JPanel {
-    private static final int MIN_SCORE = 60; // Mindestscore für Bestehen
+    private static final int MIN_SCORE = 50; // Mindestscore für Bestehen
     
     private JLabel scoreLabel;
     private JLabel medalLabel;
@@ -142,12 +142,12 @@ public class FeedbackPanel extends JPanel {
         });
         
         menuButton.addActionListener(e -> {
-            windowController.showHome();
+            windowController.showCategoryScreen();
         });
         
         if (continueButton != null) {
             continueButton.addActionListener(e -> {
-                windowController.showCategoryScreen();
+                windowController.showLevelScreen(mode, level + 1);
             });
         }
 
