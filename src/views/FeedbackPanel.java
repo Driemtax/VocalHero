@@ -103,12 +103,12 @@ public class FeedbackPanel extends JPanel {
         });
         
         menuButton.addActionListener(e -> {
-            windowController.showHome();
+            windowController.showCategoryScreen();
         });
         
         if (continueButton != null) {
             continueButton.addActionListener(e -> {
-                windowController.showCategoryScreen();
+                windowController.showLevelScreen(mode, level + 1);
             });
         }
     }
