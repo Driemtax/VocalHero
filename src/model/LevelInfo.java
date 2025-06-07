@@ -30,11 +30,11 @@ public class LevelInfo {
     // Later I think it might be better to read the difficulty from a file
     public Difficulty getLevelDifficulty(int levelNumber) {
         if (levelNumber <= 2) {
-            return Difficulty.easy;
+            return Difficulty.EASY;
         } else if (levelNumber > 2 && levelNumber <= 4) {
-            return Difficulty.medium;
+            return Difficulty.MEDIUM;
         } else {
-            return Difficulty.hard;
+            return Difficulty.HARD;
         }
     }
 
