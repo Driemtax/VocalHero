@@ -42,7 +42,6 @@ public class TrainingController {
         this.levelInfo = levelInfo;
         this.levelBuilder = new LevelBuilder(levelInfo);
         this.level = levelBuilder.buildLevel();
-        // RecordingDuration still needs to be set in the Level object (default is 3 seconds and more for melodies)
         audioManager = new AudioManager(AudioSettings.getInputDevice(), level.getReferenceNotes(), level.getRecordingDuration());
         feedbackManager = new FeedbackManager(level.getReferenceNotes());
     }
@@ -156,10 +155,6 @@ public class TrainingController {
      *                                      nach der Wiedergabe.
      */
     public void playReference(Runnable updateUiAfterPlaybackCallback) {
-
-        // The Level object contains a list of reference MidiNotes
-        // for now, the audioManager only plays one note and not the whole list
-
         if (level.getReferenceNotes() == null || level.getReferenceNotes().isEmpty()) {
             System.err.println("TrainingController: Keine Referenznoten für das Level verfügbar.");
             if (updateUiAfterPlaybackCallback != null) {
