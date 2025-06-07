@@ -28,7 +28,8 @@ public class Sidebar extends JPanel {
         add(progressButton);
         add(Box.createVerticalGlue());
 
-        ModernButton backToMenu = new ModernButton("⟵ " + LanguageManager.get("sidebar.menu"));
+        ModernButton backToMenu = new ModernButton("⬅️ " + LanguageManager.get("sidebar.menu"));
+        backToMenu.setFont(new Font("Segoe UI Emoji", Font.BOLD, 14));
         backToMenu.addActionListener(e -> controller.showHome());
         add(backToMenu);
     }
