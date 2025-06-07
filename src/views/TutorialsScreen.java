@@ -17,7 +17,7 @@ public class TutorialsScreen extends JPanel {
         gbc.gridy = 0;
 
         JLabel title = new JLabel(LanguageManager.get("tutorials.title"));
-        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        title.setFont(new Font("Segoe UI Emoji", Font.BOLD, 28));
         title.setForeground(new Color(230, 230, 230));
         gbc.gridwidth = 2;
         add(title, gbc);
@@ -44,7 +44,8 @@ public class TutorialsScreen extends JPanel {
     private void addTutorialSection(String heading, String text, GridBagConstraints gbc) {
         gbc.gridy++;
         JLabel headingLabel = new JLabel(heading);
-        headingLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        headingLabel.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
+        headingLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0)); //less overflowing emojis
         headingLabel.setForeground(new Color(0xF9A826));
         add(headingLabel, gbc);
 
