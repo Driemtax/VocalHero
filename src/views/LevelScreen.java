@@ -132,6 +132,7 @@ public class LevelScreen extends JPanel {
             startRecordingButton.setEnabled(false);
             startRecordingButton.setRecording(true);
             playReferenceButton.setEnabled(false);
+            windowController.setNavigationEnabled(false);
 
             // Set timer for recording countdown
             timer.addActionListener(ev -> {
@@ -148,6 +149,7 @@ public class LevelScreen extends JPanel {
                             startRecordingButton.setEnabled(true);
                             startRecordingButton.setRecording(false);
                             playReferenceButton.setEnabled(true);
+                            windowController.setNavigationEnabled(true);
                             System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
                             windowController.showResults(currentMode, currentLevel);
                         }
@@ -165,6 +167,7 @@ public class LevelScreen extends JPanel {
                         startRecordingButton.setEnabled(true);
                         startRecordingButton.setRecording(false);
                         playReferenceButton.setEnabled(true);
+                        windowController.setNavigationEnabled(true);
                         System.out.println("LevelScreen: Aufnahme konnte nicht gestartet werden.");
                     }
                 }
@@ -177,11 +180,13 @@ public class LevelScreen extends JPanel {
         playReferenceButton.addActionListener(e -> {
             playReferenceButton.setEnabled(false);
             startRecordingButton.setEnabled(false);
+            windowController.setNavigationEnabled(false);
     
             // Callback for when playback is finished
             Runnable updateUiAfterPlaybackCallback = () -> {
                 playReferenceButton.setEnabled(true);
                 startRecordingButton.setEnabled(true);
+                windowController.setNavigationEnabled(true);
             };
     
             // Play the reference note for the current level
