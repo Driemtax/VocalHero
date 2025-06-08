@@ -19,10 +19,14 @@ import java.util.stream.Collectors;
 
 
 import model.AudioSettings;
+import model.Difficulty;
 
 public class FileUtils {
 
 private final static String RECORDING_PATH = "recordings";
+private final static String EASY_MELODY = "major-scale.mid";
+private final static String MEDIUM_MELODY = "alle_meine_entchen.mid";
+private final static String HARD_MELODY = "let_it_be.mid";
     
     // CSV-Ladefunktion
     public static Map<String, int[]> loadProgressFromCSV(String filePath) {
@@ -93,7 +97,34 @@ private final static String RECORDING_PATH = "recordings";
         return wavBytes;
         
     }
+    /**
+     * Chooses a melody based on the difficulty level.
+     * @param difficulty the difficulty level
+     * @return the name of the melody file
+     */
+    public static String chooseMelody(Difficulty difficulty) {
+        String melodyName = "";
+        
+        // Please parse the melody path and look for all midi files
 
+        switch (difficulty) {
+            case easy:
+                melodyName = EASY_MELODY;
+                break;
+            case medium:
+                // Alle meine Entchen
+                melodyName = MEDIUM_MELODY;
+                break;
+            case hard:
+                // Let it be
+                melodyName = HARD_MELODY;
+                break;
+            default:
+                break;
+        }
+
+        return melodyName;
+    }
     /**
      * Deletes a recording file.
      * @param fileName the name of the WAV file to delete

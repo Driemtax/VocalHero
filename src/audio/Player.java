@@ -137,14 +137,24 @@ public class Player {
                 channel = channels[0];
                 channel.programChange(0); // only set instrument once, e.g. Acoustic Grand Piano = 0
 
-                for (MidiNote noteModel : notes) {
+                for (MidiNote note : notes) {
                     if (Thread.currentThread().isInterrupted()) {
                         System.out.println("MelodyPlayer-Thread: Wiedergabe vorzeitig beendet (interrupted).");
                         break; // Exit the loop if the thread is interrupted
                     }
 
-                    double frequency = noteModel.getFrequency();
-                    int durationMs = (int) (noteModel.getDuration() * 1000); 
+                    // If note is a rest, dont play anything for the duration of the rest
+                    if (note.getNoteDefinition() == MidiNote.Note.REST) {
+                        // since rests are quit good for sleeping, this thread will do the same and take some rest ;)
+                        int durationMS = (int) (note.getDuration() * 1000);
+                        if (durationMS > 0) {
+                            Thread.sleep(durationMS);
+                        }
+                        continue;
+                    }
+
+                    double frequency = note.getFrequency();
+                    int durationMs = (int) (note.getDuration() * 1000); 
                     if (durationMs <= 0) continue; // ignore notes with non-positive duration
 
                     int midiNoteNumber = frequencyToMidiNote(frequency);
