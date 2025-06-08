@@ -1,5 +1,3 @@
-// Authors: Lars Beer, Inaas Hammoush
-
 package audio;
 
 import java.io.ByteArrayInputStream;
@@ -36,47 +34,13 @@ public class Player {
     }
 
     /**
-     * Plays the audio data using the default mixer
-     *
-     * @param audioData the audio data to play
-     * @param format the audio format of the data
-     */
-    public void playAudioData(byte[] audioData, AudioFormat format) {
-        if (audioData == null) {
-            System.err.println("Keine Audiodaten zum Abspielen vorhanden.");
-            return;
-        }
-
-        new Thread(() -> {
-            try {
-                Mixer.Info selectedSpeaker = AudioSettings.getOutputDevice();
-                Mixer speaker = AudioSystem.getMixer(selectedSpeaker);
-
-                DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-                if (!speaker.isLineSupported(info)) {
-                    System.err.println("Line not supported for format: " + format);
-                    return;
-                }
-
-                try (SourceDataLine line = (SourceDataLine) speaker.getLine(info)) {
-                    line.open(format);
-                    line.start();
-                    line.write(audioData, 0, audioData.length);
-                    line.drain();
-                    Thread.sleep(100);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-    }
-
-    /**
      * Plays the audio data using the selected mixer
      * 
      * @throws LineUnavailableException
      *
-     * @param wavBytes the audio data to play as a byte array
+     * @param mixerInfo the selected mixer
+     * @param audioData the audio data to play
+     * @param format    the audio format of the data
      * @throws LineUnavailableException
      */
     public void play(byte[] wavBytes) throws LineUnavailableException {
@@ -85,32 +49,32 @@ public class Player {
             return;
         }
 
-        new Thread(() -> {
-            try {
-                Mixer.Info selectedSpeaker = AudioSettings.getOutputDevice();
-                Mixer speaker = AudioSystem.getMixer(selectedSpeaker);
-                AudioFormat format; 
-                byte[] audioData;
-                ByteArrayInputStream bais = new ByteArrayInputStream(wavBytes);
-                AudioInputStream ais = AudioSystem.getAudioInputStream(bais);
-        
-                format = ais.getFormat();
-                audioData = ais.readAllBytes();
-                
-                DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, format);
-                
-                // Try to get the data line from the selected mixer to write the audio data to
-                // We could use the default mixer if the selected one is not available
-                try (SourceDataLine line = (SourceDataLine) speaker.getLine(dataLineInfo)) {
-                    line.open(format);
-                    line.start();
-                    line.write(audioData, 0, audioData.length);
-                    line.drain(); // awaits the end of the audio data
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        Mixer.Info selectedSpeaker = AudioSettings.getOutputDevice();
+        Mixer speaker = AudioSystem.getMixer(selectedSpeaker);
+        AudioFormat format;
+        byte[] audioData;
+
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(wavBytes);
+            AudioInputStream ais = AudioSystem.getAudioInputStream(bais);
+
+            format = ais.getFormat();
+            audioData = ais.readAllBytes();
+
+            DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, format);
+
+            // Try to get the data line from the selected mixer to write the audio data to
+            // We could use the default mixer if the selected one is not available
+            try (SourceDataLine line = (SourceDataLine) speaker.getLine(dataLineInfo)) {
+                line.open(format);
+                line.start();
+                line.write(audioData, 0, audioData.length);
+                line.drain(); // awaits the end of the audio data
             }
-        }).start();
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
     }
 
     /**
@@ -148,25 +112,16 @@ public class Player {
                 channel = channels[0];
                 channel.programChange(0); // only set instrument once, e.g. Acoustic Grand Piano = 0
 
-                for (MidiNote note : notes) {
+                for (MidiNote noteModel : notes) {
                     if (Thread.currentThread().isInterrupted()) {
                         System.out.println("MelodyPlayer-Thread: Wiedergabe vorzeitig beendet (interrupted).");
                         break; // Exit the loop if the thread is interrupted
                     }
 
-                    // If note is a rest, dont play anything for the duration of the rest
-                    if (note.getNoteDefinition() == MidiNote.Note.REST) {
-                        // since rests are quit good for sleeping, this thread will do the same and take some rest ;)
-                        int durationMS = (int) (note.getDuration() * 1000);
-                        if (durationMS > 0) {
-                            Thread.sleep(durationMS);
-                        }
-                        continue;
-                    }
-
-                    double frequency = note.getFrequency();
-                    int durationMs = (int) (note.getDuration() * 1000); 
-                    if (durationMs <= 0) continue; // ignore notes with non-positive duration
+                    double frequency = noteModel.getFrequency();
+                    int durationMs = (int) (noteModel.getDuration() * 1000);
+                    if (durationMs <= 0)
+                        continue; // ignore notes with non-positive duration
 
                     int midiNoteNumber = frequencyToMidiNote(frequency);
                     int velocity = 100;

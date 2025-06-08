@@ -23,7 +23,6 @@ public class LevelScreen extends JPanel {
     // Maybe show this information in the UI later.
     private Mode currentMode;
     private int currentLevel;
-    private int currentDifficulty;
 
     private final int[] countdown = {3};
     private Timer timer = new Timer(1000, null);
@@ -32,7 +31,6 @@ public class LevelScreen extends JPanel {
         this.windowController = controller;
         this.currentMode = mode;
         this.currentLevel = level;
-        this.currentDifficulty = windowController.getCurrentDifficulty();
 
         System.out.println("LevelScreen: Initializing for category: " + currentMode.getName() + ", level: " + currentLevel);
 
@@ -66,47 +64,23 @@ public class LevelScreen extends JPanel {
         topPanel.add(statusPanel, BorderLayout.SOUTH);
 
         // Task Panel
-        JPanel taskPanel = new JPanel(new GridLayout(2, 1));
+        JPanel taskPanel = new JPanel();
         taskPanel.setBackground(new Color(80, 80, 80));
         JLabel taskLabel = null;
-        JLabel songTextLabel = new JLabel("");;
         if (currentMode == Mode.INTERVAL) {
             String intervalName = windowController.getCurrentLevel().getIntervalName();
             taskLabel = new JLabel(LanguageManager.get("task.interval.1") + intervalName + LanguageManager.get("task.interval.2"));
         } else if (currentMode == Mode.MELODY) {
             taskLabel = new JLabel(LanguageManager.get("task.melody"));
-            switch (currentDifficulty) {
-                case 1:
-                    songTextLabel = new JLabel(LanguageManager.get("task.melodyText.easy"));
-                    break;
-                case 2:
-                    songTextLabel = new JLabel(LanguageManager.get("task.melodyText.medium"));
-                    break;
-                case 3:
-                    songTextLabel = new JLabel(LanguageManager.get("task.melodyText.hard"));
-                    break;
-                default:
-                    break;
-            }
         } else {
             taskLabel = new JLabel(LanguageManager.get("task.single_note"));
         }
-
         taskLabel.setForeground(Color.WHITE);
         taskLabel.setFont(new Font("Segoe UI", Font.BOLD, 40));
         taskLabel.setBackground(new Color(20, 20, 20));
         taskLabel.setHorizontalAlignment(SwingConstants.CENTER);
         taskLabel.setVerticalAlignment(SwingConstants.CENTER);
         taskPanel.add(taskLabel);
-
-
-        songTextLabel.setForeground(Color.WHITE);
-        songTextLabel.setFont(new Font("Segoe UI", Font.PLAIN, 20));
-        songTextLabel.setBackground(new Color(20, 20, 20));
-        songTextLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        songTextLabel.setVerticalAlignment(SwingConstants.CENTER);
-        taskPanel.add(songTextLabel);
-        
 
         // Create main content panel
         JPanel contentPanel = new JPanel(new GridLayout(3, 1));
