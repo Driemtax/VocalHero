@@ -2,9 +2,7 @@
 package controller;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,6 +21,7 @@ import model.Feedback;
 import model.Level;
 import model.AudioSettings;
 import utils.AudioUtil;
+import utils.FileUtils;
 
 public class TrainingController {
     private AudioManager audioManager;
@@ -43,10 +42,7 @@ public class TrainingController {
         this.levelInfo = levelInfo;
         this.levelBuilder = new LevelBuilder(levelInfo);
         this.level = levelBuilder.buildLevel();
-        // RecordingDuration still needs to be set in the Level object (default is 3
-        // seconds and more for melodies)
-        audioManager = new AudioManager(AudioSettings.getInputDevice(), AudioSettings.getOutputDevice(),
-                level.getReferenceNotes(), level.getRecordingDuration());
+        audioManager = new AudioManager(AudioSettings.getInputDevice(), level.getReferenceNotes(), level.getRecordingDuration());
         feedbackManager = new FeedbackManager(level.getReferenceNotes());
     }
 
@@ -60,13 +56,15 @@ public class TrainingController {
      * 
      * @param updateUiAfterRecordingCallback Callback for updating the UI after
      *                                       recording is complete.
+     * @param onTooQuiet Callback for notifying the UI that the audio is too quiet.
      */
-    public boolean startRecordingWithLivePitchGraph(RecordingFinishedCallback updateUiAfterRecordingCallback) {
+    public boolean startRecordingWithLivePitchGraph(RecordingFinishedCallback updateUiAfterRecordingCallback, Runnable onTooQuiet) {
 
         return audioManager.startRecordingWithLivePitchGraph(
                 pitch -> {
                     feedbackManager.updatePitchGraph(pitch);
                 },
+                onTooQuiet,
                 (boolean success) -> {
                     // This callback is called when the recording is complete
                     setLevelFeedback(); // Analyze the recorded audio and set feedback
@@ -115,6 +113,30 @@ public class TrainingController {
     }
 
     /**
+     * Saves the recorded audio to a file.
+     * This method will be called by the WindowController to save the recording.
+     * @param fileName 
+     * @return true if the recording was saved successfully, false otherwise.
+     */
+    public boolean saveRecording(String fileName) {
+        try {
+            return audioManager.saveRecording(fileName);
+        } catch (Exception e) {
+            System.err.println("TrainingController: Fehler beim Speichern der Aufnahme: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Returns a list of available recordings.
+     * This will be called by the WindowController to get the list of available recordings.
+     * @return List of recording file names
+     */
+    public List<String> getAvailableRecordings() {
+        return FileUtils.listRecordings();
+    }
+
+    /**
      * Returns the reference notes for the current level.
      * This will be called by the LevelScreen to get the reference notes for the current level.
      *
@@ -135,19 +157,53 @@ public class TrainingController {
      * @param updateUiAfterPlaybackCallback Callback zur Aktualisierung der View
      *                                      nach der Wiedergabe.
      */
-    public void playReference(Runnable updateUiAfterPlaybackCallback) {
-
-        // The Level object contains a list of reference MidiNotes
-        // for now, the audioManager only plays one note and not the whole list
-
+    public boolean playReference(Runnable updateUiAfterPlaybackCallback) {
+        
         if (level.getReferenceNotes() == null || level.getReferenceNotes().isEmpty()) {
             System.err.println("TrainingController: Keine Referenznoten für das Level verfügbar.");
             if (updateUiAfterPlaybackCallback != null) {
                 updateUiAfterPlaybackCallback.run(); // Reactivate UI buttons even if no notes are available
             }
+            return false;
+        }
+        return audioManager.playReference(level.getReferenceNotes(), updateUiAfterPlaybackCallback);
+    }
+
+    /**
+     * Plays the recorded audioData.
+     */
+    public void playRecordedAudio() {
+        audioManager.playRecordedAudio();
+    }
+
+    /**
+     * Plays a WAV file from the given byte array.
+     * This method is used to play audio data that has been loaded from a file.
+     * @param wavBytes byte array of the WAV file
+     */
+    public void playWavFile(String fileName) {
+        byte[] wavBytes;
+        try {
+            wavBytes = FileUtils.loadRecordingFromWAV(fileName);
+        } catch (Exception e) {
+            System.err.println("TrainingController: Fehler beim Laden der WAV-Datei: " + e.getMessage());
             return;
         }
-        audioManager.playReference(level.getReferenceNotes(), updateUiAfterPlaybackCallback);
+
+        // a new AudioManager is created to play the WAV file in case the page is accessed before the training session is started
+        AudioManager audioManager = new AudioManager(AudioSettings.getOutputDevice(), null, 0);
+        audioManager.playWavBytes(wavBytes);
+    }
+
+
+    public boolean deleteRecording(String fileName) {
+        if (FileUtils.deleteRecording(fileName)) {
+            System.out.println("TrainingController: Aufnahme erfolgreich gelöscht: " + fileName);
+            return true;
+        } else {
+            System.err.println("TrainingController: Fehler beim Löschen der Aufnahme: " + fileName);
+            return false;
+        }
     }
 
     public List<Mixer.Info> getAvailableInputDevices() {
@@ -192,5 +248,15 @@ public class TrainingController {
         } catch (IOException e) {
             throw e;
         }
+    }
+
+    /**
+     * call this function on exiting the programm to close the current synthesizer to avoid weird states
+     */
+    public void cleanup() {
+        if (audioManager != null) {
+            audioManager.cleanup();
+        }
+            
     }
 }

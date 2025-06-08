@@ -16,6 +16,10 @@ public class AudioSettings {
         return format;
     }
 
+    public static void setFormat(AudioFormat audioFormat) {
+        format = audioFormat;
+    }
+
     public static double getSampleRate() {
         return SAMPLE_RATE;
     }

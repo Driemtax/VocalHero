@@ -20,12 +20,13 @@ public class Level {
     private MidiNote targetIntervalNote; // Target note for interval training, can be null if not applicable
     private String intervalName; // Name of the interval, can be used for display purposes
     private Feedback feedback; // Feedback object to provide feedback on the training session
-    // private final int levelNumber; // Unique identifier for the level, can be used for progress tracking
+    private final int levelNumber; // Unique identifier for the level, can be used for progress tracking
 
-    public Level(Mode mode, Difficulty difficulty, List<MidiNote> referenceNotes) {
+    public Level(Mode mode, Difficulty difficulty, List<MidiNote> referenceNotes, int levelNumber) {
         this.mode = mode;
         this.difficulty = difficulty;
         this.referenceNotes = referenceNotes;
+        this.levelNumber = levelNumber;
     }
 
     // getters and setters 
@@ -52,4 +53,6 @@ public class Level {
     public String getIntervalName() {return intervalName;}
 
     public void setIntervalName(String intervalName) {this.intervalName = intervalName;}
+
+    public int getLevelNumber() {return levelNumber;}
 }

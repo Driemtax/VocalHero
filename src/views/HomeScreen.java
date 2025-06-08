@@ -51,7 +51,10 @@ public class HomeScreen extends JPanel {
         gbc.gridy = 3;
         ModernButton exitBtn = new ModernButton(LanguageManager.get("home.exit"));
         exitBtn.setPreferredSize(new Dimension(200, 50));
-        exitBtn.addActionListener(e -> System.exit(0));
+        exitBtn.addActionListener(e -> {
+            windowController.cleanup();
+            System.exit(0);
+        });
         add(exitBtn, gbc);
     }
 }

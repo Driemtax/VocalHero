@@ -1,3 +1,5 @@
+// Authors: Lars Beer, Inaas Hammoush
+
 package audio;
 
 import java.io.ByteArrayInputStream;
@@ -14,24 +16,60 @@ import model.MidiNote;
 
 public class Player {
     private Synthesizer synthesizer;
+    private boolean isSynthOpen = false;
 
     public Player() {
         try {
             this.synthesizer = MidiSystem.getSynthesizer();
-            synthesizer.open();
 
-        } catch (Exception e) {
+        } catch (MidiUnavailableException e) {
+            System.err.println("Konnte keine Referenz zum MIDI-Synthesizer bekommen.");
+            this.synthesizer = null;
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Plays the audio data using the default mixer
+     *
+     * @param audioData the audio data to play
+     * @param format the audio format of the data
+     */
+    public void playAudioData(byte[] audioData, AudioFormat format) {
+        if (audioData == null) {
+            System.err.println("Keine Audiodaten zum Abspielen vorhanden.");
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                Mixer.Info selectedSpeaker = AudioSettings.getOutputDevice();
+                Mixer speaker = AudioSystem.getMixer(selectedSpeaker);
+
+                DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+                if (!speaker.isLineSupported(info)) {
+                    System.err.println("Line not supported for format: " + format);
+                    return;
+                }
+
+                try (SourceDataLine line = (SourceDataLine) speaker.getLine(info)) {
+                    line.open(format);
+                    line.start();
+                    line.write(audioData, 0, audioData.length);
+                    line.drain();
+                    Thread.sleep(100);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     /**
      * Plays the audio data using the selected mixer
      * @throws LineUnavailableException
      *
-     * @param mixerInfo the selected mixer
-     * @param audioData the audio data to play
-     * @param format the audio format of the data
+     * @param wavBytes the audio data to play as a byte array
      * @throws LineUnavailableException
      */
     public void play(byte[] wavBytes) throws LineUnavailableException {
@@ -40,32 +78,32 @@ public class Player {
             return;
         }
 
-        Mixer.Info selectedSpeaker = AudioSettings.getOutputDevice();
-        Mixer speaker = AudioSystem.getMixer(selectedSpeaker);
-        AudioFormat format; 
-        byte[] audioData;
-
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(wavBytes);
-            AudioInputStream ais = AudioSystem.getAudioInputStream(bais);
-    
-            format = ais.getFormat();
-            audioData = ais.readAllBytes();
-            
-            DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, format);
-            
-            // Try to get the data line from the selected mixer to write the audio data to
-            // We could use the default mixer if the selected one is not available
-            try (SourceDataLine line = (SourceDataLine) speaker.getLine(dataLineInfo)) {
-                 line.open(format);
-                 line.start();
-                 line.write(audioData, 0, audioData.length);
-                 line.drain(); // awaits the end of the audio data
+        new Thread(() -> {
+            try {
+                Mixer.Info selectedSpeaker = AudioSettings.getOutputDevice();
+                Mixer speaker = AudioSystem.getMixer(selectedSpeaker);
+                AudioFormat format; 
+                byte[] audioData;
+                ByteArrayInputStream bais = new ByteArrayInputStream(wavBytes);
+                AudioInputStream ais = AudioSystem.getAudioInputStream(bais);
+        
+                format = ais.getFormat();
+                audioData = ais.readAllBytes();
+                
+                DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, format);
+                
+                // Try to get the data line from the selected mixer to write the audio data to
+                // We could use the default mixer if the selected one is not available
+                try (SourceDataLine line = (SourceDataLine) speaker.getLine(dataLineInfo)) {
+                    line.open(format);
+                    line.start();
+                    line.write(audioData, 0, audioData.length);
+                    line.drain(); // awaits the end of the audio data
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-
+        }).start();
     }
 
     /**
@@ -75,14 +113,15 @@ public class Player {
      * @param notes a list of MidiNote objects to play
      * @param onPlaybackFinishedCallback a callback to execute when playback is finished to updatte UI and controller
      */
-    public void playNotes(List<MidiNote> notes, Runnable onPlaybackFinishedCallback) {
-        if (synthesizer == null || !synthesizer.isOpen()) {
+    public boolean playNotes(List<MidiNote> notes, Runnable onPlaybackFinishedCallback) {
+        if (!ensureSynthesizerIsOpen()) {
             System.err.println("Synthesizer ist nicht verfügbar.");
-            // still execute the callback to avoid deadlock in GUI
+            // If opening the synthesizer fails, return the callback
             if (onPlaybackFinishedCallback != null) {
                 SwingUtilities.invokeLater(onPlaybackFinishedCallback);
             }
-            return;
+
+            return false;
         }
 
         // Spawn a new thread to play the notes
@@ -150,6 +189,8 @@ public class Player {
                 }
             }
         }, "MelodyPlaybackThread-" + System.currentTimeMillis()).start();
+
+        return true;
     }
 
     /**
@@ -165,6 +206,26 @@ public class Player {
          * where 440 Hz is the frequency of MIDI note 69 (A4)
          */
         return (int) Math.round(12 * (Math.log(frequency / 440.0) / Math.log(2)) + 69);
+    }
+
+    private boolean ensureSynthesizerIsOpen() {
+        if (synthesizer == null) return false;
+        if (isSynthOpen) return true;
+
+        try {
+            synthesizer.open();
+            isSynthOpen = true;
+            System.out.println("Synthesizer erfolgreich geöffnet: " + synthesizer.getDeviceInfo().getName());
+            return true;
+        } catch (MidiUnavailableException e) {
+            // This means that the default device is not in the right audio format and can therefore not open the synthesizer
+            // Unfortunatly we cannot control which device to open the synth on
+            System.err.println("FEHLER: Der Synthesizer konnte nicht geöffnet werden. Das Standard-Audiogerät ist möglicherweise in einem inkompatiblen Format oder wird von einer anderen Anwendung exklusiv verwendet.");
+            e.printStackTrace();
+            // TODO: Zeige hier dem Benutzer eine freundliche Fehlermeldung in der GUI!
+            // z.B. "MIDI-Wiedergabe nicht möglich. Bitte überprüfen Sie Ihre System-Soundeinstellungen."
+            return false;
+        }
     }
 
     /**

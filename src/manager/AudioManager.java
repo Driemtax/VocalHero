@@ -12,6 +12,7 @@ import model.MidiNote;
 import model.RecordingFinishedCallback;
 import model.AnalysisResult;
 import model.AudioSettings;
+import utils.FileUtils;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -28,7 +29,6 @@ import java.util.function.Consumer;
 public class AudioManager {
     
     private Mixer.Info selectedMic;
-    private Mixer.Info selectedSpeaker;
     private int recordingDuration;
     private Recorder recorder;
     private Player player;
@@ -39,10 +39,9 @@ public class AudioManager {
     private List<MidiNote> referenceNotes;
     private AudioFormat format;
 
-    public AudioManager(Mixer.Info selectedMic, Mixer.Info selectedSpeaker, List<MidiNote> referenceNotes, int recordingDuration) {
+    public AudioManager(Mixer.Info selectedMic, List<MidiNote> referenceNotes, int recordingDuration) {
         this.recordingDuration = recordingDuration;
         this.selectedMic = selectedMic;
-        this.selectedSpeaker = selectedSpeaker;
         this.audioData = null; // initially null, will be set after recording
         this.recorder = new Recorder();
         this.player = new Player();
@@ -68,9 +67,20 @@ public class AudioManager {
      *      feedbackManager.updatePitchGraph(pitch);
      *     });
      */
-    public boolean startRecordingWithLivePitchGraph(Consumer<Double> pitchListener, RecordingFinishedCallback updateUiAfterRecordingCallback) {
+    private static final double MIN_RMS = 0.02; // Schwellenwert anpassen
+
+    public boolean startRecordingWithLivePitchGraph(Consumer<Double> pitchListener, Runnable onTooQuiet, RecordingFinishedCallback updateUiAfterRecordingCallback) {
         recorder.setAudioChunkListener(chunk -> {
+            double rms = pitchDetector.calculateRMS(chunk);
+            if (rms < MIN_RMS) {
+                // Zu leise: Graph pausieren, UI informieren
+                if (onTooQuiet != null) {
+                    SwingUtilities.invokeLater(onTooQuiet);
+                }
+                return;
+            }
             double pitch = pitchDetector.getDominantFrequency(chunk);
+            System.out.println("AudioManager: Detected pitch: " + pitch);
             pitchListener.accept(pitch);
         });
 
@@ -139,31 +149,44 @@ public class AudioManager {
     /**
      * Plays the recorded audio data.
      */
-    public void playAudio() {
+    public void playRecordedAudio() {
         try {
-            player.play(audioData);
-        } catch (LineUnavailableException e) {
+            player.playAudioData(audioData, format);
+        } catch (Exception e) {
             // TODO: Handle exception through GUI
             e.printStackTrace();
         }
     }
 
     /**
+     * Plays a WAV file from the given byte array.
+     * This method is used to play audio data that has been loaded from a file.
+     * @param wavBytes
+     */
+    public void playWavBytes(byte[] wavBytes) {
+        try {
+            player.play(wavBytes);
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }    
+
+    /**
      * Plays a frequency using the synthesizer to generate an instrument sound.
      * @param referenceNotes List of reference notes to play
      * @param onPlaybackFinishedCallback callback to execute when playback is finished
      */
-    public void playReference(List<MidiNote> referenceNotes, Runnable updateUiAfterPlaybackCallback) {
+    public boolean playReference(List<MidiNote> referenceNotes, Runnable updateUiAfterPlaybackCallback) {
         if (player == null) {
             System.err.println("AudioManager: Player ist nicht initialisiert!");
             // still execute the callback to avoid deadlock in GUI
             if (updateUiAfterPlaybackCallback != null) {
                 SwingUtilities.invokeLater(updateUiAfterPlaybackCallback);
             }
-            return;
+            return false;
         }
         // System.out.println("AudioManager: Spiele Referenznote (Freq: " + frequency + ", Dauer: " + durationMs + "ms)");
-        player.playNotes(referenceNotes, updateUiAfterPlaybackCallback);
+        return player.playNotes(referenceNotes, updateUiAfterPlaybackCallback);
     }
 
     /**
@@ -205,11 +228,27 @@ public class AudioManager {
         }
     }
 
+    /**
+     * Saves the recorded audio data to a WAV file.
+     * @param fileName the name of the file to save the recording
+     * @return boolean indicating success or failure
+     */
+    public boolean saveRecording(String fileName) {
+        try {
+            // Save the recorded audio data to a WAV file
+            FileUtils.saveRecordingToWAV(fileName, audioData);
+            System.out.println("AudioManager: Aufnahme erfolgreich gespeichert.");
+            return true;
+        } catch (Exception e) {
+            System.err.println("AudioManager: Fehler beim Speichern der Aufnahme: " + e.getMessage());
+            return false;
+        }
+    }
+
     // Beim Beenden der Anwendung den Player-Synthesizer schließen
     public void cleanup() {
         if (player != null) {
-            // TODO: Implement proper cleanup for the player
-            //player.closeSynthesizer();
+            player.close();
         }
     }
 }
