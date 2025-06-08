@@ -8,14 +8,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.sound.sampled.*;
 import java.io.File;
-import java.util.List;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -135,14 +133,14 @@ public class FileUtils {
         // Please parse the melody path and look for all midi files
 
         switch (difficulty) {
-            case easy:
+            case EASY:
                 melodyName = EASY_MELODY;
                 break;
-            case medium:
+            case MEDIUM:
                 // Alle meine Entchen
                 melodyName = MEDIUM_MELODY;
                 break;
-            case hard:
+            case HARD:
                 // Let it be
                 melodyName = HARD_MELODY;
                 break;
