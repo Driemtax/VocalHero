@@ -2,17 +2,17 @@
 package model;
 
 public enum Difficulty{
-    EASY,
-    MEDIUM,
-    HARD;
+    easy,
+    medium,
+    hard;
 
-    public Range getDifficultyRange() {
-    MidiNote.Note baseUserNote = MidiNote.Note.C4; //TODO get the actual base Note 
+    public Range getDifficultyRange(MidiNote.Note baseVoice) {
+    MidiNote.Note baseUserNote = baseVoice; //TODO get the actual base Note 
 
         return switch(this) {
-            case EASY -> new Range(baseUserNote.ordinal() - 1, baseUserNote.ordinal() + 1);
-            case MEDIUM -> new Range(baseUserNote.ordinal() - 2, baseUserNote.ordinal() + 2);
-            case HARD -> new Range(baseUserNote.ordinal() - 3, baseUserNote.ordinal() + 3); //TODO adjust values to fit
+            case easy -> new Range(baseUserNote.ordinal() - 1, baseUserNote.ordinal() + 1);
+            case medium -> new Range(baseUserNote.ordinal() - 2, baseUserNote.ordinal() + 2);
+            case hard -> new Range(baseUserNote.ordinal() - 3, baseUserNote.ordinal() + 3); //TODO adjust values to fit
         };
     }
 }

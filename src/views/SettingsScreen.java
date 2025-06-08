@@ -22,6 +22,8 @@ public class SettingsScreen extends JPanel {
     private JComboBox<String> inputDeviceCombo;
     private JComboBox<String> outputDeviceCombo;
 
+    private ModernButton gotoBaseVoiceButton;
+
     public SettingsScreen(WindowController controller) {
         this.windowController = controller;
 
@@ -70,6 +72,11 @@ public class SettingsScreen extends JPanel {
         setSelectedDevice(outputDeviceCombo, AudioSettings.getOutputDevice());
         add(outputDeviceCombo, gbc);
 
+        //Basisstimmlage bestimmen
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gotoBaseVoiceButton = new ModernButton(LanguageManager.get("settings.baseVoice"));
+        add(gotoBaseVoiceButton, gbc);    
 
         inputDeviceCombo.addActionListener(e -> {
             String selected = (String) inputDeviceCombo.getSelectedItem();
@@ -92,6 +99,8 @@ public class SettingsScreen extends JPanel {
                 }
             }
         });
+
+        gotoBaseVoiceButton.addActionListener(_1 -> windowController.showBaseVoiceRecordScreen());
 
         // Sprachauswahl
         gbc.gridx = 0;

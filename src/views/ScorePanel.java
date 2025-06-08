@@ -21,16 +21,10 @@ public class ScorePanel extends JPanel {
     public static class Note {
         private final int x;
         private final int pitch; // y-position will be calculated from pitch
-        private final boolean isRest;
         
-        public Note(int x, int pitch, boolean isRest) {
+        public Note(int x, int pitch) {
             this.x = x;
             this.pitch = pitch;
-            this.isRest = isRest;
-        }
-
-        public boolean isRest() {
-             return isRest;
         }
     }
 
@@ -72,11 +66,7 @@ public class ScorePanel extends JPanel {
         for (MidiNote midiNote : notes) {
             int xPosition = StartX + counter * spacing;
             counter++;
-
-            boolean isRest = midiNote.getNoteDefinition() == MidiNote.Note.REST;
-            int pitch = isRest ? 0 : midiNote.getNoteDefinition().getMidiNumber();
-
-            uiNotes.add(new Note(xPosition, pitch, isRest));
+            uiNotes.add(new Note(xPosition, midiNote.getNoteDefinition().getMidiNumber()));
         }
         return uiNotes;
     }
@@ -91,14 +81,14 @@ public class ScorePanel extends JPanel {
         
         // C major scale (MIDI notes: C4=60, D4=62, E4=64, F4=65, G4=67, A4=69, B4=71, C5=72)
         List<Note> scaleNotes = new ArrayList<>();
-        scaleNotes.add(new Note(startX, 60, false));              // C4
-        scaleNotes.add(new Note(startX + spacing, 62, false));    // D4
-        scaleNotes.add(new Note(startX + spacing*2, 64, false));  // E4
-        scaleNotes.add(new Note(startX + spacing*3, 65, false));  // F4
-        scaleNotes.add(new Note(startX + spacing*4, 67, false));  // G4
-        scaleNotes.add(new Note(startX + spacing*5, 69, false));  // A4
-        scaleNotes.add(new Note(startX + spacing*6, 71, false));  // B4
-        scaleNotes.add(new Note(startX + spacing*7, 72, false));  // C5
+        scaleNotes.add(new Note(startX, 60));              // C4
+        scaleNotes.add(new Note(startX + spacing, 62));    // D4
+        scaleNotes.add(new Note(startX + spacing*2, 64));  // E4
+        scaleNotes.add(new Note(startX + spacing*3, 65));  // F4
+        scaleNotes.add(new Note(startX + spacing*4, 67));  // G4
+        scaleNotes.add(new Note(startX + spacing*5, 69));  // A4
+        scaleNotes.add(new Note(startX + spacing*6, 71));  // B4
+        scaleNotes.add(new Note(startX + spacing*7, 72));  // C5
         
         setNotes(scaleNotes);
     }
@@ -136,14 +126,7 @@ public class ScorePanel extends JPanel {
         // Draw notes
         for (Note note : notes) {
             int yPos = scoreUtils.calculateYPosition(startY, lineSpacing, note.pitch);
-
-            if (note.isRest()) {
-                // Draw a rest
-                //scoreUtils.drawRest(g2, note.x, yPos, getHeight());
-            } else {
-                // Draw a normal note
-                scoreUtils.drawNote(g2, note.x, yPos, getHeight());
-            }
+            scoreUtils.drawNote(g2, note.x, yPos, getHeight());
         }
     }
 }

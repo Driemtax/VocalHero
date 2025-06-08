@@ -35,16 +35,6 @@ public class ScoreUtils {
         g2.drawLine(x + 4, y, x + 4, y - 40);
     }
 
-    // For now we draw a big nothing, but we could add a picture here
-    public void drawRest(Graphics2D g2, int x, int y, int panelHeight) {
-        int width = 16;
-        int height = 8;
-        int restY = y + 20; // slightly below die lower line
-
-        g2.setColor(Color.BLACK);
-        g2.fillRect(x - width / 2, restY, width, height);
-    }
-
     private void drawHelpLines(Graphics2D g2, int x, int y, int panelHeight) {
         int lineSpacing = 20;
         int startY = panelHeight/2 - 2 * lineSpacing;

@@ -12,14 +12,13 @@ public class SplashScreen extends JWindow {
         panel.setBackground(new Color(30, 30, 30));
         panel.setLayout(new GridBagLayout());
 
-        ImageIcon logoIcon = new ImageIcon(getClass().getResource("/assets/VocalHeroLogo.png"));
-        Image scaledImage = logoIcon.getImage().getScaledInstance(400, 400, Image.SCALE_SMOOTH);
-        ImageIcon scaledIcon = new ImageIcon(scaledImage);
-        JLabel logoLabel = new JLabel(scaledIcon);
-        panel.add(logoLabel);
+        JLabel label = new JLabel("🎤 VocalHero");
+        label.setFont(new Font("Segoe UI", Font.BOLD, 36));
+        label.setForeground(new Color(0, 255, 128));
+        panel.add(label);
 
         add(panel);
-        setSize(500, 500);
+        setSize(600, 300);
         setLocationRelativeTo(null);
         setVisible(true);
 

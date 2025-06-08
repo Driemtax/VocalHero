@@ -6,26 +6,24 @@ import views.SplashScreen;
 
 import java.awt.*;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 
 import javax.swing.*;
 
+import manager.FeedbackManager;
 import model.Feedback;
 import model.LevelInfo;
 import model.Level;
 import model.Mode;
 import model.RecordingFinishedCallback;
 import model.MidiNote;
-import model.Difficulty;
+import model.MidiNote.*;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.sound.sampled.*;
 
-
-public class WindowController extends JFrame{
+public class WindowController extends JFrame {
     private TrainingController trainingController;
 
     private SplashScreen splashScreen;
@@ -37,7 +35,7 @@ public class WindowController extends JFrame{
 
     public static final String HOME = "home";
     public static final String APP = "app";
-    
+
     public WindowController(TrainingController controller) {
         this.trainingController = controller;
     }
@@ -52,7 +50,17 @@ public class WindowController extends JFrame{
 
     public void showApp() {
         if (cardLayout != null && rootPanel != null && contentPanel != null) {
+            // TODO: move showStartPanel to WindowController
             contentPanel.showStartPanel(); // Zeigt das StartPanel im ContentPanel
+            cardLayout.show(rootPanel, APP);
+        } else {
+            System.err.println("Fehler: Haupt-UI nicht initialisiert, bevor showApp() aufgerufen wurde.");
+        }
+    }
+
+    public void showAppFirst() {
+        if (cardLayout != null && rootPanel != null && contentPanel != null) {
+            showFirstStartScreen(); // Zeigt das StartPanel im ContentPanel
             cardLayout.show(rootPanel, APP);
         } else {
             System.err.println("Fehler: Haupt-UI nicht initialisiert, bevor showApp() aufgerufen wurde.");
@@ -81,7 +89,11 @@ public class WindowController extends JFrame{
 
         setContentPane(rootPanel);
 
-        showHome();
+        if (trainingController.isFirstStart()) {
+            showAppFirst();
+        } else {
+            showHome();
+        }
         setVisible(true);
     }
 
@@ -90,12 +102,14 @@ public class WindowController extends JFrame{
     }
 
     public void showSplashScreen() {
-        // This is the Runnable that will be executed when the splash screen is finished.
+        // This is the Runnable that will be executed when the splash screen is
+        // finished.
         Runnable onSplashScreenFinished = () -> {
             initAndShowMainApplicationUI();
         };
-        
-        // The SplashScreen will be shown and will call the onSplashScreenFinished Runnable when it is done.
+
+        // The SplashScreen will be shown and will call the onSplashScreenFinished
+        // Runnable when it is done.
         splashScreen = new SplashScreen(onSplashScreenFinished);
     }
 
@@ -107,7 +121,7 @@ public class WindowController extends JFrame{
         // We need to notify trainingController about the level to start here
         LevelInfo levelInfo = new LevelInfo(level, mode);
         startTrainingSession(levelInfo);
-        
+
         contentPanel.removeAll();
         contentPanel.add(new LevelScreen(this, mode, level), BorderLayout.CENTER);
         contentPanel.revalidate();
@@ -131,8 +145,10 @@ public class WindowController extends JFrame{
     public void showLevelSelection(Mode mode) {
         contentPanel.removeAll();
         try {
-            contentPanel.add(new LevelSelectionPanel(this, mode ,trainingController.getLevels(mode)), BorderLayout.CENTER);
+            contentPanel.add(new LevelSelectionPanel(this, mode, trainingController.getLevels(mode)),
+                    BorderLayout.CENTER);
         } catch (IOException e) {
+            // TODO show error
             e.printStackTrace();
         }
         contentPanel.revalidate();
@@ -153,9 +169,18 @@ public class WindowController extends JFrame{
         contentPanel.repaint();
     }
 
-    public void showRecordingsScreen() {
+    public void showBaseVoiceRecordScreen() {
+
         contentPanel.removeAll();
-        contentPanel.add(new RecordingsPanel(this), BorderLayout.CENTER);
+        contentPanel.add(new BaseVoicePanel(this), BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    public void showFirstStartScreen() {
+
+        contentPanel.removeAll();
+        contentPanel.add(new FirstPanel(this), BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
     }
@@ -167,7 +192,7 @@ public class WindowController extends JFrame{
         for (int i = 0; i < inputDevices.size(); i++) {
             inputDeviceNames[i] = inputDevices.get(i).getName();
         }
-        
+
         return inputDeviceNames;
     }
 
@@ -185,17 +210,17 @@ public class WindowController extends JFrame{
         if (trainingController != null) {
             trainingController.setPitchListener(pitchListener::addPitchValue);
         } else {
-            System.err.println("WindowController: TrainingController ist null. PitchListener kann nicht gesetzt werden.");
+            System.err
+                    .println("WindowController: TrainingController ist null. PitchListener kann nicht gesetzt werden.");
         }
     }
-
 
     /**
      * Starts the training session with the given level info.
      * This will be called by the HomeScreen to start a new training session.
      *
      * @param category The category of the level.
-     * @param level The level number.
+     * @param level    The level number.
      */
     public void startTrainingSession(LevelInfo levelInfo) {
         if (trainingController != null) {
@@ -204,31 +229,38 @@ public class WindowController extends JFrame{
         } else {
             System.err.println("WindowController: TrainingController ist null. Training kann nicht gestartet werden.");
         }
-    }   
-    
+    }
+
     /**
      * Returns the reference notes for the current level.
-     * This will be called by the LevelScreen to get the reference notes for the current level.
+     * This will be called by the LevelScreen to get the reference notes for the
+     * current level.
      *
-     * @return List of MidiNote objects representing the reference notes for the current level.
+     * @return List of MidiNote objects representing the reference notes for the
+     *         current level.
      */
     public List<MidiNote> getReferenceNotesForCurrentLevel() {
         if (trainingController != null) {
             return trainingController.getReferenceNotesForCurrentLevel();
         } else {
-            System.err.println("WindowController: TrainingController ist null. Referenznoten können nicht abgerufen werden.");
+            System.err.println(
+                    "WindowController: TrainingController ist null. Referenznoten können nicht abgerufen werden.");
             return List.of(); // Return an empty list if the controller is null
         }
     }
 
     /**
-     * Starts the recording with a live pitch graph and notifies if audio is too quiet.
-     * This will be called by the LevelScreen to start the recording with live feedback.
+     * Starts the recording with a live pitch graph and notifies if audio is too
+     * quiet.
+     * This will be called by the LevelScreen to start the recording with live
+     * feedback.
      *
      * @param updateUiAfterRecordingCallback Callback for UI update after recording.
-     * @param onTooQuiet Callback for notifying the UI that the audio is too quiet.
+     * @param onTooQuiet                     Callback for notifying the UI that the
+     *                                       audio is too quiet.
      */
-    public boolean startRecordingForLevel(RecordingFinishedCallback updateUiAfterRecordingCallback, Runnable onTooQuiet) {
+    public boolean startRecordingForLevel(RecordingFinishedCallback updateUiAfterRecordingCallback,
+            Runnable onTooQuiet) {
         boolean success = false;
         if (trainingController != null) {
             success = trainingController.startRecordingWithLivePitchGraph(updateUiAfterRecordingCallback, onTooQuiet);
@@ -239,7 +271,7 @@ public class WindowController extends JFrame{
             // reactivate UI buttons, even if the recording cannot be started
             if (updateUiAfterRecordingCallback != null) {
                 SwingUtilities.invokeLater(
-                    () -> updateUiAfterRecordingCallback.onRecordingFinished(finalSuccess));
+                        () -> updateUiAfterRecordingCallback.onRecordingFinished(finalSuccess));
             }
             return false;
         }
@@ -250,8 +282,8 @@ public class WindowController extends JFrame{
      * This will be called by the LevelScreen to show the results after recording.
      *
      * @param category The category of the level.
-     * @param level The level number.
-     * @param score The score achieved in the level.
+     * @param level    The level number.
+     * @param score    The score achieved in the level.
      */
     public void showResults(Mode mode, int level) {
         Feedback feedback = trainingController.getFeedback();
@@ -266,68 +298,18 @@ public class WindowController extends JFrame{
     }
 
     /**
-     * Saves the recording to a file.
-     * This will be called by the FeedbackPanel to save the recording after the training session.
-     * 
-     * @return true if the recording was saved successfully, false otherwise.
-     */
-    public boolean saveRecording() {
-        if (trainingController != null) {
-            try {
-                return trainingController.saveRecording(createRecordingFileName());
-            } catch (Exception e) {
-                System.err.println("WindowController: Fehler beim Speichern der Aufnahme: " + e.getMessage());
-                return false;
-            }
-        } else {
-            System.err.println("WindowController: TrainingController ist null. Aufnahme kann nicht gespeichert werden.");
-            return false;
-        }
-    }
-
-    /**
-     * Creates a unique filename for the recording based on the current level and timestamp.
-     * The filename will be in the format: level_<levelNumber>_<mode>_<timestamp>.wav
-     * where <timestamp> is formatted as yyyy-MM-dd_HH-mm-ss to ensure it is safe for filenames.
-     *
-     * @return A string representing the unique filename for the recording.
-     */
-    public String createRecordingFileName() {
-        Instant now = Instant.now();
-
-        // Format Instant to a safe filename
-        String safeTimestamp = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
-                .withZone(ZoneId.systemDefault())
-                .format(now);
-
-        return "level_" + currentLevel.getLevelNumber() + "_" + currentLevel.getMode().toString() + "_" + safeTimestamp + ".wav";
-    }
-
-    /**
-     * Returns a list of saved recordings.
-     * This will be called by the RecordingsPanel to get the list of saved recordings.
-     * @return List of recording file names
-     */
-    public List<String> getSavedRecordings() {
-        if (trainingController != null) {
-            return trainingController.getAvailableRecordings();
-        } else {
-            System.err.println("WindowController: TrainingController ist null. Aufnahmen können nicht abgerufen werden.");
-            return List.of(); // Return an empty list if the controller is null
-        }
-    }
-
-    /**
      * Plays the reference note for the current level.
      * This will be called by the LevelScreen to play the reference note.
      * The callback will be executed after the playback is finished.
+     * 
      * @param updateUiAfterPlaybackCallback
      */
     public boolean playReference(Runnable updateUiAfterPlaybackCallback) {
         if (trainingController != null) {
             return trainingController.playReference(updateUiAfterPlaybackCallback);
         } else {
-            System.err.println("WindowController: TrainingController ist null. Referenzton kann nicht abgespielt werden.");
+            System.err.println(
+                    "WindowController: TrainingController ist null. Referenzton kann nicht abgespielt werden.");
             // reactivate UI buttons, even if the playback cannot be started
             if (updateUiAfterPlaybackCallback != null) {
                 SwingUtilities.invokeLater(updateUiAfterPlaybackCallback);
@@ -337,85 +319,19 @@ public class WindowController extends JFrame{
         }
     }
 
-    /**
-     * Plays the recorded audio data.
-     * This will be called by the FeedbackPanel to play the recorded audio after a recording is finished.
-     */
-    public void playRecordedAudio() {
-        if (trainingController != null) {
-            trainingController.playRecordedAudio();
-        } else {
-            System.err.println("WindowController: TrainingController ist null. Aufgenommene Audiodaten können nicht abgespielt werden.");
-        }
-    }
-
-    /**
-     * Plays a WAV file from the given file name.
-     * @param fileName
-     */
-    public void playWavFile(String fileName) {
-        if (trainingController != null) {
-            trainingController.playWavFile(fileName);
-        } else {
-            System.err.println("WindowController: TrainingController ist null. WAV-Daten können nicht abgespielt werden.");
-        }
-    }
-
-    /**
-     * Deletes a recording file.
-     * This will be called by the RecordingsPanel to delete a recording.
-     * @param fileName
-     */
-    public boolean deleteRecording(String fileName) {
-        if (trainingController != null) {
-            return trainingController.deleteRecording(fileName);
-        } else {
-            System.err.println("WindowController: TrainingController ist null. Aufnahme kann nicht gelöscht werden.");
-            return false;
-        }
-    }
-
-    /**
-     * Returns the current level of the training session.
-     *
-     * @return The current Level object.
-     */
     public Level getCurrentLevel() {
         return currentLevel;
     }
 
-    /**
-     * Returns the current difficulty level of the training session.
-     * This will be called by the LevelScreen to get the current difficulty level.
-     *
-     * @return The current difficulty level as an integer (1 for Easy, 2 for Medium, 3 for Hard).
-     */
-    public int getCurrentDifficulty() {
-        if (currentLevel != null) {
-            Level currentLevel = trainingController.getLevel();
-            if (currentLevel == null) {
-                System.err.println("WindowController: Current Level is null. Cannot get difficulty.");
-                return -1;
-            }
-            
-            switch (currentLevel.getDifficulty()) {
-                case Difficulty.EASY:
-                    return 1;
-                case Difficulty.MEDIUM:
-                    return 2;
-                case Difficulty.HARD:
-                    return 3;            
-                default:
-                    System.err.println("WindowController: Unknown difficulty level: " + currentLevel.getDifficulty());
-                    return -1;
-            }
-        } else {
-            System.err.println("WindowController: Current Level is null. Cannot get difficulty.");
-            return -1;
-        }
-    }
-
     public void cleanup() {
         trainingController.cleanup();
+    }
+
+    public Note getPlayerVoice() {
+        return trainingController.getPlayerVoice();
+    }
+
+    public void recordForBaseVoice(Runnable finished) {
+        trainingController.recordForBaseVoice(finished);
     }
 }

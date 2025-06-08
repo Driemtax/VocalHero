@@ -5,8 +5,6 @@ public class MidiNote {
 
     // Inner static enum for Notes, which is used to define musical notes with their names and frequencies.
     public static enum Note {
-        REST("Rest", 0.0, -1),
-
         C2("C2", 65.41, 36),
         Cs2("C#2", 69.30, 37),
         D2("D2", 73.42, 38),
