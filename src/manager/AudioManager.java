@@ -47,7 +47,7 @@ public class AudioManager {
         this.player = new Player();
         this.SAMPLE_RATE = 44100;
         this.format = AudioSettings.getFormat();
-        this.pitchDetector = new PitchDetector(2048, 44100);
+        this.pitchDetector = new PitchDetector(2048, SAMPLE_RATE);
         this.referenceNotes = referenceNotes;
 
     }
