@@ -19,6 +19,7 @@ import model.MidiNote;
 import model.MidiNote.*;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.sound.sampled.*;
 
@@ -59,7 +60,7 @@ public class WindowController extends JFrame {
 
     public void showAppFirst() {
         if (cardLayout != null && rootPanel != null && contentPanel != null) {
-            showBaseVoiceRecordScreen(); // Zeigt das StartPanel im ContentPanel
+            showFirstStartScreen(); // Zeigt das StartPanel im ContentPanel
             cardLayout.show(rootPanel, APP);
         } else {
             System.err.println("Fehler: Haupt-UI nicht initialisiert, bevor showApp() aufgerufen wurde.");
@@ -172,6 +173,14 @@ public class WindowController extends JFrame {
 
         contentPanel.removeAll();
         contentPanel.add(new BaseVoicePanel(this), BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    public void showFirstStartScreen() {
+
+        contentPanel.removeAll();
+        contentPanel.add(new FirstPanel(this), BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
     }
@@ -322,7 +331,7 @@ public class WindowController extends JFrame {
         return trainingController.getPlayerVoice();
     }
 
-    public void recordForBaseVoice(RecordingFinishedCallback finished) {
+    public void recordForBaseVoice(Runnable finished) {
         trainingController.recordForBaseVoice(finished);
     }
 }

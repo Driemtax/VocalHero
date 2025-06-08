@@ -1,3 +1,5 @@
+//Author: David Herrmann
+
 package utils;
 
 import model.MidiNote;
@@ -77,10 +79,27 @@ public class NoteUtil {
 
     public static Note getNoteFromString(String name){
         for (Note note : MidiNote.Note.values()){
-            if (note.getName() == name){
+            if (note.getName().equals(name)){
                 return note;
             }
         }
         return Note.C4;
+    }
+
+    public static Note getNoteFromPitch(Double pitch) {
+        Double lowerFrequency = 0.0, higherFrequency = 0.0;
+        Note lowerNote = null;
+        for(Note note : MidiNote.Note.values()){
+            if(note.getFrequency() > pitch) {
+                if(lowerFrequency == 0.0){return note;}
+                higherFrequency = note.getFrequency();
+                double lower = pitch - lowerFrequency;
+                double higher = higherFrequency - pitch;
+                return lower < higher ? lowerNote : note;
+            }
+            lowerNote = note;
+            lowerFrequency = note.getFrequency();
+        }
+        return Note.C6;
     }
 }

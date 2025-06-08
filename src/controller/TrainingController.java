@@ -3,11 +3,13 @@ package controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.sound.sampled.Mixer;
 
@@ -26,6 +28,7 @@ import model.Level;
 import model.AudioSettings;
 import utils.AudioUtil;
 import utils.FileUtils;
+import utils.NoteUtil;
 
 public class TrainingController {
     private AudioManager audioManager;
@@ -63,9 +66,11 @@ public class TrainingController {
      * 
      * @param updateUiAfterRecordingCallback Callback for updating the UI after
      *                                       recording is complete.
-     * @param onTooQuiet Callback for notifying the UI that the audio is too quiet.
+     * @param onTooQuiet                     Callback for notifying the UI that the
+     *                                       audio is too quiet.
      */
-    public boolean startRecordingWithLivePitchGraph(RecordingFinishedCallback updateUiAfterRecordingCallback, Runnable onTooQuiet) {
+    public boolean startRecordingWithLivePitchGraph(RecordingFinishedCallback updateUiAfterRecordingCallback,
+            Runnable onTooQuiet) {
 
         return audioManager.startRecordingWithLivePitchGraph(
                 pitch -> {
@@ -75,7 +80,8 @@ public class TrainingController {
                 (boolean success) -> {
                     // This callback is called when the recording is complete
                     setLevelFeedback(); // Analyze the recorded audio and set feedback
-                    updateUiAfterRecordingCallback.onRecordingFinished(success);; // Update the UI after recording
+                    updateUiAfterRecordingCallback.onRecordingFinished(success);
+                    ; // Update the UI after recording
                 });
     }
 
@@ -121,9 +127,11 @@ public class TrainingController {
 
     /**
      * Returns the reference notes for the current level.
-     * This will be called by the LevelScreen to get the reference notes for the current level.
+     * This will be called by the LevelScreen to get the reference notes for the
+     * current level.
      *
-     * @return List of MidiNote objects representing the reference notes for the current level.
+     * @return List of MidiNote objects representing the reference notes for the
+     *         current level.
      */
     public List<MidiNote> getReferenceNotesForCurrentLevel() {
         if (level != null && level.getReferenceNotes() != null) {
@@ -200,13 +208,14 @@ public class TrainingController {
     }
 
     /**
-     * call this function on exiting the programm to close the current synthesizer to avoid weird states
+     * call this function on exiting the programm to close the current synthesizer
+     * to avoid weird states
      */
     public void cleanup() {
         if (audioManager != null) {
             audioManager.cleanup();
         }
-            
+
     }
 
     public Note getPlayerVoice() {
@@ -216,13 +225,21 @@ public class TrainingController {
 
     public boolean isFirstStart() {
         List<String> data = FileUtils.loadVoiceFromTXT("baseVoice.txt");
-        FileUtils.saveVoiceToTXT("baseVoice.txt", data.getFirst() + "\nfalse" ); //set first time to false
-        return Boolean.parseBoolean(data.get(1));
+        if (Boolean.parseBoolean(data.get(1))) {
+            FileUtils.saveVoiceToTXT("baseVoice.txt", data.getFirst() + "\nfalse"); // set first time to false
+            return true;
+        }
+        return false;
+
     }
 
-    public void recordForBaseVoice( RecordingFinishedCallback updateUICallback) {
-        Mixer.Info input = audioUtil.getDefaultInputDevice();
+    public void recordForBaseVoice(Runnable updateUICallback) {
+        Mixer.Info input = AudioSettings.getInputDevice();
 
-        
+        audioManager = new AudioManager(input, null, new ArrayList<>(), 0);
+        audioManager.startRecordingForBaseVoice(updateUICallback, (double pitch) -> {
+            Note note = NoteUtil.getNoteFromPitch(pitch);
+            audioManager.setBaseVoice(note);
+        });
     }
 }

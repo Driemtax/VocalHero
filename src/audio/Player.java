@@ -18,13 +18,11 @@ import utils.NoteUtil;
 public class Player {
     private Synthesizer synthesizer;
     private boolean isSynthOpen = false;
-    private Note baseVoice;
     private final static String BASE_VOICE_FILE = "baseVoice.txt"; 
 
     public Player() {
         try {
             this.synthesizer = MidiSystem.getSynthesizer();
-            this.baseVoice = NoteUtil.getNoteFromString(FileUtils.loadVoiceFromTXT(BASE_VOICE_FILE).getFirst());
 
         } catch (MidiUnavailableException e) {
             System.err.println("Konnte keine Referenz zum MIDI-Synthesizer bekommen.");
@@ -242,11 +240,10 @@ public class Player {
     }
 
     public Note getBaseVoice(){
-        return baseVoice;
+        return NoteUtil.getNoteFromString(FileUtils.loadVoiceFromTXT(BASE_VOICE_FILE).getFirst());
     }
 
     public void setBaseVoice(Note newbaseVoice){
         FileUtils.saveVoiceToTXT(BASE_VOICE_FILE, newbaseVoice.getName() + "\nfalse"); //set first startup to false
-        baseVoice = newbaseVoice;
     }
 }
