@@ -6,7 +6,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.Mixer;
 
 public class AudioSettings {
-    private static final double SAMPLE_RATE = 44100.0;
+    private static final double SAMPLE_RATE = 22100.0f;
     private static AudioFormat format = new AudioFormat((float) SAMPLE_RATE, 16, 2, true, false);
 
     private static Mixer.Info inputDevice;

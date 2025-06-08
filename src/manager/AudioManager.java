@@ -45,9 +45,9 @@ public class AudioManager {
         this.audioData = null; // initially null, will be set after recording
         this.recorder = new Recorder();
         this.player = new Player();
-        this.SAMPLE_RATE = AudioSettings.getSampleRate();
+        this.SAMPLE_RATE = 44100;
         this.format = AudioSettings.getFormat();
-        this.pitchDetector = new PitchDetector(2048, SAMPLE_RATE);
+        this.pitchDetector = new PitchDetector(2048, 44100);
         this.referenceNotes = referenceNotes;
 
     }
