@@ -1,8 +1,9 @@
+// Authors: Jonas Rumpf, Lars Beer, Inaas Hammoush
+
 package utils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,15 +16,21 @@ import java.util.Map;
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 
 import model.AudioSettings;
+import model.Difficulty;
 
 public class FileUtils {
-
     private final static String SRC_PATH = "src";
-    private final static String RECORDING_PATH = "recordings";
     private final static String ASSETS_PATH = "assets";
-
+    private final static String RECORDING_PATH = "recordings";
+    private final static String EASY_MELODY = "major-scale.mid";
+    private final static String MEDIUM_MELODY = "alle_meine_entchen.mid";
+    private final static String HARD_MELODY = "let_it_be.mid";
+    
     // CSV-Ladefunktion
     public static Map<String, int[]> loadProgressFromCSV(String filePath) {
         Map<String, int[]> progressData = new HashMap<>();
@@ -63,12 +70,23 @@ public class FileUtils {
 
         // Put byte array into AudioInputStream
         try (ByteArrayInputStream bais = new ByteArrayInputStream(audioData);
-                AudioInputStream ais = new AudioInputStream(bais, format,
-                        audioData.length / (format.getSampleSizeInBits() / 8))) {
-            AudioSystem.write(ais, AudioFileFormat.Type.WAVE, file);
-        }
+             AudioInputStream ais = new AudioInputStream(bais, format, audioData.length / (format.getSampleSizeInBits() / 8))) {
+                
+                System.out.println("FileUtils: Saving recording to WAV file");
+                System.out.println("Audio length (bytes): " + audioData.length);
+                System.out.println("Saving to: " + file.getAbsolutePath());
+
+                AudioSystem.write(ais, AudioFileFormat.Type.WAVE, file);
+             }
     }
 
+    /**
+     * Loads a recording from a WAV file and returns the audio data as a byte array.
+     * @param fileName the name of the WAV file to load
+     * @return the audio data as a byte array
+     * @throws IOException if the file cannot be read
+     * @throws UnsupportedAudioFileException if the file is not a valid WAV file
+     */
     public static byte[] loadRecordingFromWAV(String fileName) throws IOException, UnsupportedAudioFileException {
         String projectRoot = System.getProperty("user.dir");
         String filePath = projectRoot + File.separator + RECORDING_PATH + File.separator + fileName;
@@ -108,5 +126,68 @@ public class FileUtils {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+    /**
+     * Chooses a melody based on the difficulty level.
+     * @param difficulty the difficulty level
+     * @return the name of the melody file
+     */
+    public static String chooseMelody(Difficulty difficulty) {
+        String melodyName = "";
+        
+        switch (difficulty) {
+            case EASY:
+                melodyName = EASY_MELODY;
+                break;
+            case MEDIUM:
+                // Alle meine Entchen
+                melodyName = MEDIUM_MELODY;
+                break;
+            case HARD:
+                // Let it be
+                melodyName = HARD_MELODY;
+                break;
+            default:
+                break;
+        }
+
+        return melodyName;
+    }
+    /**
+     * Deletes a recording file.
+     * @param fileName the name of the WAV file to delete
+     * @return true if the file was deleted successfully, false otherwise
+     */
+    public static boolean deleteRecording(String fileName) {
+        String projectRoot = System.getProperty("user.dir");
+        String filePath = projectRoot + File.separator + RECORDING_PATH + File.separator + fileName;
+        File file = new File(filePath);
+        
+        if (file.exists()) {
+            return file.delete();
+        } else {
+            System.err.println("FileUtils: Recording file not found: " + filePath);
+            return false;
+        }
+    }
+
+    /**
+     * Lists all recordings in the recordings directory.
+     * @return a list of recording file names
+     */
+    public static List<String> listRecordings() {
+        String projectRoot = System.getProperty("user.dir");
+        String dirPath = projectRoot + File.separator + RECORDING_PATH;
+        File dir = new File(dirPath);
+        
+        if (!dir.exists() || !dir.isDirectory()) {
+            System.err.println("FileUtils: Recordings directory not found: " + dirPath);
+            return new ArrayList<>();
+        }
+        
+        return Arrays.stream(dir.listFiles())
+                     .filter(File::isFile)
+                     .map(File::getName)
+                     .collect(Collectors.toList());
     }
 }

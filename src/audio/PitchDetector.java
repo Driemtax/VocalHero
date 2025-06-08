@@ -41,6 +41,12 @@ public class PitchDetector {
 
   public double getDominantFrequency(byte[] audioData) {
     float[] audioDataFloat = Helper.byteArrayToFloatArray(audioData);
+
+    // Guard Close to ensure we have enough data for a full frame
+    if (audioDataFloat.length < frameSize) {
+        return 0.0; // not detectable frequency
+    }
+
     float[] spectrum = new float[frameSize / 2];
 
     double[] detectedFrequencies = new double[(audioDataFloat.length - frameSize) / frameSize + 1];

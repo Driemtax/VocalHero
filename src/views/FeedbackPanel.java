@@ -1,4 +1,4 @@
-// Author: Jonas Rumpf
+// Author: Jonas Rumpf, Inaas Hammoush
 
 package views;
 
@@ -10,13 +10,17 @@ import model.Feedback;
 import model.Mode;
 
 public class FeedbackPanel extends JPanel {
-    private static final int MIN_SCORE = 60; // Mindestscore für Bestehen
+    private static final int MIN_SCORE = 50; // Mindestscore für Bestehen
     
     private JLabel scoreLabel;
     private JLabel medalLabel;
+    private JLabel saveLabel;
+    private JLabel confirmationLabel;
     private ModernButton continueButton;
     private ModernButton retryButton;
     private ModernButton menuButton;
+    private ModernButton playRecordingButton;
+    private ModernButton saveButton;
     private Mode mode;
     private int level;
     private WindowController windowController;
@@ -36,14 +40,21 @@ public class FeedbackPanel extends JPanel {
     private void initializeComponents() {
         scoreLabel = new JLabel(LanguageManager.get("feedback.score") + ": " + feedback.score() + "%");
         medalLabel = new JLabel(LanguageManager.get("feedback.medal") + ": " + feedback.getFeedbackMedal());
-        
+        saveLabel = new JLabel(LanguageManager.get("feedback.save_label"));
+        confirmationLabel = new JLabel(" "); // Placeholder for confirmation message
+
         // Buttons erstellen
         retryButton = new ModernButton(LanguageManager.get("feedback.retry"));
         menuButton = new ModernButton(LanguageManager.get("feedback.menu"));
+        playRecordingButton = new ModernButton(LanguageManager.get("feedback.play"));
         
         if (feedback.score() >= MIN_SCORE) {
             continueButton = new ModernButton(LanguageManager.get("feedback.continue"));
         }
+
+        // Button for save prompt
+        saveButton = new ModernButton(LanguageManager.get("feedback.save_button"));
+
         
         // Styling
         scoreLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
@@ -51,6 +62,13 @@ public class FeedbackPanel extends JPanel {
         
         medalLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         medalLabel.setForeground(getMedalColor(feedback.getFeedbackMedal()));
+
+        saveLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        saveLabel.setForeground(Color.WHITE);
+
+        confirmationLabel.setFont(new Font("Segoe UI", Font.ITALIC, 14));
+        confirmationLabel.setForeground(new Color(180, 255, 180));
+        
     }
     
     private Color getMedalColor(String medal) {
@@ -70,6 +88,10 @@ public class FeedbackPanel extends JPanel {
         medalLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         retryButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         menuButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        playRecordingButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        saveLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        saveButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        confirmationLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         if (continueButton != null) {
             continueButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         }
@@ -86,6 +108,8 @@ public class FeedbackPanel extends JPanel {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
         buttonPanel.setBackground(new Color(50, 50, 50));
         
+        buttonPanel.add(playRecordingButton);
+        buttonPanel.add(Box.createHorizontalStrut(20));
         buttonPanel.add(retryButton);
         buttonPanel.add(Box.createHorizontalStrut(20));
         if (continueButton != null) {
@@ -95,6 +119,21 @@ public class FeedbackPanel extends JPanel {
         buttonPanel.add(menuButton);
         
         add(buttonPanel);
+
+        // Save prompt panel
+        JPanel savePanel = new JPanel();
+        savePanel.setLayout(new BoxLayout(savePanel, BoxLayout.Y_AXIS));
+        savePanel.setBackground(new Color(50, 50, 50));
+
+        savePanel.add(saveLabel);
+        savePanel.add(Box.createVerticalStrut(10));
+
+        savePanel.add(saveButton);
+        savePanel.add(Box.createVerticalStrut(10));
+
+        savePanel.add(confirmationLabel);
+
+        add(savePanel);
     }
     
     private void setupListeners() {
@@ -103,15 +142,31 @@ public class FeedbackPanel extends JPanel {
         });
         
         menuButton.addActionListener(e -> {
-            windowController.showHome();
+            windowController.showCategoryScreen();
         });
         
         if (continueButton != null) {
             continueButton.addActionListener(e -> {
-                windowController.showCategoryScreen();
+                windowController.showLevelScreen(mode, level + 1);
             });
         }
+
+        saveButton.addActionListener(e -> {
+            // Logic to save the recording
+            boolean success = windowController.saveRecording();
+            if (success) {
+                confirmationLabel.setText(LanguageManager.get("feedback.save_success"));
+            } else {
+                confirmationLabel.setText(LanguageManager.get("feedback.save_failure"));
+            }
+        });
+
+        playRecordingButton.addActionListener(e -> {
+            windowController.playRecordedAudio();
+        });
     }
+
+
     
     public JButton getRetryButton() {
         return retryButton;
