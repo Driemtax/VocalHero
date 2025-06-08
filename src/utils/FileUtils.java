@@ -7,17 +7,23 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.sound.sampled.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import model.AudioSettings;
 
 public class FileUtils {
 
-private final static String RECORDING_PATH = "recordings";
-    
+    private final static String SRC_PATH = "src";
+    private final static String RECORDING_PATH = "recordings";
+    private final static String ASSETS_PATH = "assets";
+
     // CSV-Ladefunktion
     public static Map<String, int[]> loadProgressFromCSV(String filePath) {
         Map<String, int[]> progressData = new HashMap<>();
@@ -29,7 +35,7 @@ private final static String RECORDING_PATH = "recordings";
                 String name = parts[0];
                 int completed = Integer.parseInt(parts[1]);
                 int total = Integer.parseInt(parts[2]);
-                progressData.put(name, new int[]{completed, total});
+                progressData.put(name, new int[] { completed, total });
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -39,13 +45,14 @@ private final static String RECORDING_PATH = "recordings";
 
     /**
      * Saves the audio data to a WAV file in a specified path.
-     * @param fileName the name of the  WAV file 
+     * 
+     * @param fileName  the name of the WAV file
      * @param audioData the audio data as a byte array
      * @throws IOException
      * @throws UnsupportedAudioFileException
      */
     public static void saveRecordingToWAV(String fileName, byte[] audioData)
-        throws IOException, UnsupportedAudioFileException {
+            throws IOException, UnsupportedAudioFileException {
         AudioFormat format = AudioSettings.getFormat();
         String projectRoot = System.getProperty("user.dir");
         String filePath = projectRoot + File.separator + RECORDING_PATH + File.separator + fileName;
@@ -56,16 +63,17 @@ private final static String RECORDING_PATH = "recordings";
 
         // Put byte array into AudioInputStream
         try (ByteArrayInputStream bais = new ByteArrayInputStream(audioData);
-             AudioInputStream ais = new AudioInputStream(bais, format, audioData.length / (format.getSampleSizeInBits() / 8))) {
-                AudioSystem.write(ais, AudioFileFormat.Type.WAVE, file);
-             }
+                AudioInputStream ais = new AudioInputStream(bais, format,
+                        audioData.length / (format.getSampleSizeInBits() / 8))) {
+            AudioSystem.write(ais, AudioFileFormat.Type.WAVE, file);
+        }
     }
 
     public static byte[] loadRecordingFromWAV(String fileName) throws IOException, UnsupportedAudioFileException {
         String projectRoot = System.getProperty("user.dir");
         String filePath = projectRoot + File.separator + RECORDING_PATH + File.separator + fileName;
         File file = new File(filePath);
-        
+
         if (!file.exists()) {
             throw new IOException("Recording file not found: " + filePath);
         }
@@ -73,6 +81,32 @@ private final static String RECORDING_PATH = "recordings";
         byte[] wavBytes = Files.readAllBytes(Paths.get(filePath));
 
         return wavBytes;
-        
+
+    }
+
+    public static List<String> loadVoiceFromTXT(String fileName) {
+        String projectRoot = System.getProperty("user.dir");
+
+        List<String> VoiceData = new ArrayList<>(0);
+        String path = projectRoot + File.separator + ASSETS_PATH + File.separator + fileName;
+        try {
+            Files
+                    .readAllLines(Paths.get(projectRoot + File.separator + SRC_PATH + File.separator + ASSETS_PATH + File.separator + fileName)).forEach(line -> VoiceData.add(line));
+        } catch (IOException e) {
+            VoiceData.add("C4");
+            VoiceData.add("false");
+        } finally {
+            return VoiceData;
+        }        
+    }
+
+    public static void saveVoiceToTXT(String fileName, String msg) {
+        String projectRoot = System.getProperty("user.dir");
+        try {
+            Files.writeString(Paths.get(projectRoot + File.separator + SRC_PATH + File.separator + File.separator + ASSETS_PATH + File.separator + fileName), msg);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }

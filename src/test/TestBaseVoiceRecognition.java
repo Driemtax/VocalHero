@@ -7,9 +7,12 @@ import java.util.Scanner;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
+import javax.swing.SwingUtilities;
 
 import audio.PitchDetector;
 import audio.Recorder;
+import controller.TrainingController;
+import controller.WindowController;
 import model.AudioSettings;
 import model.RecordingFinishedCallback;
 

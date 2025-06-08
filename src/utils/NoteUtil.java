@@ -1,6 +1,7 @@
 package utils;
 
 import model.MidiNote;
+import model.MidiNote.*;
 import model.Interval;
 import model.Range;
 
@@ -72,5 +73,14 @@ public class NoteUtil {
             }
         }
         throw new IllegalStateException("This code should be unreachable");
+    }
+
+    public static Note getNoteFromString(String name){
+        for (Note note : MidiNote.Note.values()){
+            if (note.getName() == name){
+                return note;
+            }
+        }
+        return Note.C4;
     }
 }

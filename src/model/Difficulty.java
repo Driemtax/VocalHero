@@ -6,8 +6,8 @@ public enum Difficulty{
     medium,
     hard;
 
-    public Range getDifficultyRange() {
-    MidiNote.Note baseUserNote = MidiNote.Note.C4; //TODO get the actual base Note 
+    public Range getDifficultyRange(MidiNote.Note baseVoice) {
+    MidiNote.Note baseUserNote = baseVoice; //TODO get the actual base Note 
 
         return switch(this) {
             case easy -> new Range(baseUserNote.ordinal() - 1, baseUserNote.ordinal() + 1);

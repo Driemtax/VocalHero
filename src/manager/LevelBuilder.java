@@ -22,7 +22,7 @@ public class LevelBuilder {
         this.levelInfo = levelInfo;
     }
 
-    public Level buildLevel() {
+    public Level buildLevel(MidiNote.Note baseVoice) {
         Mode mode = levelInfo.getMode();
         Difficulty difficulty = levelInfo.getDifficulty();
         if (mode == Mode.MELODY) {
@@ -35,7 +35,7 @@ public class LevelBuilder {
             return new Level(mode, difficulty, new ArrayList<MidiNote>()); 
         } else {
             // For note and interval modes, we generate reference notes based on the difficulty level
-            MidiNote note = NoteUtil.getRandomNoteInRange(difficulty.getDifficultyRange()); 
+            MidiNote note = NoteUtil.getRandomNoteInRange(difficulty.getDifficultyRange(baseVoice)); 
             List<MidiNote> referenceNotes = List.of(note);
 
             Level level = new Level(mode, difficulty, referenceNotes);

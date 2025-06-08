@@ -1,6 +1,7 @@
 // Authors: Inaas Hammoush, Lars Beer, David Herrmann
 package controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,6 +15,7 @@ import manager.*;
 import model.LevelInfo;
 import model.LevelState;
 import model.MidiNote;
+import model.MidiNote.*;
 import model.Mode;
 import model.PitchListener;
 import model.RecordingFinishedCallback;
@@ -23,6 +25,7 @@ import model.Feedback;
 import model.Level;
 import model.AudioSettings;
 import utils.AudioUtil;
+import utils.FileUtils;
 
 public class TrainingController {
     private AudioManager audioManager;
@@ -42,7 +45,7 @@ public class TrainingController {
     public void startTrainingSession(LevelInfo levelInfo) {
         this.levelInfo = levelInfo;
         this.levelBuilder = new LevelBuilder(levelInfo);
-        this.level = levelBuilder.buildLevel();
+        this.level = levelBuilder.buildLevel(getPlayerVoice());
         // RecordingDuration still needs to be set in the Level object (default is 3
         // seconds and more for melodies)
         audioManager = new AudioManager(AudioSettings.getInputDevice(), AudioSettings.getOutputDevice(),
@@ -204,5 +207,22 @@ public class TrainingController {
             audioManager.cleanup();
         }
             
+    }
+
+    public Note getPlayerVoice() {
+        audioManager = new AudioManager(null, null, getReferenceNotesForCurrentLevel(), 0);
+        return audioManager.getPlayerVoice();
+    }
+
+    public boolean isFirstStart() {
+        List<String> data = FileUtils.loadVoiceFromTXT("baseVoice.txt");
+        FileUtils.saveVoiceToTXT("baseVoice.txt", data.getFirst() + "\nfalse" ); //set first time to false
+        return Boolean.parseBoolean(data.get(1));
+    }
+
+    public void recordForBaseVoice( RecordingFinishedCallback updateUICallback) {
+        Mixer.Info input = audioUtil.getDefaultInputDevice();
+
+        
     }
 }

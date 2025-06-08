@@ -9,6 +9,7 @@ import audio.PitchDetector;
 import audio.Player;
 import audio.Recorder;
 import model.MidiNote;
+import model.MidiNote.*;
 import model.RecordingFinishedCallback;
 import model.AnalysisResult;
 import model.AudioSettings;
@@ -221,5 +222,9 @@ public class AudioManager {
         if (player != null) {
             player.close();
         }
+    }
+
+    public Note getPlayerVoice() {
+        return player.getBaseVoice();
     }
 }
