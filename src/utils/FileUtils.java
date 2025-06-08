@@ -108,14 +108,14 @@ private final static String HARD_MELODY = "let_it_be.mid";
         // Please parse the melody path and look for all midi files
 
         switch (difficulty) {
-            case easy:
+            case EASY:
                 melodyName = EASY_MELODY;
                 break;
-            case medium:
+            case MEDIUM:
                 // Alle meine Entchen
                 melodyName = MEDIUM_MELODY;
                 break;
-            case hard:
+            case HARD:
                 // Let it be
                 melodyName = HARD_MELODY;
                 break;
