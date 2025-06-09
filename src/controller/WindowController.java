@@ -440,11 +440,11 @@ public class WindowController extends JFrame {
             }
             
             switch (currentLevel.getDifficulty()) {
-                case Difficulty.EASY:
+                case EASY:
                     return 1;
-                case Difficulty.MEDIUM:
+                case MEDIUM:
                     return 2;
-                case Difficulty.HARD:
+                case HARD:
                     return 3;            
                 default:
                     System.err.println("WindowController: Unknown difficulty level: " + currentLevel.getDifficulty());

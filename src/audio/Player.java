@@ -285,7 +285,7 @@ public class Player {
     }
 
     public Note getBaseVoice(){
-        return NoteUtil.getNoteFromString(FileUtils.loadVoiceFromTXT(BASE_VOICE_FILE).getFirst());
+        return NoteUtil.getNoteFromString(FileUtils.loadVoiceFromTXT(BASE_VOICE_FILE).get(0));
     }
 
     public void setBaseVoice(Note newbaseVoice){

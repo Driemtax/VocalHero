@@ -279,7 +279,7 @@ public class TrainingController {
     public boolean isFirstStart() {
         List<String> data = FileUtils.loadVoiceFromTXT("baseVoice.txt");
         if (Boolean.parseBoolean(data.get(1))) {
-            FileUtils.saveVoiceToTXT("baseVoice.txt", data.getFirst() + "\nfalse"); // set first time to false
+            FileUtils.saveVoiceToTXT("baseVoice.txt", data.get(0) + "\nfalse"); // set first time to false
             return true;
         }
         return false;

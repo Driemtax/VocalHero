@@ -105,16 +105,15 @@ public class FileUtils {
         String projectRoot = System.getProperty("user.dir");
 
         List<String> VoiceData = new ArrayList<>(0);
-        String path = projectRoot + File.separator + ASSETS_PATH + File.separator + fileName;
+        String path = projectRoot + File.separator + SRC_PATH + File.separator + ASSETS_PATH + File.separator + fileName;
         try {
-            Files
-                    .readAllLines(Paths.get(path)).forEach(line -> VoiceData.add(line));
+            Files.readAllLines(Paths.get(path)).forEach(line -> VoiceData.add(line));
         } catch (IOException e) {
+            System.err.println("FileUtils: Error reading voice data from file: " + path);
             VoiceData.add("C4");
             VoiceData.add("false");
-        } finally {
-            return VoiceData;
-        }        
+        } 
+        return VoiceData;       
     }
 
     public static void saveVoiceToTXT(String fileName, String msg) {

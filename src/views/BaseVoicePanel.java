@@ -1,93 +1,93 @@
-//Author:David Herrmann
-
 package views;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.function.Consumer;
-
 import controller.WindowController;
-import i18n.LanguageManager;
-import model.RecordingFinishedCallback;
+import model.MidiNote.Note;
+import utils.FileUtils;
+import java.util.List;
 
 public class BaseVoicePanel extends JPanel {
+    private final WindowController windowController;
+    private JLabel currentVoiceLabel;
+    private JLabel newVoiceLabel;
+    private ModernButton recordButton;
+    private ModernButton continueButton;
+    private Runnable onContinue;
 
-    private JTextArea descriptionLabel;
-    private JLabel resultLabel;
-    private ModernButton startRecordButton;
-    private ModernButton startButton;
-    private WindowController windowController;
+    private static final String BASE_VOICE_FILE = "baseVoice.txt";
 
     public BaseVoicePanel(WindowController windowController) {
         this.windowController = windowController;
-
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(new Color(50, 50, 50));
-        initializeComponents();
-        setupLayout();
-        setupListeners();
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(20, 20, 20, 20);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        JLabel title = new JLabel("Basisstimmlage erkennen");
+        title.setFont(new Font("Segoe UI Emoji", Font.BOLD, 28));
+        title.setForeground(Color.WHITE);
+        add(title, gbc);
+
+        gbc.gridy++;
+        currentVoiceLabel = new JLabel("Aktuelle Basisstimmlage: " + readBaseVoiceFromFile());
+        currentVoiceLabel.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        currentVoiceLabel.setForeground(Color.WHITE);
+        add(currentVoiceLabel, gbc);
+
+        gbc.gridy++;
+        newVoiceLabel = new JLabel("Neue Basisstimmlage: -");
+        newVoiceLabel.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        newVoiceLabel.setForeground(new Color(180, 220, 255));
+        add(newVoiceLabel, gbc);
+
+        gbc.gridy++;
+        gbc.gridwidth = 1;
+        gbc.gridx = 0;
+        recordButton = new ModernButton("🎤 Aufnahme starten");
+        recordButton.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
+        add(recordButton, gbc);
+
+        gbc.gridx = 1;
+        continueButton = new ModernButton("Weiter");
+        continueButton.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        add(continueButton, gbc);
+
+        // Button-Listener
+        recordButton.addActionListener(e -> startBaseVoiceRecording());
+        continueButton.addActionListener(e -> {
+            windowController.showSettingsScreen();
+        });
     }
 
-    Runnable finished = () -> {
-        updatePitchLabel(getPlayerVoice());
-    };
-
-    private void setupListeners() {
-        startRecordButton.addActionListener(_1 -> windowController.recordForBaseVoice(finished));
-        startButton.addActionListener(_1 -> windowController.showHome());
+    public void setOnContinue(Runnable onContinue) {
+        this.onContinue = onContinue;
     }
 
-    private void setupLayout() {
-        descriptionLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        resultLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        startRecordButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        descriptionLabel.setMargin(new Insets(10, 10, 10, 10));
-        descriptionLabel.setMaximumSize(new Dimension(900, 400));
-        descriptionLabel.setPreferredSize(new Dimension(900, 400));
-
-        add(Box.createVerticalStrut(100));
-        add(descriptionLabel);
-        add(Box.createVerticalStrut(50));
-        add(resultLabel);
-        add(Box.createVerticalStrut(30));
-
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-        buttonPanel.setBackground(new Color(50, 50, 50));
-        buttonPanel.setMaximumSize(new Dimension(600, 200));
-
-        buttonPanel.add(startRecordButton);
-        buttonPanel.add(Box.createHorizontalStrut(20));
-        buttonPanel.add(startButton);
-
-        add(buttonPanel);
+    private String readBaseVoiceFromFile() {
+        List<String> lines = FileUtils.loadVoiceFromTXT(BASE_VOICE_FILE);
+        return lines.isEmpty() ? "-" : lines.get(0);
     }
 
-    private void initializeComponents() {
-        descriptionLabel = new JTextArea(LanguageManager.get("baseVoice.description"));
-        resultLabel = new JLabel(LanguageManager.get("baseVoice.current") + getPlayerVoice());
-
-        startRecordButton = new ModernButton(LanguageManager.get("baseVoice.record"));
-        startButton = new ModernButton(LanguageManager.get("baseVoice.start"));
-
-        descriptionLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
-        descriptionLabel.setForeground(Color.WHITE);
-        descriptionLabel.setBackground(new Color(50, 50, 50));
-        descriptionLabel.setEnabled(false);
-        descriptionLabel.setLineWrap(true);
-        descriptionLabel.setWrapStyleWord(true);
-
-        resultLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
-        resultLabel.setForeground(Color.WHITE);
+    private void updateBaseVoiceLabels() {
+        String baseVoice = readBaseVoiceFromFile();
+        currentVoiceLabel.setText("Aktuelle Basisstimmlage: " + baseVoice);
+        newVoiceLabel.setText("Neue Basisstimmlage: " + baseVoice);
     }
 
-    private String getPlayerVoice() {
-        return windowController.getPlayerVoice().getName();
-    }
-
-    void updatePitchLabel(String pitch){
-        resultLabel.setText(LanguageManager.get("baseVoice.current") + pitch);
+    private void startBaseVoiceRecording() {
+        recordButton.setEnabled(false);
+        newVoiceLabel.setText("Neue Basisstimmlage: Aufnahme läuft...");
+        windowController.recordForBaseVoice(() -> {
+            // UI-Update nach Aufnahme
+            SwingUtilities.invokeLater(() -> {
+                updateBaseVoiceLabels();
+                recordButton.setEnabled(true);
+            });
+        });
     }
 }
