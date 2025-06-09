@@ -250,6 +250,10 @@ public class WindowController extends JFrame{
         trainingController.stopRecording();
     }
 
+    public void stopPlayingReference() {
+        trainingController.stopPlayingReference();
+    }
+
     /**
      * Shows the results screen with the given category, level, and score.
      * This will be called by the LevelScreen to show the results after recording.

@@ -204,33 +204,49 @@ public class LevelScreen extends JPanel {
         
         // action listener for play reference button
         playReferenceButton.addActionListener(e -> {
-            playReferenceButton.setEnabled(false);
-            startRecordingButton.setEnabled(false);
-            windowController.setNavigationEnabled(false);
-    
-            // Callback for when playback is finished
-            Runnable updateUiAfterPlaybackCallback = () -> {
-                playReferenceButton.setEnabled(true);
-                startRecordingButton.setEnabled(true);
-                windowController.setNavigationEnabled(true);
-            };
-    
-            // Play the reference note for the current level
-            boolean success = windowController.playReference(updateUiAfterPlaybackCallback);
+            if (!isPlaying) {
+                startRecordingButton.setEnabled(false);
+                windowController.setNavigationEnabled(false);
+        
+                // Callback for when playback is finished
+                Runnable updateUiAfterPlaybackCallback = () -> {
+                    isPlaying = false;
+                    playReferenceButton.setText(LanguageManager.get("levelscreen.play_reference"));
+                    startRecordingButton.setEnabled(true);
+                    windowController.setNavigationEnabled(true);
+                };
+        
+                // Play the reference note for the current level
+                boolean success = windowController.playReference(updateUiAfterPlaybackCallback);
 
-            if (!success) {
-                final String originalText = statusLabel.getText();
-                statusLabel.setText("MIDI-Wiedergabe nicht möglich. Bitte überprüfen Sie Ihre System-Soundeinstellungen.");
+                if (success) {
+                    isPlaying = true;
+                    playReferenceButton.setText(LanguageManager.get("levelscreen.stop_reference"));
+                } else {
+                    // Playback could not start
+                    playReferenceButton.setText(LanguageManager.get("levelscreen.play_reference"));
+                    isPlaying = false;
 
-                // We need a timer to wait until the statusLabel will be resetted.
-                Timer revertTimer = new Timer(2000, wait -> {
-                    statusLabel.setText(originalText);
-                });
+                    final String originalText = statusLabel.getText();
+                    statusLabel.setText(LanguageManager.get("levelscreen.play_error"));
 
-                revertTimer.setRepeats(false);
-                revertTimer.start();
+                    // We need a timer to wait until the statusLabel will be resetted.
+                    Timer revertTimer = new Timer(2000, wait -> {
+                        statusLabel.setText(originalText);
+                    });
+
+                    revertTimer.setRepeats(false);
+                    revertTimer.start();
+                    
+                }
+
+            } else {
+                // For now, you could try closing the synthesizer to stop playback:
+                windowController.stopPlayingReference();
+
+                isPlaying = false;
+                playReferenceButton.setText(LanguageManager.get("levelscreen.play_reference"));
             }
-
 
         });   
     }
