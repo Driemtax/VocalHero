@@ -15,10 +15,28 @@ public class RecordingButton extends ModernButton {
         super(LanguageManager.get("recordingbutton.start"));
         setFocusPainted(false);
         setBorderPainted(false);
-        setContentAreaFilled(true);  // Make sure background color is used
-        setOpaque(true);      // Make background visible
-        setRolloverEnabled(false);   // Disable hover effect
+        setContentAreaFilled(true);
+        setOpaque(true);
+        setRolloverEnabled(false);
         setBackground(IDLE_COLOR);
+
+        setHoverEffectEnabled(false); // Standard-Hover deaktivieren
+
+        // Eigener Hover-Effekt (z.B. heller machen)
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (!isRecording) {
+                    setBackground(new Color(100, 240, 120)); // Helleres Grün beim Hover im Idle-Zustand
+                } else {
+                    setBackground(new Color(220, 60, 80));   // Helleres Rot beim Hover im Recording-Zustand
+                }
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                setBackground(isRecording ? RECORDING_COLOR : IDLE_COLOR);
+            }
+        });
     }
 
     public void setRecording(boolean recording) {
