@@ -1,4 +1,4 @@
-//Author:David Herrmann
+//Author:David Herrmann, Jonas Rumpf
 
 package views;
 

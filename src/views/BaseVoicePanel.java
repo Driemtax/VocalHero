@@ -1,3 +1,5 @@
+// Author: David Herrmann, Jonas Rumpf
+
 package views;
 
 import javax.swing.*;

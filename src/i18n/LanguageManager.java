@@ -1,3 +1,5 @@
+// Author: Jonas Rumpf
+
 package i18n;
 
 import java.util.*;

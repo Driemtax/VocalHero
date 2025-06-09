@@ -1,3 +1,5 @@
+// Author: Jonas Rumpf
+
 package utils;
 
 import java.util.Locale;
