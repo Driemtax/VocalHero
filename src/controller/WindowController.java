@@ -467,6 +467,7 @@ public class WindowController extends JFrame {
 
     public void recordForBaseVoice(Runnable finished) {
         trainingController.recordForBaseVoice(finished);
+    }
 
     public void setNavigationEnabled(boolean enabled) {
         sidebar.setEnabled(enabled);
