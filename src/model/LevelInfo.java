@@ -29,13 +29,17 @@ public class LevelInfo {
     // Method to determine difficulty based on level number
     // Later I think it might be better to read the difficulty from a file
     public Difficulty getLevelDifficulty(int levelNumber) {
-        if (levelNumber <= 2) {
-            return Difficulty.EASY;
-        } else if (levelNumber > 2 && levelNumber <= 4) {
-            return Difficulty.MEDIUM;
+        
+        if (getMode() == Mode.MELODY) {
+            if (levelNumber == 1) {return Difficulty.EASY;} 
+            else if (levelNumber == 2) {return Difficulty.MEDIUM;} 
+            else {return Difficulty.HARD;}
         } else {
-            return Difficulty.HARD;
+            if (levelNumber <= 2) {return Difficulty.EASY;} 
+            else if (levelNumber > 2 && levelNumber <= 4) {return Difficulty.MEDIUM;} 
+            else {return Difficulty.HARD;}
         }
+
     }
 
     public Mode getMode() {return mode;}
