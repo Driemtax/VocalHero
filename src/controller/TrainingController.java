@@ -127,6 +127,10 @@ public class TrainingController {
         }
     }
 
+    public void stopRecording() {
+        audioManager.stopRecording();
+    }
+
     /**
      * Returns a list of available recordings.
      * This will be called by the WindowController to get the list of available recordings.

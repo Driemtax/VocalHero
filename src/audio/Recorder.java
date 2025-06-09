@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class Recorder {
@@ -18,6 +19,7 @@ public class Recorder {
     private Mixer.Info selectedMixer;
     private ByteArrayOutputStream audioBuffer;
     private Consumer<byte[]> audioChunkListener;
+    private volatile boolean shouldStopRecording = false;
 
     
     public Recorder() {
@@ -68,11 +70,13 @@ public class Recorder {
 
         // Need a final to pass it to the thread
         final boolean finalSuccess = success;
-        
+        shouldStopRecording = false; // reset at start
+        AtomicBoolean callbackInvoked = new AtomicBoolean(false);
+
         new Thread(() -> {
             long startTime = System.currentTimeMillis();
             try {
-                while (System.currentTimeMillis() - startTime < durationSeconds * 1000L) {
+                while (!shouldStopRecording && System.currentTimeMillis() - startTime < durationSeconds * 1000L) {
                     int bytesRead = targetLine.read(buffer, 0, buffer.length);
                     audioBuffer.write(buffer, 0, bytesRead);
 
@@ -90,7 +94,7 @@ public class Recorder {
                 stopRecording();
 
                 // Important: run callback on the Event Dispatch Thread (EDT), cause UI updates must be done on the EDT
-                if (getRecordedDataCallback != null) {
+                if (getRecordedDataCallback != null && callbackInvoked.compareAndSet(false, true)) {
                     SwingUtilities.invokeLater(() -> getRecordedDataCallback.onRecordingFinished(finalSuccess));
                 }
             }
@@ -104,6 +108,8 @@ public class Recorder {
      * Stops the recording if not automaticlly stopped
      */
     public void stopRecording() {
+        shouldStopRecording = true;
+
         if (targetLine != null) {
             targetLine.flush();
             targetLine.stop();
