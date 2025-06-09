@@ -21,7 +21,7 @@ public class Recorder {
 
     
     public Recorder() {
-        this(new AudioFormat(22050.0f, 16, 1, true, false));
+        this(new AudioFormat(44100.0f, 16, 1, true, false));
     }
     
     public Recorder(AudioFormat format) {
@@ -105,6 +105,7 @@ public class Recorder {
      */
     public void stopRecording() {
         if (targetLine != null) {
+            targetLine.flush();
             targetLine.stop();
             targetLine.close();
         }
@@ -126,6 +127,7 @@ public class Recorder {
     public void saveToFile(String filename) throws IOException {
         if (audioBuffer == null) return;
         
+        audioBuffer.flush();
         ByteArrayInputStream bais = new ByteArrayInputStream(audioBuffer.toByteArray());
         AudioInputStream ais = new AudioInputStream(bais, format, 
             audioBuffer.size() / format.getFrameSize());

@@ -34,10 +34,12 @@ public class AudioManager {
     private Player player;
     private PitchDetector pitchDetector;
     private MelodyAnalyzer melodyAnalyzer;
-    private double SAMPLE_RATE;
+    private double RECORDER_SAMPLE_RATE;
+    //private double PLAYER_SAMPLE_RATE;
     byte[] audioData;
     private List<MidiNote> referenceNotes;
-    private AudioFormat format;
+    private AudioFormat playerFormat;
+    private AudioFormat recorderFormat;
 
     public AudioManager(Mixer.Info selectedMic, List<MidiNote> referenceNotes, int recordingDuration) {
         this.recordingDuration = recordingDuration;
@@ -45,15 +47,13 @@ public class AudioManager {
         this.audioData = null; // initially null, will be set after recording
         this.recorder = new Recorder();
         this.player = new Player();
-        this.SAMPLE_RATE = AudioSettings.getSampleRate();
-        this.format = AudioSettings.getFormat();
-        this.pitchDetector = new PitchDetector(2048, SAMPLE_RATE);
+        this.RECORDER_SAMPLE_RATE = AudioSettings.getRecorderSampleRate();
+        //this.PLAYER_SAMPLE_RATE = AudioSettings.getPlayerSampleRate();
+        this.playerFormat = AudioSettings.getPlayerFormat();
+        this.recorderFormat = AudioSettings.getRecorderFormat();
+        this.pitchDetector = new PitchDetector(2048, RECORDER_SAMPLE_RATE);
         this.referenceNotes = referenceNotes;
 
-    }
-
-    public AudioFormat getFormat() {
-        return format;
     }
 
     /**
@@ -106,7 +106,7 @@ public class AudioManager {
                 () -> updateUiAfterRecordingCallback.onRecordingFinished(false));
             return false;
         }
-        if (format == null) { // Zusätzlicher Check
+        if (recorderFormat == null) { // Zusätzlicher Check
             System.err.println("AudioManager: AudioFormat ist nicht gesetzt!");
             if (updateUiAfterRecordingCallback != null) SwingUtilities.invokeLater(
                 () -> updateUiAfterRecordingCallback.onRecordingFinished(false));
@@ -151,7 +151,7 @@ public class AudioManager {
      */
     public void playRecordedAudio() {
         try {
-            player.playAudioData(audioData, format);
+            player.playAudioData(audioData, playerFormat);
         } catch (Exception e) {
             // TODO: Handle exception through GUI
             e.printStackTrace();
@@ -195,7 +195,7 @@ public class AudioManager {
      * @return AnalysisResult
      */
     public AnalysisResult analyzeMelody() {
-        this.melodyAnalyzer = new MelodyAnalyzer(referenceNotes, SAMPLE_RATE, audioData);
+        this.melodyAnalyzer = new MelodyAnalyzer(referenceNotes, RECORDER_SAMPLE_RATE, audioData);
         try {
             return melodyAnalyzer.analyze();
         } catch (Exception e) {
@@ -217,9 +217,6 @@ public class AudioManager {
         }
         
         try {
-            // TODO: Improve accuracy
-            // Right now, even if I sing a note all over the place (e.g. I cant hold it steady)
-            // it still returns me an excellent result with the dominant frequency.
             return pitchDetector.getDominantFrequency(audioData);
         } catch (Exception e) {
             // TODO: Handle exception appropriately

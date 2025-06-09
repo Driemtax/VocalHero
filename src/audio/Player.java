@@ -55,15 +55,23 @@ public class Player {
                 try (SourceDataLine line = (SourceDataLine) speaker.getLine(info)) {
                     line.open(format);
                     line.start();
-                    line.write(audioData, 0, audioData.length);
-                    line.drain();
-                    Thread.sleep(100);
+
+                    int offset = 0;
+                    int bufferSize = 4096;
+                    while (offset < audioData.length) {
+                        int bytesToWrite = Math.min(bufferSize, audioData.length - offset);
+                        line.write(audioData, offset, bytesToWrite);
+                        offset += bytesToWrite;
+                    }
+
+                    line.drain(); // Wait until all data has been played
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
     }
+
 
     /**
      * Plays the audio data using the selected mixer

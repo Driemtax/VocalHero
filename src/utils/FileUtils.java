@@ -56,7 +56,7 @@ private final static String HARD_MELODY = "let_it_be.mid";
      */
     public static void saveRecordingToWAV(String fileName, byte[] audioData)
         throws IOException, UnsupportedAudioFileException {
-        AudioFormat format = AudioSettings.getFormat();
+        AudioFormat format = AudioSettings.getRecorderFormat();
         String projectRoot = System.getProperty("user.dir");
         String filePath = projectRoot + File.separator + RECORDING_PATH + File.separator + fileName;
 
