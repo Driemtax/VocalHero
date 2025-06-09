@@ -32,7 +32,7 @@ public class TestBaseVoiceRecognition {
         output = devices[device];
 
         Recorder recorder = new Recorder();
-        PitchDetector pitchDetector = new PitchDetector(2048, AudioSettings.getSampleRate());
+        PitchDetector pitchDetector = new PitchDetector(2048, AudioSettings.getRecorderSampleRate());
 
         recorder.setAudioChunkListener(chunk -> {
             double pitch = pitchDetector.getDominantFrequency(chunk);

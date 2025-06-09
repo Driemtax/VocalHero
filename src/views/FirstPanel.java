@@ -4,11 +4,8 @@ package views;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.function.Consumer;
-
 import controller.WindowController;
 import i18n.LanguageManager;
-import model.RecordingFinishedCallback;
 
 public class FirstPanel extends JPanel {
 
@@ -69,9 +66,5 @@ public class FirstPanel extends JPanel {
         descriptionLabel.setEnabled(false);
         descriptionLabel.setLineWrap(true);
         descriptionLabel.setWrapStyleWord(true);
-    }
-
-    private String getPlayerVoice() {
-        return windowController.getPlayerVoice().getName();
     }
 }

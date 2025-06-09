@@ -3,11 +3,8 @@ package views;
 import javax.swing.*;
 import java.awt.*;
 import controller.WindowController;
-import model.MidiNote.Note;
-import utils.FileUtils;
 import i18n.LanguageManager;
 import java.text.MessageFormat;
-import java.util.List;
 
 public class BaseVoicePanel extends JPanel {
     private final WindowController windowController;
@@ -16,8 +13,6 @@ public class BaseVoicePanel extends JPanel {
     private ModernButton recordButton;
     private ModernButton continueButton;
     private Runnable onContinue;
-
-    private static final String BASE_VOICE_FILE = "baseVoice.txt";
 
     public BaseVoicePanel(WindowController windowController) {
         this.windowController = windowController;
@@ -44,7 +39,7 @@ public class BaseVoicePanel extends JPanel {
 
         gbc.gridy++;
         newVoiceLabel = new JLabel(MessageFormat.format(LanguageManager.get("basevoice.new"), "-"));
-        newVoiceLabel.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        newVoiceLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 20));
         newVoiceLabel.setForeground(new Color(180, 220, 255));
         add(newVoiceLabel, gbc);
 
@@ -72,8 +67,7 @@ public class BaseVoicePanel extends JPanel {
     }
 
     private String readBaseVoiceFromFile() {
-        List<String> lines = FileUtils.loadVoiceFromTXT(BASE_VOICE_FILE);
-        return lines.isEmpty() ? "-" : lines.get(0);
+        return windowController.getUserBaseNote();
     }
 
     private void updateBaseVoiceLabels() {
@@ -85,6 +79,7 @@ public class BaseVoicePanel extends JPanel {
     private void startBaseVoiceRecording() {
         recordButton.setEnabled(false);
         newVoiceLabel.setText("🎤 " + LanguageManager.get("basevoice.recording"));
+        newVoiceLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0)); //prevent emoji from being cut at the top
         windowController.recordForBaseVoice(() -> {
             // UI-Update nach Aufnahme
             SwingUtilities.invokeLater(() -> {

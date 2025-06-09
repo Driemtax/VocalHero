@@ -8,9 +8,9 @@ import model.AudioSettings;
 
 public class testPitchDetector {
     public static void main(String[] args) {
-        List<byte[]> testSounds = generateTestSounds(3, AudioSettings.getSampleRate());
+        List<byte[]> testSounds = generateTestSounds(3, AudioSettings.getRecorderSampleRate());
 
-        PitchDetector detector = new PitchDetector(2048, AudioSettings.getSampleRate());
+        PitchDetector detector = new PitchDetector(2048, AudioSettings.getRecorderSampleRate());
 
         for (byte[] test : testSounds) {
             System.out.println("Result: " + detector.getDominantFrequency(test));

@@ -18,8 +18,6 @@ import model.Level;
 import model.Mode;
 import model.RecordingFinishedCallback;
 import model.MidiNote;
-import model.MidiNote.*;
-import model.Difficulty;
 
 import java.util.List;
 
@@ -218,8 +216,7 @@ public class WindowController extends JFrame {
         if (trainingController != null) {
             trainingController.setPitchListener(pitchListener::addPitchValue);
         } else {
-            System.err
-                    .println("WindowController: TrainingController ist null. PitchListener kann nicht gesetzt werden.");
+            System.err.println("WindowController: TrainingController ist null. PitchListener kann nicht gesetzt werden.");
         }
     }
 
@@ -251,8 +248,7 @@ public class WindowController extends JFrame {
         if (trainingController != null) {
             return trainingController.getReferenceNotesForCurrentLevel();
         } else {
-            System.err.println(
-                    "WindowController: TrainingController ist null. Referenznoten können nicht abgerufen werden.");
+            System.err.println("WindowController: TrainingController ist null. Referenznoten können nicht abgerufen werden.");
             return List.of(); // Return an empty list if the controller is null
         }
     }
@@ -368,8 +364,7 @@ public class WindowController extends JFrame {
         if (trainingController != null) {
             return trainingController.playReference(updateUiAfterPlaybackCallback);
         } else {
-            System.err.println(
-                    "WindowController: TrainingController ist null. Referenzton kann nicht abgespielt werden.");
+            System.err.println("WindowController: TrainingController ist null. Referenzton kann nicht abgespielt werden.");
             // reactivate UI buttons, even if the playback cannot be started
             if (updateUiAfterPlaybackCallback != null) {
                 SwingUtilities.invokeLater(updateUiAfterPlaybackCallback);
@@ -461,12 +456,12 @@ public class WindowController extends JFrame {
         trainingController.cleanup();
     }
 
-    public Note getPlayerVoice() {
-        return trainingController.getPlayerVoice();
+    public String getUserBaseNote() {
+        return trainingController.readBaseVoiceFromFile();
     }
 
     public void recordForBaseVoice(Runnable finished) {
-        trainingController.recordForBaseVoice(finished);
+        trainingController.setNewUserBaseNote(finished);
     }
 
     public void setNavigationEnabled(boolean enabled) {

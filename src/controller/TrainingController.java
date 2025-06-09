@@ -1,16 +1,14 @@
 // Authors: Inaas Hammoush, Lars Beer, David Herrmann
 package controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.sound.sampled.Mixer;
+import javax.swing.SwingUtilities;
 
 import manager.*;
 import model.LevelInfo;
@@ -38,6 +36,7 @@ public class TrainingController {
     private ProgressManager progressManager;
     private AnalysisResult analysisResult;
     private static AudioUtil audioUtil = new AudioUtil();
+    private final static String BASE_VOICE_FILE = "baseVoice.txt"; 
 
     public TrainingController() {
         initializeAudioSettings(); // Load saved audio settings or set defaults
@@ -47,8 +46,7 @@ public class TrainingController {
     public void startTrainingSession(LevelInfo levelInfo) {
         this.levelInfo = levelInfo;
         this.levelBuilder = new LevelBuilder(levelInfo);
-        this.level = levelBuilder.buildLevel(getPlayerVoice());
-        // RecordingDuration still needs to be set in the Level object (default is 3 seconds and more for melodies)
+        this.level = levelBuilder.buildLevel(getUserBaseNote());
         audioManager = new AudioManager(AudioSettings.getInputDevice(), level.getReferenceNotes(), level.getRecordingDuration());
         feedbackManager = new FeedbackManager(level.getReferenceNotes());
     }
@@ -77,8 +75,7 @@ public class TrainingController {
                 (boolean success) -> {
                     // This callback is called when the recording is complete
                     setLevelFeedback(); // Analyze the recorded audio and set feedback
-                    updateUiAfterRecordingCallback.onRecordingFinished(success);
-                    ; // Update the UI after recording
+                    updateUiAfterRecordingCallback.onRecordingFinished(success); // Update the UI after recording
                 });
     }
 
@@ -271,9 +268,14 @@ public class TrainingController {
 
     }
 
-    public Note getPlayerVoice() {
-        audioManager = new AudioManager(null, getReferenceNotesForCurrentLevel(), 0);
-        return audioManager.getPlayerVoice();
+    public Note getUserBaseNote() {
+        String baseNoteName = readBaseVoiceFromFile();
+        return NoteUtil.getNoteByName(baseNoteName);
+    }
+
+    public String readBaseVoiceFromFile() {
+        List<String> lines = FileUtils.loadVoiceFromTXT(BASE_VOICE_FILE);
+        return lines.isEmpty() ? "-" : lines.get(0);
     }
 
     public boolean isFirstStart() {
@@ -286,13 +288,20 @@ public class TrainingController {
 
     }
 
-    public void recordForBaseVoice(Runnable updateUICallback) {
+    public void setNewUserBaseNote(Runnable updateUICallback) {
+
         Mixer.Info input = AudioSettings.getInputDevice();
 
         audioManager = new AudioManager(input, new ArrayList<>(), 0);
-        audioManager.startRecordingForBaseVoice(updateUICallback, (double pitch) -> {
-            Note note = NoteUtil.getNoteFromPitch(pitch);
-            audioManager.setBaseVoice(note);
+        audioManager.getUserBaseNote(userBaseNote -> {
+            if (userBaseNote != null && !userBaseNote.equals("Undefined")) {
+                FileUtils.saveVoiceToTXT(BASE_VOICE_FILE, userBaseNote + "\nfalse");
+            }            
+            
+            // Always update UI
+            if (updateUICallback != null) {
+                SwingUtilities.invokeLater(updateUICallback); // safe on EDT
+            }
         });
     }
 }

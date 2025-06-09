@@ -126,6 +126,11 @@ public class FileUtils {
         }
     }
 
+    /**
+     * Chooses a melody based on the difficulty level.
+     * @param difficulty the difficulty level
+     * @return the name of the melody file
+     */
     public static String chooseMelody(Difficulty difficulty) {
         String melodyName = "";
         

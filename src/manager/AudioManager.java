@@ -15,10 +15,9 @@ import model.AnalysisResult;
 import model.AudioSettings;
 import utils.FileUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
+import utils.NoteUtil;
 
 /**
  * AudioManager is responsible for managing audio recording, playback, and
@@ -269,47 +268,24 @@ public class AudioManager {
         }
     }
 
-    public Note getPlayerVoice() {
-        return player.getBaseVoice();
-    }
-
-    public void startRecordingForBaseVoice(Runnable finishedUI, DoubleConsumer callbackTC) {
-        List<Double> pitches = new ArrayList<>();
-
-        recorder.setAudioChunkListener(chunk -> {
-            double pitch = pitchDetector.getDominantFrequency(chunk);
-            pitches.add(pitch);
-        });
-
-        RecordingFinishedCallback finished = (boolean success) -> {
-            if (success) {
-                int pitchCount = 0;
-                double pitchTotal = 0.0;
-                for (double pitch : pitches) {
-                    pitchCount++;
-                    pitchTotal += pitch;
-                }
-                callbackTC.accept(pitchTotal/pitchCount);
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                finishedUI.run();
-            }
-        };
-
+    public void getUserBaseNote(Consumer<String> noteCallback) {
         try {
-            recorder.startRecording(5, selectedMic, finished);
+            recorder.startRecording(3, selectedMic, (boolean success) -> {
+                if (success) {
+                    audioData = recorder.getAudioData();
+                    double detectedPitch = pitchDetector.getDominantFrequency(audioData);
+                    Note baseNote = NoteUtil.getApproximateNoteFromPitch(detectedPitch);
+                    String noteName = baseNote.getName();
+
+                    // Return result via callback
+                    noteCallback.accept(noteName);
+                } else {
+                    noteCallback.accept("Undefined");
+                }
+            });
         } catch (LineUnavailableException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
+            noteCallback.accept("Undefined");
         }
-
-    }
-
-    public void setBaseVoice(Note note) {
-        player.setBaseVoice(note);
     }
 }

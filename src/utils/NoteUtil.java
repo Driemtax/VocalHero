@@ -77,7 +77,7 @@ public class NoteUtil {
         throw new IllegalStateException("This code should be unreachable");
     }
 
-    public static Note getNoteFromString(String name){
+    public static Note getNoteByName(String name){
         for (Note note : MidiNote.Note.values()){
             if (note.getName().equals(name)){
                 return note;
@@ -86,7 +86,7 @@ public class NoteUtil {
         return Note.C4;
     }
 
-    public static Note getNoteFromPitch(Double pitch) {
+    public static Note getApproximateNoteFromPitch(Double pitch) {
         Double lowerFrequency = 0.0, higherFrequency = 0.0;
         Note lowerNote = null;
         for(Note note : MidiNote.Note.values()){

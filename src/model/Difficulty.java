@@ -7,12 +7,11 @@ public enum Difficulty{
     HARD;
 
     public Range getDifficultyRange(MidiNote.Note baseVoice) {
-    MidiNote.Note baseUserNote = baseVoice; //TODO get the actual base Note 
 
         return switch(this) {
-            case EASY -> new Range(baseUserNote.ordinal() - 1, baseUserNote.ordinal() + 1);
-            case MEDIUM -> new Range(baseUserNote.ordinal() - 2, baseUserNote.ordinal() + 2);
-            case HARD -> new Range(baseUserNote.ordinal() - 3, baseUserNote.ordinal() + 3); //TODO adjust values to fit
+            case EASY -> new Range(baseVoice.ordinal() - 1, baseVoice.ordinal() + 1);
+            case MEDIUM -> new Range(baseVoice.ordinal() - 2, baseVoice.ordinal() + 2);
+            case HARD -> new Range(baseVoice.ordinal() - 3, baseVoice.ordinal() + 3);
         };
     }
 }
