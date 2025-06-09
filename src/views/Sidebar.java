@@ -36,6 +36,16 @@ public class Sidebar extends JPanel {
         backToMenu.addActionListener(e -> controller.showHome());
         add(backToMenu);
     }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled); // controls this Jpanel
+
+        // Iterate over all components in this JPanel and control them aswell
+        for (Component comp : getComponents()) {
+            comp.setEnabled(enabled);
+        }
+    }
 }
 
 
