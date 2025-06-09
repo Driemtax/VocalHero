@@ -5,6 +5,7 @@ package views;
 import javax.swing.*;
 
 import model.MidiNote;
+import model.NoteType;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -14,29 +15,32 @@ import utils.ScoreUtils;
 
 public class ScorePanel extends JPanel {
     private Image clef;
+    private Image bassClef;
     private List<Note> notes;
     private final ScoreUtils scoreUtils;
     
     // Inner class to represent a musical note
     public static class Note {
         private final int x;
-        private final int pitch; // y-position will be calculated from pitch
+        private final int pitch;
         private final boolean isRest;
-        
-        public Note(int x, int pitch, boolean isRest) {
+        private final NoteType noteType;
+
+        public Note(int x, int pitch, boolean isRest, NoteType noteType) {
             this.x = x;
             this.pitch = pitch;
             this.isRest = isRest;
+            this.noteType = noteType;
         }
 
-        public boolean isRest() {
-             return isRest;
-        }
+        public boolean isRest() { return isRest; }
+        public NoteType getNoteType() { return noteType; }
     }
 
     public ScorePanel(List<MidiNote> referenceNotes) {
         setBackground(new Color(80, 80, 80));
         clef = new ImageIcon(getClass().getResource("/assets/clef.png")).getImage();
+        bassClef = new ImageIcon(getClass().getResource("/assets/bassclef.png")).getImage(); // Bild muss noch hinzugefügt werden
         notes = midiNotesToUiNotes(referenceNotes);
         scoreUtils = new ScoreUtils();
 
@@ -75,8 +79,9 @@ public class ScorePanel extends JPanel {
 
             boolean isRest = midiNote.getNoteDefinition() == MidiNote.Note.REST;
             int pitch = isRest ? 0 : midiNote.getNoteDefinition().getMidiNumber();
+            NoteType noteType = getNoteTypeForDuration(midiNote.getDuration());
 
-            uiNotes.add(new Note(xPosition, pitch, isRest));
+            uiNotes.add(new Note(xPosition, pitch, isRest, noteType));
         }
         return uiNotes;
     }
@@ -91,14 +96,14 @@ public class ScorePanel extends JPanel {
         
         // C major scale (MIDI notes: C4=60, D4=62, E4=64, F4=65, G4=67, A4=69, B4=71, C5=72)
         List<Note> scaleNotes = new ArrayList<>();
-        scaleNotes.add(new Note(startX, 60, false));              // C4
-        scaleNotes.add(new Note(startX + spacing, 62, false));    // D4
-        scaleNotes.add(new Note(startX + spacing*2, 64, false));  // E4
-        scaleNotes.add(new Note(startX + spacing*3, 65, false));  // F4
-        scaleNotes.add(new Note(startX + spacing*4, 67, false));  // G4
-        scaleNotes.add(new Note(startX + spacing*5, 69, false));  // A4
-        scaleNotes.add(new Note(startX + spacing*6, 71, false));  // B4
-        scaleNotes.add(new Note(startX + spacing*7, 72, false));  // C5
+        scaleNotes.add(new Note(startX, 60, false, NoteType.QUARTER));              // C4
+        scaleNotes.add(new Note(startX + spacing, 62, false, NoteType.QUARTER));    // D4
+        scaleNotes.add(new Note(startX + spacing*2, 64, false, NoteType.QUARTER));  // E4
+        scaleNotes.add(new Note(startX + spacing*3, 65, false, NoteType.QUARTER));  // F4
+        scaleNotes.add(new Note(startX + spacing*4, 67, false, NoteType.QUARTER));  // G4
+        scaleNotes.add(new Note(startX + spacing*5, 69, false, NoteType.QUARTER));  // A4
+        scaleNotes.add(new Note(startX + spacing*6, 71, false, NoteType.QUARTER));  // B4
+        scaleNotes.add(new Note(startX + spacing*7, 72, false, NoteType.QUARTER));  // C5
         
         setNotes(scaleNotes);
     }
@@ -126,25 +131,78 @@ public class ScorePanel extends JPanel {
         int startY = h/2 - 2 * lineSpacing;
         scoreUtils.drawStaffLines(g2, w, startY, lineSpacing);
 
+        // Entscheide, ob Violin- oder Bassschlüssel
+        boolean useBassClef = notes.stream().anyMatch(n -> !n.isRest() && n.pitch > 0 && n.pitch < 54);
+        Image clefToDraw = useBassClef ? bassClef : clef;
+
         // Draw clef
-        int clefWidth = 50;
-        int clefHeight = 100;
-        int clefX = 100;
-        int clefY = startY;
-        g2.drawImage(clef, clefX, clefY, clefWidth, clefHeight, this);
+        int clefWidth, clefHeight, clefX, clefY;
+        if (useBassClef) {
+            clefWidth = 70;
+            clefHeight = 70;
+            clefX = 100;
+            clefY = startY - lineSpacing/4; // Bassschlüssel sitzt tiefer
+        } else {
+            clefWidth = 50;
+            clefHeight = 100;
+            clefX = 100;
+            clefY = startY;
+        }
+        g2.drawImage(clefToDraw, clefX, clefY, clefWidth, clefHeight, this);
 
         // Draw notes
         for (Note note : notes) {
-            int yPos = scoreUtils.calculateYPosition(startY, lineSpacing, note.pitch);
-
             if (note.isRest()) {
-                // Draw a rest
-                //scoreUtils.drawRest(g2, note.x, yPos, getHeight());
+                // Beispiel: Viertelpause zeichnen
+                int yPos = scoreUtils.calculateYPositionWhiteKeys(startY, lineSpacing, 60, useBassClef); // 60 = C4 als Dummy
+                scoreUtils.drawQuarterRest(g2, note.x, yPos);
             } else {
-                // Draw a normal note
-                scoreUtils.drawNote(g2, note.x, yPos, getHeight());
+                // Notenposition und Vorzeichen bestimmen
+                ScoreUtils.NotePosition pos = ScoreUtils.getNotePosition(note.pitch);
+                int yPos = scoreUtils.calculateYPositionWhiteKeys(startY, lineSpacing, note.pitch, useBassClef);
+
+                // Vorzeichen zeichnen, falls nötig
+                if (pos.isFlat) {
+                    g2.setFont(new Font("Serif", Font.BOLD, 22));
+                    g2.drawString("♭", note.x - 18, yPos + 7);
+                }
+
+                // Beispiel: Verschiedene Notenarten zeichnen
+                switch (note.getNoteType()) { // noteType musst du selbst bestimmen/übergeben
+                    case WHOLE:
+                        scoreUtils.drawWholeNote(g2, note.x, yPos, startY, lineSpacing);
+                        System.err.println("Drawing whole note at x: " + note.x + ", y: " + yPos);
+                        break;
+                    case HALF:
+                        scoreUtils.drawHalfNote(g2, note.x, yPos, startY, lineSpacing);
+                        System.err.println("Drawing half note at x: " + note.x + ", y: " + yPos);
+                        break;
+                    case QUARTER:
+                        scoreUtils.drawQuarterNote(g2, note.x, yPos, startY, lineSpacing);
+                        System.err.println("Drawing quarter note at x: " + note.x + ", y: " + yPos);
+                        break;
+                    case EIGHTH:
+                        scoreUtils.drawEighthNote(g2, note.x, yPos, startY, lineSpacing);
+                        System.err.println("Drawing eighth note at x: " + note.x + ", y: " + yPos);
+                        break;
+                    case SIXTEENTH:
+                        scoreUtils.drawSixteenthNote(g2, note.x, yPos, startY, lineSpacing);
+                        System.err.println("Drawing sixteenth note at x: " + note.x + ", y: " + yPos);
+                        break;
+                    default:
+                        scoreUtils.drawQuarterNote(g2, note.x, yPos, startY, lineSpacing);
+                        System.err.println("Unknown note type: " + note.getNoteType());
+                }
             }
         }
+    }
+
+    private NoteType getNoteTypeForDuration(double duration) {
+        if (duration >= 3.5) return NoteType.WHOLE;
+        if (duration >= 1.5) return NoteType.HALF;
+        if (duration >= 0.75) return NoteType.QUARTER;
+        if (duration >= 0.35) return NoteType.EIGHTH;
+        return NoteType.SIXTEENTH;
     }
 }
 
