@@ -189,6 +189,10 @@ public class AudioManager {
         return player.playNotes(referenceNotes, updateUiAfterPlaybackCallback);
     }
 
+    public void stopPlayingReference() {
+        player.stopReferencePlayback();
+    }
+
     /**
      * Analyzes the recorded audio data using the MelodyAnalyzer.
      * It compares the detected notes with the reference notes and returns the analysis result.

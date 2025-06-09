@@ -19,6 +19,9 @@ public class LevelScreen extends JPanel {
     private PitchGraphPanel pitchPanel;
     private ScorePanel scorePanel;
     private JLabel statusLabel;
+    private boolean isCountdownRunning = false;
+    private boolean wasManuallyStopped = false;
+    private boolean isPlaying = false;
 
     // Maybe show this information in the UI later.
     private Mode currentMode;
@@ -127,84 +130,123 @@ public class LevelScreen extends JPanel {
         add(topPanel, BorderLayout.NORTH);  // Changed from NORTH to SOUTH
         add(contentPanel, BorderLayout.CENTER);
 
-        // Add button listeners (empty for now, will be connected to TrainingController later)
         startRecordingButton.addActionListener(e -> {
-            startRecordingButton.setEnabled(false);
-            startRecordingButton.setRecording(true);
-            playReferenceButton.setEnabled(false);
-            windowController.setNavigationEnabled(false);
+            if (!startRecordingButton.isRecording() && !isCountdownRunning) {
+                startRecordingButton.setRecording(true);
+                playReferenceButton.setEnabled(false);
+                windowController.setNavigationEnabled(false);
 
-            // Set timer for recording countdown
-            timer.addActionListener(ev -> {
-                if (countdown[0] > 0) {
-                    statusLabel.setText(LanguageManager.get("levelscreen.countdown") + " " + countdown[0]);
-                    countdown[0]--;
-                } else {
-                    timer.stop();
-                    statusLabel.setText(LanguageManager.get("levelscreen.recording"));
+                countdown[0] = 3;
+                isCountdownRunning = true;
 
-                    RecordingFinishedCallback updateUiAfterRecordingCallback = (boolean success) -> {
-                        if (success) {
-                            statusLabel.setText(LanguageManager.get("levelscreen.finished"));
-                            startRecordingButton.setEnabled(true);
+                timer = new Timer(1000, null);
+                timer.addActionListener(ev -> {
+                    if (countdown[0] > 0) {
+                        statusLabel.setText(LanguageManager.get("levelscreen.countdown") + " " + countdown[0]);
+                        countdown[0]--;
+                    } else {
+                        timer.stop();
+                        isCountdownRunning = false;
+                        statusLabel.setText(LanguageManager.get("levelscreen.recording"));
+
+                        RecordingFinishedCallback updateUiAfterRecordingCallback = (boolean success) -> {
+                            if (success && startRecordingButton.isRecording()) {
+                                startRecordingButton.setRecording(false);
+                                statusLabel.setText(LanguageManager.get("levelscreen.finished"));
+                                playReferenceButton.setEnabled(true);
+                                windowController.setNavigationEnabled(true);
+                                if (!wasManuallyStopped) {
+                                    windowController.showResults(currentMode, currentLevel);
+                                }
+                            } else {
+                                statusLabel.setText(LanguageManager.get("levelscreen.stopped"));
+                            }
+
+                            // Reset manual stop flag
+                            wasManuallyStopped = false;
+                        };
+
+                        Runnable onTooQuiet = () -> {
+                            statusLabel.setText(LanguageManager.get("levelscreen.too_quiet"));
+                        };
+
+                        boolean success = windowController.startRecordingForLevel(updateUiAfterRecordingCallback, onTooQuiet);
+                        if (!success) {
                             startRecordingButton.setRecording(false);
+                            statusLabel.setText(LanguageManager.get("levelscreen.error"));
                             playReferenceButton.setEnabled(true);
                             windowController.setNavigationEnabled(true);
-                            System.out.println("LevelScreen: Aufnahme beendet. Button wieder aktiviert.");
-                            windowController.showResults(currentMode, currentLevel);
                         }
-                    };
-
-                    // Callback für "Audio zu leise"
-                    Runnable onTooQuiet = () -> {
-                        statusLabel.setText(LanguageManager.get("levelscreen.too_quiet"));
-                    };
-
-                    // Starte die Aufnahme mit beiden Callbacks
-                    boolean success = windowController.startRecordingForLevel(updateUiAfterRecordingCallback, onTooQuiet);
-                    if (!success) {
-                        statusLabel.setText(LanguageManager.get("levelscreen.error"));
-                        startRecordingButton.setEnabled(true);
-                        startRecordingButton.setRecording(false);
-                        playReferenceButton.setEnabled(true);
-                        windowController.setNavigationEnabled(true);
-                        System.out.println("LevelScreen: Aufnahme konnte nicht gestartet werden.");
                     }
+                });
+                timer.setInitialDelay(0);
+                timer.start();
+
+            } else {
+                // User clicked during countdown or recording -> cancel everything
+                if (isCountdownRunning && timer != null) {
+                    timer.stop();
+                    isCountdownRunning = false;
+                    statusLabel.setText(LanguageManager.get("levelscreen.stopped"));
                 }
-            });
-            timer.setInitialDelay(0);
-            timer.start();
+
+                if (startRecordingButton.isRecording()) {
+                    windowController.stopRecording();
+                }
+
+                wasManuallyStopped = true;
+                startRecordingButton.setRecording(false);
+                playReferenceButton.setEnabled(true);
+                windowController.setNavigationEnabled(true);
+            }
         });
+
         
         // action listener for play reference button
         playReferenceButton.addActionListener(e -> {
-            playReferenceButton.setEnabled(false);
-            startRecordingButton.setEnabled(false);
-            windowController.setNavigationEnabled(false);
-    
-            // Callback for when playback is finished
-            Runnable updateUiAfterPlaybackCallback = () -> {
-                playReferenceButton.setEnabled(true);
-                startRecordingButton.setEnabled(true);
-                windowController.setNavigationEnabled(true);
-            };
-    
-            // Play the reference note for the current level
-            boolean success = windowController.playReference(updateUiAfterPlaybackCallback);
+            if (!isPlaying) {
+                startRecordingButton.setEnabled(false);
+                windowController.setNavigationEnabled(false);
+        
+                // Callback for when playback is finished
+                Runnable updateUiAfterPlaybackCallback = () -> {
+                    isPlaying = false;
+                    playReferenceButton.setText(LanguageManager.get("levelscreen.play_reference"));
+                    startRecordingButton.setEnabled(true);
+                    windowController.setNavigationEnabled(true);
+                };
+        
+                // Play the reference note for the current level
+                boolean success = windowController.playReference(updateUiAfterPlaybackCallback);
 
-            if (!success) {
-                final String originalText = statusLabel.getText();
-                statusLabel.setText("MIDI-Wiedergabe nicht möglich. Bitte überprüfen Sie Ihre System-Soundeinstellungen.");
+                if (success) {
+                    isPlaying = true;
+                    playReferenceButton.setText(LanguageManager.get("levelscreen.stop_reference"));
+                } else {
+                    // Playback could not start
+                    playReferenceButton.setText(LanguageManager.get("levelscreen.play_reference"));
+                    isPlaying = false;
 
-                // We need a timer to wait until the statusLabel will be resetted.
-                Timer revertTimer = new Timer(2000, wait -> {
-                    statusLabel.setText(originalText);
-                });
+                    final String originalText = statusLabel.getText();
+                    statusLabel.setText(LanguageManager.get("levelscreen.play_error"));
 
-                revertTimer.setRepeats(false);
-                revertTimer.start();
+                    // We need a timer to wait until the statusLabel will be resetted.
+                    Timer revertTimer = new Timer(2000, wait -> {
+                        statusLabel.setText(originalText);
+                    });
+
+                    revertTimer.setRepeats(false);
+                    revertTimer.start();
+                    
+                }
+
+            } else {
+                // For now, you could try closing the synthesizer to stop playback:
+                windowController.stopPlayingReference();
+
+                isPlaying = false;
+                playReferenceButton.setText(LanguageManager.get("levelscreen.play_reference"));
             }
-
 
         });   
     }

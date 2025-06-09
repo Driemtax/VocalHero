@@ -17,6 +17,7 @@ import model.MidiNote;
 public class Player {
     private Synthesizer synthesizer;
     private boolean isSynthOpen = false;
+    private Thread referencePlaybackThread;
 
     public Player() {
         try {
@@ -134,7 +135,7 @@ public class Player {
 
         // Spawn a new thread to play the notes
         // This is necessary to avoid blocking the Event Dispatch Thread (EDT) in Swing applications
-        new Thread(() -> {
+        referencePlaybackThread = new Thread(() -> {
             MidiChannel channel = null;
             try {
                 MidiChannel[] channels = synthesizer.getChannels();
@@ -196,9 +197,17 @@ public class Player {
                     SwingUtilities.invokeLater(onPlaybackFinishedCallback);
                 }
             }
-        }, "MelodyPlaybackThread-" + System.currentTimeMillis()).start();
+        }, "MelodyPlaybackThread-" + System.currentTimeMillis());
+
+        referencePlaybackThread.start();
 
         return true;
+    }
+
+    public void stopReferencePlayback() {
+        if (referencePlaybackThread != null && referencePlaybackThread.isAlive()) {
+            referencePlaybackThread.interrupt();
+        }
     }
 
     /**
