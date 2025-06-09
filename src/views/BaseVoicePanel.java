@@ -5,6 +5,8 @@ import java.awt.*;
 import controller.WindowController;
 import model.MidiNote.Note;
 import utils.FileUtils;
+import i18n.LanguageManager;
+import java.text.MessageFormat;
 import java.util.List;
 
 public class BaseVoicePanel extends JPanel {
@@ -28,19 +30,20 @@ public class BaseVoicePanel extends JPanel {
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
 
-        JLabel title = new JLabel("Basisstimmlage erkennen");
+        JLabel title = new JLabel(LanguageManager.get("basevoice.title"));
         title.setFont(new Font("Segoe UI Emoji", Font.BOLD, 28));
         title.setForeground(Color.WHITE);
         add(title, gbc);
 
         gbc.gridy++;
-        currentVoiceLabel = new JLabel("Aktuelle Basisstimmlage: " + readBaseVoiceFromFile());
+        String baseVoice = readBaseVoiceFromFile();
+        currentVoiceLabel = new JLabel(MessageFormat.format(LanguageManager.get("basevoice.current"), baseVoice));
         currentVoiceLabel.setFont(new Font("Segoe UI", Font.PLAIN, 20));
         currentVoiceLabel.setForeground(Color.WHITE);
         add(currentVoiceLabel, gbc);
 
         gbc.gridy++;
-        newVoiceLabel = new JLabel("Neue Basisstimmlage: -");
+        newVoiceLabel = new JLabel(MessageFormat.format(LanguageManager.get("basevoice.new"), "-"));
         newVoiceLabel.setFont(new Font("Segoe UI", Font.PLAIN, 20));
         newVoiceLabel.setForeground(new Color(180, 220, 255));
         add(newVoiceLabel, gbc);
@@ -48,12 +51,12 @@ public class BaseVoicePanel extends JPanel {
         gbc.gridy++;
         gbc.gridwidth = 1;
         gbc.gridx = 0;
-        recordButton = new ModernButton("🎤 Aufnahme starten");
-        recordButton.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
+        recordButton = new ModernButton(LanguageManager.get("basevoice.record_button"));
+        recordButton.setFont(new Font("Segoe UI", Font.BOLD, 18));
         add(recordButton, gbc);
 
         gbc.gridx = 1;
-        continueButton = new ModernButton("Weiter");
+        continueButton = new ModernButton(LanguageManager.get("basevoice.continue_button"));
         continueButton.setFont(new Font("Segoe UI", Font.BOLD, 18));
         add(continueButton, gbc);
 
@@ -75,13 +78,13 @@ public class BaseVoicePanel extends JPanel {
 
     private void updateBaseVoiceLabels() {
         String baseVoice = readBaseVoiceFromFile();
-        currentVoiceLabel.setText("Aktuelle Basisstimmlage: " + baseVoice);
-        newVoiceLabel.setText("Neue Basisstimmlage: " + baseVoice);
+        currentVoiceLabel.setText(MessageFormat.format(LanguageManager.get("basevoice.current"), baseVoice));
+        newVoiceLabel.setText(MessageFormat.format(LanguageManager.get("basevoice.new"), baseVoice));
     }
 
     private void startBaseVoiceRecording() {
         recordButton.setEnabled(false);
-        newVoiceLabel.setText("Neue Basisstimmlage: Aufnahme läuft...");
+        newVoiceLabel.setText("🎤 " + LanguageManager.get("basevoice.recording"));
         windowController.recordForBaseVoice(() -> {
             // UI-Update nach Aufnahme
             SwingUtilities.invokeLater(() -> {
