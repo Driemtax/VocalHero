@@ -34,6 +34,7 @@ public class WindowController extends JFrame {
     private JPanel rootPanel;
     private CardLayout cardLayout;
     private ContentPanel contentPanel;
+    private Sidebar sidebar;
 
     public static final String HOME = "home";
     public static final String APP = "app";
@@ -81,7 +82,7 @@ public class WindowController extends JFrame {
 
         // HomeScreen ohne Sidebar
         HomeScreen homeScreen = new HomeScreen(this);
-        Sidebar sidebar = new Sidebar(contentPanel, this);
+        sidebar = new Sidebar(contentPanel, this);
         JPanel appPanel = new JPanel(new BorderLayout());
         appPanel.add(sidebar, BorderLayout.WEST);
         appPanel.add(contentPanel, BorderLayout.CENTER);
@@ -466,5 +467,8 @@ public class WindowController extends JFrame {
 
     public void recordForBaseVoice(Runnable finished) {
         trainingController.recordForBaseVoice(finished);
+
+    public void setNavigationEnabled(boolean enabled) {
+        sidebar.setEnabled(enabled);
     }
 }

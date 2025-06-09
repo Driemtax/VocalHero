@@ -58,8 +58,8 @@ public class FileUtils {
      * @throws UnsupportedAudioFileException
      */
     public static void saveRecordingToWAV(String fileName, byte[] audioData)
-            throws IOException, UnsupportedAudioFileException {
-        AudioFormat format = AudioSettings.getFormat();
+        throws IOException, UnsupportedAudioFileException {
+        AudioFormat format = AudioSettings.getRecorderFormat();
         String projectRoot = System.getProperty("user.dir");
         String filePath = projectRoot + File.separator + RECORDING_PATH + File.separator + fileName;
 
