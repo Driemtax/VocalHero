@@ -38,6 +38,9 @@ public class WindowController extends JFrame {
 
     public static final String HOME = "home";
     public static final String APP = "app";
+    public static final String FIRST_START = "first_start";
+    public static final String SETTINGS = "settings";
+    public static final String BASE_VOICE = "base_voice";
 
     public WindowController(TrainingController controller) {
         this.trainingController = controller;
@@ -87,13 +90,21 @@ public class WindowController extends JFrame {
         appPanel.add(sidebar, BorderLayout.WEST);
         appPanel.add(contentPanel, BorderLayout.CENTER);
 
+        // Panels ohne Sidebar:
+        FirstPanel firstPanel = new FirstPanel(this);
+        SettingsScreen settingsScreen = new SettingsScreen(this);
+        BaseVoicePanel baseVoicePanel = new BaseVoicePanel(this); // <--- hinzufügen
+
         rootPanel.add(homeScreen, HOME);
         rootPanel.add(appPanel, APP);
+        rootPanel.add(firstPanel, FIRST_START);
+        rootPanel.add(settingsScreen, SETTINGS);
+        rootPanel.add(baseVoicePanel, BASE_VOICE); // <--- hinzufügen
 
         setContentPane(rootPanel);
 
         if (trainingController.isFirstStart()) {
-            showAppFirst();
+            showFirstStartScreen();
         } else {
             showHome();
         }
@@ -132,10 +143,7 @@ public class WindowController extends JFrame {
     }
 
     public void showSettingsScreen() {
-        contentPanel.removeAll();
-        contentPanel.add(new SettingsScreen(this), BorderLayout.CENTER);
-        contentPanel.revalidate();
-        contentPanel.repaint();
+        cardLayout.show(rootPanel, SETTINGS);
     }
 
     public void showCategoryScreen() {
@@ -172,19 +180,11 @@ public class WindowController extends JFrame {
     }
 
     public void showBaseVoiceRecordScreen() {
-
-        contentPanel.removeAll();
-        contentPanel.add(new BaseVoicePanel(this), BorderLayout.CENTER);
-        contentPanel.revalidate();
-        contentPanel.repaint();
+        cardLayout.show(rootPanel, BASE_VOICE);
     }
 
     public void showFirstStartScreen() {
-
-        contentPanel.removeAll();
-        contentPanel.add(new FirstPanel(this), BorderLayout.CENTER);
-        contentPanel.revalidate();
-        contentPanel.repaint();
+        cardLayout.show(rootPanel, FIRST_START);
     }
     public void showRecordingsScreen() {
         contentPanel.removeAll();
