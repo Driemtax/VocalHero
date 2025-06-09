@@ -1,4 +1,4 @@
-// Authors: Inaas Hammoush, Lars Beer, David Herrmann
+// Authors: Inaas Hammoush, Lars Beer, David Herrmann, Jonas Rumpf
 package controller;
 
 import java.io.IOException;
