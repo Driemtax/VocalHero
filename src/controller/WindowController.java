@@ -14,6 +14,7 @@ import javax.swing.*;
 
 import model.Feedback;
 import model.LevelInfo;
+import model.LevelState;
 import model.Level;
 import model.Mode;
 import model.RecordingFinishedCallback;
@@ -142,7 +143,7 @@ public class WindowController extends JFrame{
 
     public void showProgressScreen() {
         contentPanel.removeAll();
-        contentPanel.add(new ProgressPanel(), BorderLayout.CENTER);
+        contentPanel.add(new ProgressPanel(this), BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
     }
@@ -422,5 +423,9 @@ public class WindowController extends JFrame{
 
     public void setNavigationEnabled(boolean enabled) {
         sidebar.setEnabled(enabled);
+    }
+
+    public List<LevelState> getProgress(Mode mode) {
+        return trainingController.getProgress(mode);
     }
 }

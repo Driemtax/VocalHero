@@ -1,26 +1,28 @@
-// Authors: Jonas Rumpf
+// Authors: Jonas Rumpf, David Herrmann
 
 package views;
 
 import javax.swing.*;
 
+import controller.WindowController;
 import i18n.LanguageManager;
+import model.LevelState;
+import model.Mode;
 
 import java.awt.*;
+import java.util.List;
 import java.util.Map;
 import utils.FileUtils;
+import utils.ProgressUtil;
 
 public class ProgressPanel extends JPanel {
+    private WindowController windowController;
     private JProgressBar category1Bar;
     private JProgressBar category2Bar;
     private JProgressBar category3Bar;
 
-    public ProgressPanel() {
-        // Lädt Fortschritt aus progress.csv, wenn vorhanden, sonst Standardwerte
-        this(FileUtils.loadProgressFromCSV("src/savedata/progress.csv"));
-    }
-
-    public ProgressPanel(Map<String, int[]> progressData) {
+    public ProgressPanel(WindowController windowController) {
+        this.windowController = windowController;
         setBackground(new Color(40, 40, 40));
         setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
         setLayout(new GridBagLayout());
@@ -29,9 +31,13 @@ public class ProgressPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
 
-        addCategoryProgress(LanguageManager.get("progress.single_note"), progressData.getOrDefault("Einzelnote", new int[]{0, 10}), gbc, 0, new Color(0x4F8A8B));
-        addCategoryProgress(LanguageManager.get("progress.intervals"),  progressData.getOrDefault("Intervalle",  new int[]{0, 8}),  gbc, 1, new Color(0xF9A826));
-        addCategoryProgress(LanguageManager.get("progress.melody"),  progressData.getOrDefault("Melodie",  new int[]{0, 12}), gbc, 2, new Color(0xF76E6C));
+        int[] NoteData = ProgressUtil.getLevelAndCompleted(windowController.getProgress(Mode.NOTE));
+        int[] IntervalData = ProgressUtil.getLevelAndCompleted(windowController.getProgress(Mode.INTERVAL));
+        int[] MelodyData = ProgressUtil.getLevelAndCompleted(windowController.getProgress(Mode.MELODY));
+
+        addCategoryProgress(LanguageManager.get("progress.single_note"), NoteData, gbc, 0, new Color(0x4F8A8B));
+        addCategoryProgress(LanguageManager.get("progress.intervals"),  IntervalData,  gbc, 1, new Color(0xF9A826));
+        addCategoryProgress(LanguageManager.get("progress.melody"),  MelodyData, gbc, 2, new Color(0xF76E6C));
     }
 
     private void addCategoryProgress(String name, int[] data, GridBagConstraints gbc, int row, Color barColor) {
