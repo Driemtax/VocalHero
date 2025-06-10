@@ -21,8 +21,11 @@ public class NoteUtil {
         int start = range.min();
         int end = range.max();
         int index = start + (int) (Math.random() * (end - start + 1));
-        if (index < 0 || index >= notes.length) {
-            throw new IndexOutOfBoundsException("Index out of bounds for note array: " + index);
+        if (index <= 0 ) {
+            index = 1;
+        }
+        if (index >= notes.length){
+            index = notes.length-1;
         }
 
         midiNote = new MidiNote(notes[index]);
@@ -67,8 +70,11 @@ public class NoteUtil {
                 } else {
                     newIndex = noteIndex + interval.getSemitones();
                 }
-                if (newIndex < 0 || newIndex > (MidiNote.Note.getAllNotes().length - 1)) {
-                    throw new IndexOutOfBoundsException("No Note for index: " + newIndex);
+                if (newIndex <= 0 ) {
+                    newIndex = 1;
+                }
+                if(newIndex > (MidiNote.Note.getAllNotes().length - 1)){
+                    newIndex = MidiNote.Note.getAllNotes().length - 1;
                 }
                 intervalNote = MidiNote.Note.getAllNotes()[newIndex];
                 return new MidiNote(intervalNote);
