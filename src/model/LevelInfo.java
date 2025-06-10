@@ -15,9 +15,9 @@ public class LevelInfo {
     private int levelNumber; 
 
     public LevelInfo(int levelNumber, Mode mode) {
-        this.difficulty = getLevelDifficulty(levelNumber);
         this.levelNumber = levelNumber;
         this.mode = mode;
+        this.difficulty = getLevelDifficulty(levelNumber);
     }
 
     // Getters and Setters
@@ -29,8 +29,8 @@ public class LevelInfo {
     // Method to determine difficulty based on level number
     // Later I think it might be better to read the difficulty from a file
     public Difficulty getLevelDifficulty(int levelNumber) {
-        
-        if (getMode() == Mode.MELODY) {
+        System.out.println("Determining difficulty for level number: " + levelNumber + " in mode: " + mode);
+        if (mode == Mode.MELODY) {
             if (levelNumber == 1) {return Difficulty.EASY;} 
             else if (levelNumber == 2) {return Difficulty.MEDIUM;} 
             else {return Difficulty.HARD;}

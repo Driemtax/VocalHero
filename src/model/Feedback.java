@@ -1,6 +1,8 @@
 // Authors: Jonas Rumpf
 package model;
 
+import i18n.LanguageManager;
+
 public record Feedback(float score) {
 
     //Here maybe we can have the final feedback message that is calculated based on the functions in the FeedbackManager
@@ -19,13 +21,13 @@ public record Feedback(float score) {
 
     public String getFeedbackMedal() {
         if (score >= 90) {
-            return "Gold Medal";
+            return LanguageManager.get("feedback.medal.gold");
         } else if (score >= 75) {
-            return "Silver Medal";
+            return LanguageManager.get("feedback.medal.silver");
         } else if (score >= 50) {
-            return "Bronze Medal";
+            return LanguageManager.get("feedback.medal.bronze");
         } else {
-            return "No Medal";
+            return LanguageManager.get("feedback.retry_label");
         }
     }
 }
