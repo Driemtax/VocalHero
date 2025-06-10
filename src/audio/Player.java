@@ -17,6 +17,7 @@ import model.MidiNote;
 public class Player {
     private Synthesizer synthesizer;
     private boolean isSynthOpen = false;
+    private Thread referencePlaybackThread;
 
     public Player() {
         try {
@@ -134,7 +135,7 @@ public class Player {
 
         // Spawn a new thread to play the notes
         // This is necessary to avoid blocking the Event Dispatch Thread (EDT) in Swing applications
-        new Thread(() -> {
+        referencePlaybackThread = new Thread(() -> {
             MidiChannel channel = null;
             try {
                 MidiChannel[] channels = synthesizer.getChannels();
@@ -196,9 +197,17 @@ public class Player {
                     SwingUtilities.invokeLater(onPlaybackFinishedCallback);
                 }
             }
-        }, "MelodyPlaybackThread-" + System.currentTimeMillis()).start();
+        }, "MelodyPlaybackThread-" + System.currentTimeMillis());
+
+        referencePlaybackThread.start();
 
         return true;
+    }
+
+    public void stopReferencePlayback() {
+        if (referencePlaybackThread != null && referencePlaybackThread.isAlive()) {
+            referencePlaybackThread.interrupt();
+        }
     }
 
     /**
@@ -254,21 +263,21 @@ public class Player {
      * @param sf2Path
      */
     public void loadSoundFont(String sf2Path) {
-    if (synthesizer == null || !synthesizer.isOpen()) {
-        System.err.println("Synthesizer ist nicht verfügbar.");
-        return;
-    }
-    try {
-        File sf2File = new File(sf2Path);
-        if (!sf2File.exists()) {
-            System.err.println("SoundFont nicht gefunden unter: " + sf2Path);
+        if (synthesizer == null || !synthesizer.isOpen()) {
+            System.err.println("Synthesizer ist nicht verfügbar.");
             return;
         }
-        Soundbank soundbank = MidiSystem.getSoundbank(sf2File);
-        synthesizer.loadAllInstruments(soundbank);
-        System.out.println("SoundFont erfolgreich geladen!");
-    } catch (InvalidMidiDataException | IOException e) {
-        e.printStackTrace();
+        try {
+            File sf2File = new File(sf2Path);
+            if (!sf2File.exists()) {
+                System.err.println("SoundFont nicht gefunden unter: " + sf2Path);
+                return;
+            }
+            Soundbank soundbank = MidiSystem.getSoundbank(sf2File);
+            synthesizer.loadAllInstruments(soundbank);
+            System.out.println("SoundFont erfolgreich geladen!");
+        } catch (InvalidMidiDataException | IOException e) {
+            e.printStackTrace();
+        }
     }
-}
 }

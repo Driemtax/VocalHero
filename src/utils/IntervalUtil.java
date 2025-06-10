@@ -1,3 +1,5 @@
+//Author: David Herrmann
+
 package utils;
 
 import model.Interval;

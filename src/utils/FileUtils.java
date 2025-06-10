@@ -10,10 +10,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.sound.sampled.*;
 import java.io.File;
-import java.util.List;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -23,10 +23,12 @@ import model.Difficulty;
 
 public class FileUtils {
 
-private final static String RECORDING_PATH = "recordings";
-private final static String EASY_MELODY = "major-scale.mid";
-private final static String MEDIUM_MELODY = "alle_meine_entchen.mid";
-private final static String HARD_MELODY = "let_it_be.mid";
+    private final static String SRC_PATH = "src";
+    private final static String ASSETS_PATH = "assets";
+    private final static String RECORDING_PATH = "recordings";
+    private final static String EASY_MELODY = "major-scale.mid";
+    private final static String MEDIUM_MELODY = "alle_meine_entchen.mid";
+    private final static String HARD_MELODY = "let_it_be.mid";
     
     // CSV-Ladefunktion
     public static Map<String, int[]> loadProgressFromCSV(String filePath) {
@@ -39,7 +41,7 @@ private final static String HARD_MELODY = "let_it_be.mid";
                 String name = parts[0];
                 int completed = Integer.parseInt(parts[1]);
                 int total = Integer.parseInt(parts[2]);
-                progressData.put(name, new int[]{completed, total});
+                progressData.put(name, new int[] { completed, total });
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -49,7 +51,8 @@ private final static String HARD_MELODY = "let_it_be.mid";
 
     /**
      * Saves the audio data to a WAV file in a specified path.
-     * @param fileName the name of the  WAV file 
+     * 
+     * @param fileName  the name of the WAV file
      * @param audioData the audio data as a byte array
      * @throws IOException
      * @throws UnsupportedAudioFileException
@@ -87,7 +90,7 @@ private final static String HARD_MELODY = "let_it_be.mid";
         String projectRoot = System.getProperty("user.dir");
         String filePath = projectRoot + File.separator + RECORDING_PATH + File.separator + fileName;
         File file = new File(filePath);
-        
+
         if (!file.exists()) {
             throw new IOException("Recording file not found: " + filePath);
         }
@@ -95,8 +98,34 @@ private final static String HARD_MELODY = "let_it_be.mid";
         byte[] wavBytes = Files.readAllBytes(Paths.get(filePath));
 
         return wavBytes;
-        
+
     }
+
+    public static List<String> loadVoiceFromTXT(String fileName) {
+        String projectRoot = System.getProperty("user.dir");
+
+        List<String> VoiceData = new ArrayList<>(0);
+        String path = projectRoot + File.separator + SRC_PATH + File.separator + ASSETS_PATH + File.separator + fileName;
+        try {
+            Files.readAllLines(Paths.get(path)).forEach(line -> VoiceData.add(line));
+        } catch (IOException e) {
+            System.err.println("FileUtils: Error reading voice data from file: " + path);
+            VoiceData.add("C4");
+            VoiceData.add("false");
+        } 
+        return VoiceData;       
+    }
+
+    public static void saveVoiceToTXT(String fileName, String msg) {
+        String projectRoot = System.getProperty("user.dir");
+        try {
+            Files.writeString(Paths.get(projectRoot + File.separator + SRC_PATH + File.separator + File.separator + ASSETS_PATH + File.separator + fileName), msg);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Chooses a melody based on the difficulty level.
      * @param difficulty the difficulty level
@@ -125,6 +154,7 @@ private final static String HARD_MELODY = "let_it_be.mid";
 
         return melodyName;
     }
+
     /**
      * Deletes a recording file.
      * @param fileName the name of the WAV file to delete

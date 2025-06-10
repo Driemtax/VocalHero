@@ -1,37 +1,49 @@
-// Author: Jonas Rumpf
+// Author: Jonas Rumpf, Inaas Hammoush
 
 package views;
 
 import java.awt.Color;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
 import i18n.LanguageManager;
 
 public class RecordingButton extends ModernButton {
-    private static final Color IDLE_COLOR = new Color(80, 220, 100);
-    private static final Color RECORDING_COLOR = new Color(200, 40, 60);
-    private static final Color HOVER_RECORDING_COLOR = new Color(180, 60, 60);      // Red 
-    private static final Color HOVER_IDLE_COLOR = new Color(60, 180, 60);  // Green
+    private static final Color IDLE_COLOR = new Color(80, 220, 100);         // Green
+    private static final Color RECORDING_COLOR = new Color(200, 40, 60);     // Red
 
     private boolean isRecording = false;
 
     public RecordingButton() {
         super(LanguageManager.get("recordingbutton.start"));
+        setFocusPainted(false);
+        setBorderPainted(false);
+        setContentAreaFilled(true);
+        setOpaque(true);
+        setRolloverEnabled(false);
         setBackground(IDLE_COLOR);
-        
-        addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                setBackground(isRecording ? new Color(180, 40, 60) : new Color(40, 200, 60));
+
+        setHoverEffectEnabled(false); // Standard-Hover deaktivieren
+
+        // Eigener Hover-Effekt (z.B. heller machen)
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (!isRecording) {
+                    setBackground(new Color(100, 240, 120)); // Helleres Grün beim Hover im Idle-Zustand
+                } else {
+                    setBackground(new Color(220, 60, 80));   // Helleres Rot beim Hover im Recording-Zustand
+                }
             }
-            public void mouseExited(MouseEvent e) {
-                setBackground(isRecording ? HOVER_RECORDING_COLOR : HOVER_IDLE_COLOR);
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                setBackground(isRecording ? RECORDING_COLOR : IDLE_COLOR);
             }
         });
     }
 
     public void setRecording(boolean recording) {
         this.isRecording = recording;
+        setText(recording 
+            ? LanguageManager.get("levelscreen.stop_recording") 
+            : LanguageManager.get("recordingbutton.start"));
         setBackground(recording ? RECORDING_COLOR : IDLE_COLOR);
     }
 
