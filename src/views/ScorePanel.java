@@ -65,24 +65,30 @@ public class ScorePanel extends JPanel {
         repaint();
     }
 
-    public List<Note> midiNotesToUiNotes(List<MidiNote> notes) {
-        if (notes == null || notes.isEmpty()) {
+    public List<Note> midiNotesToUiNotes(List<MidiNote> midiNotes) {
+        if (midiNotes == null || midiNotes.isEmpty()) {
             return new ArrayList<>();
         }
+
         List<Note> uiNotes = new ArrayList<>();
-        int StartX = 200; // Starting x position for notes
-        int spacing = 60; // Spacing between notes
+        int startX = 200; // Starting x position for notes
+        int spacing = 20; // Spacing between notes
         int counter = 0;
-        for (MidiNote midiNote : notes) {
-            int xPosition = StartX + counter * spacing;
+
+        for (int i = 0; i < midiNotes.size(); i++) {
+            MidiNote current = midiNotes.get(i);
+            MidiNote next = (i < midiNotes.size() - 1) ? midiNotes.get(i + 1) : null;
+
+            int xPosition = startX + counter * spacing;
             counter++;
 
-            boolean isRest = midiNote.getNoteDefinition() == MidiNote.Note.REST;
-            int pitch = isRest ? 0 : midiNote.getNoteDefinition().getMidiNumber();
-            NoteType noteType = getNoteTypeForDuration(midiNote.getDuration());
+            boolean isRest = current.getNoteDefinition() == MidiNote.Note.REST;
+            int pitch = isRest ? 0 : current.getNoteDefinition().getMidiNumber();
+            NoteType noteType = getNoteTypeForTiming(current, next); // Hier neue Methode verwenden
 
             uiNotes.add(new Note(xPosition, pitch, isRest, noteType));
         }
+
         return uiNotes;
     }
 
@@ -124,7 +130,7 @@ public class ScorePanel extends JPanel {
         int scoreY = h/2 - scoreHeight/2;
         
         g2.setColor(Color.WHITE);
-        g2.fillRect(scoreX, scoreY, scoreWidth, scoreHeight);
+        g2.fillRect(0, 0, w, h);
 
         // Draw staff lines
         int lineSpacing = 20;
@@ -153,9 +159,7 @@ public class ScorePanel extends JPanel {
         // Draw notes
         for (Note note : notes) {
             if (note.isRest()) {
-                // Beispiel: Viertelpause zeichnen
-                int yPos = scoreUtils.calculateYPositionWhiteKeys(startY, lineSpacing, 60, useBassClef); // 60 = C4 als Dummy
-                scoreUtils.drawQuarterRest(g2, note.x, yPos);
+                
             } else {
                 // Notenposition und Vorzeichen bestimmen
                 ScoreUtils.NotePosition pos = ScoreUtils.getNotePosition(note.pitch);
@@ -204,5 +208,27 @@ public class ScorePanel extends JPanel {
         if (duration >= 0.35) return NoteType.EIGHTH;
         return NoteType.SIXTEENTH;
     }
+
+    private double bpm = 120.0;
+
+    public void setBpm(double bpm) {
+        this.bpm = bpm;
+    }
+
+    private NoteType getNoteTypeForTiming(MidiNote currentNote, MidiNote nextNote) {
+        double beatDuration = 60.0 / bpm;
+        double timeUntilNext = (nextNote != null)
+                ? nextNote.getStartTime() - currentNote.getStartTime()
+                : currentNote.getDuration(); // Fallback
+
+        double beats = timeUntilNext / beatDuration;
+
+        if (beats >= 4.0) return NoteType.WHOLE;        // 4 Schläge
+        if (beats >= 2.0) return NoteType.HALF;         // 2 Schläge
+        if (beats >= 1.0) return NoteType.QUARTER;      // 1 Schlag
+        if (beats >= 0.5) return NoteType.EIGHTH;       // ½ Schlag
+        return NoteType.SIXTEENTH;                      // < ½ Schlag
+    }   
+
 }
 
