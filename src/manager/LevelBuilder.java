@@ -23,7 +23,7 @@ public class LevelBuilder {
         this.levelInfo = levelInfo;
     }
 
-    public Level buildLevel() {
+    public Level buildLevel(MidiNote.Note baseVoice) {
         Mode mode = levelInfo.getMode();
         Difficulty difficulty = levelInfo.getDifficulty();
         int levelNumber = levelInfo.getLevelNumber();
@@ -33,13 +33,13 @@ public class LevelBuilder {
             List<MidiNote> referenceNotes = MidiParser.parseMidiFile(melodyPath); // we get this from a melody collection
             // Don't forget to set the recording duration for melodies, which is usually longer than 3 seconds
             int melodyLength = (int) MidiParser.getLengthOfMelody(referenceNotes);
-            Level level = new Level(levelInfo.getMode(), levelInfo.getDifficulty(), referenceNotes, levelInfo.getLevelNumber());
+            Level level = new Level(mode, difficulty, referenceNotes, levelNumber);
             level.setRecordingDuration(melodyLength);
             
             return level;
         } else {
             // For note and interval modes, we generate reference notes based on the difficulty level
-            MidiNote note = NoteUtil.getRandomNoteInRange(difficulty.getDifficultyRange()); 
+            MidiNote note = NoteUtil.getRandomNoteInRange(difficulty.getDifficultyRange(baseVoice)); 
             List<MidiNote> referenceNotes = List.of(note);
 
             Level level = new Level(mode, difficulty, referenceNotes, levelNumber);

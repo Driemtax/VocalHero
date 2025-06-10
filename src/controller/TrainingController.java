@@ -1,17 +1,20 @@
-// Authors: Inaas Hammoush, Lars Beer, David Herrmann
+// Authors: Inaas Hammoush, Lars Beer, David Herrmann, Jonas Rumpf
 package controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.sound.sampled.Mixer;
+import javax.swing.SwingUtilities;
 
 import manager.*;
 import model.LevelInfo;
 import model.LevelState;
 import model.MidiNote;
+import model.MidiNote.*;
 import model.Mode;
 import model.PitchListener;
 import model.RecordingFinishedCallback;
@@ -22,6 +25,7 @@ import model.Level;
 import model.AudioSettings;
 import utils.AudioUtil;
 import utils.FileUtils;
+import utils.NoteUtil;
 
 public class TrainingController {
     private AudioManager audioManager;
@@ -32,6 +36,7 @@ public class TrainingController {
     private ProgressManager progressManager;
     private AnalysisResult analysisResult;
     private static AudioUtil audioUtil = new AudioUtil();
+    private final static String BASE_VOICE_FILE = "baseVoice.txt"; 
 
     public TrainingController() {
         initializeAudioSettings(); // Load saved audio settings or set defaults
@@ -41,7 +46,7 @@ public class TrainingController {
     public void startTrainingSession(LevelInfo levelInfo) {
         this.levelInfo = levelInfo;
         this.levelBuilder = new LevelBuilder(levelInfo);
-        this.level = levelBuilder.buildLevel();
+        this.level = levelBuilder.buildLevel(getUserBaseNote());
         audioManager = new AudioManager(AudioSettings.getInputDevice(), level.getReferenceNotes(), level.getRecordingDuration());
         feedbackManager = new FeedbackManager(level.getReferenceNotes());
     }
@@ -56,9 +61,11 @@ public class TrainingController {
      * 
      * @param updateUiAfterRecordingCallback Callback for updating the UI after
      *                                       recording is complete.
-     * @param onTooQuiet Callback for notifying the UI that the audio is too quiet.
+     * @param onTooQuiet                     Callback for notifying the UI that the
+     *                                       audio is too quiet.
      */
-    public boolean startRecordingWithLivePitchGraph(RecordingFinishedCallback updateUiAfterRecordingCallback, Runnable onTooQuiet) {
+    public boolean startRecordingWithLivePitchGraph(RecordingFinishedCallback updateUiAfterRecordingCallback,
+            Runnable onTooQuiet) {
 
         return audioManager.startRecordingWithLivePitchGraph(
                 pitch -> {
@@ -68,7 +75,7 @@ public class TrainingController {
                 (boolean success) -> {
                     // This callback is called when the recording is complete
                     setLevelFeedback(); // Analyze the recorded audio and set feedback
-                    updateUiAfterRecordingCallback.onRecordingFinished(success);; // Update the UI after recording
+                    updateUiAfterRecordingCallback.onRecordingFinished(success); // Update the UI after recording
                 });
     }
 
@@ -146,9 +153,11 @@ public class TrainingController {
 
     /**
      * Returns the reference notes for the current level.
-     * This will be called by the LevelScreen to get the reference notes for the current level.
+     * This will be called by the LevelScreen to get the reference notes for the
+     * current level.
      *
-     * @return List of MidiNote objects representing the reference notes for the current level.
+     * @return List of MidiNote objects representing the reference notes for the
+     *         current level.
      */
     public List<MidiNote> getReferenceNotesForCurrentLevel() {
         if (level != null && level.getReferenceNotes() != null) {
@@ -160,13 +169,11 @@ public class TrainingController {
     }
 
     /**
-     * Spielt den Referenzton für ein bestimmtes Level ab.
+     * Plays the reference notes for the current level
      * 
-     * @param updateUiAfterPlaybackCallback Callback zur Aktualisierung der View
-     *                                      nach der Wiedergabe.
+     * @param updateUiAfterPlaybackCallback callback to update the ui after playback has finished
      */
     public boolean playReference(Runnable updateUiAfterPlaybackCallback) {
-        
         if (level.getReferenceNotes() == null || level.getReferenceNotes().isEmpty()) {
             System.err.println("TrainingController: Keine Referenznoten für das Level verfügbar.");
             if (updateUiAfterPlaybackCallback != null) {
@@ -259,12 +266,50 @@ public class TrainingController {
     }
 
     /**
-     * call this function on exiting the programm to close the current synthesizer to avoid weird states
+     * call this function on exiting the programm to close the current synthesizer
+     * to avoid weird states
      */
     public void cleanup() {
         if (audioManager != null) {
             audioManager.cleanup();
         }
+
+    }
+
+    public Note getUserBaseNote() {
+        String baseNoteName = readBaseVoiceFromFile();
+        return NoteUtil.getNoteByName(baseNoteName);
+    }
+
+    public String readBaseVoiceFromFile() {
+        List<String> lines = FileUtils.loadVoiceFromTXT(BASE_VOICE_FILE);
+        return lines.isEmpty() ? "-" : lines.get(0);
+    }
+
+    public boolean isFirstStart() {
+        List<String> data = FileUtils.loadVoiceFromTXT("baseVoice.txt");
+        if (Boolean.parseBoolean(data.get(1))) {
+            FileUtils.saveVoiceToTXT("baseVoice.txt", data.get(0) + "\nfalse"); // set first time to false
+            return true;
+        }
+        return false;
+
+    }
+
+    public void setNewUserBaseNote(Runnable updateUICallback) {
+
+        Mixer.Info input = AudioSettings.getInputDevice();
+
+        audioManager = new AudioManager(input, new ArrayList<>(), 0);
+        audioManager.getUserBaseNote(userBaseNote -> {
+            if (userBaseNote != null && !userBaseNote.equals("Undefined")) {
+                FileUtils.saveVoiceToTXT(BASE_VOICE_FILE, userBaseNote + "\nfalse");
+            }            
             
+            // Always update UI
+            if (updateUICallback != null) {
+                SwingUtilities.invokeLater(updateUICallback); // safe on EDT
+            }
+        });
     }
 }

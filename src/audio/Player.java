@@ -263,21 +263,21 @@ public class Player {
      * @param sf2Path
      */
     public void loadSoundFont(String sf2Path) {
-    if (synthesizer == null || !synthesizer.isOpen()) {
-        System.err.println("Synthesizer ist nicht verfügbar.");
-        return;
-    }
-    try {
-        File sf2File = new File(sf2Path);
-        if (!sf2File.exists()) {
-            System.err.println("SoundFont nicht gefunden unter: " + sf2Path);
+        if (synthesizer == null || !synthesizer.isOpen()) {
+            System.err.println("Synthesizer ist nicht verfügbar.");
             return;
         }
-        Soundbank soundbank = MidiSystem.getSoundbank(sf2File);
-        synthesizer.loadAllInstruments(soundbank);
-        System.out.println("SoundFont erfolgreich geladen!");
-    } catch (InvalidMidiDataException | IOException e) {
-        e.printStackTrace();
+        try {
+            File sf2File = new File(sf2Path);
+            if (!sf2File.exists()) {
+                System.err.println("SoundFont nicht gefunden unter: " + sf2Path);
+                return;
+            }
+            Soundbank soundbank = MidiSystem.getSoundbank(sf2File);
+            synthesizer.loadAllInstruments(soundbank);
+            System.out.println("SoundFont erfolgreich geladen!");
+        } catch (InvalidMidiDataException | IOException e) {
+            e.printStackTrace();
+        }
     }
-}
 }

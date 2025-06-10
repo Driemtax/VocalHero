@@ -9,6 +9,7 @@ import audio.PitchDetector;
 import audio.Player;
 import audio.Recorder;
 import model.MidiNote;
+import model.MidiNote.*;
 import model.RecordingFinishedCallback;
 import model.AnalysisResult;
 import model.AudioSettings;
@@ -16,18 +17,20 @@ import utils.FileUtils;
 
 import java.util.List;
 import java.util.function.Consumer;
-
+import utils.NoteUtil;
 
 /**
- * AudioManager is responsible for managing audio recording, playback, and analysis.
+ * AudioManager is responsible for managing audio recording, playback, and
+ * analysis.
  * It uses the Recorder and Player classes to handle audio input and output,
- * and the PitchDetector and MelodyAnalyzer classes for analyzing the recorded audio.
+ * and the PitchDetector and MelodyAnalyzer classes for analyzing the recorded
+ * audio.
  * 
  * @author Inaas Hammoush
  * @version 1.0
  */
 public class AudioManager {
-    
+
     private Mixer.Info selectedMic;
     private int recordingDuration;
     private Recorder recorder;
@@ -57,19 +60,23 @@ public class AudioManager {
     }
 
     /**
-     * Starts recording audio for a specified duration and provides live pitch graphing.
-     * The pitch is calculated using the PitchDetector and passed to the provided listener.
+     * Starts recording audio for a specified duration and provides live pitch
+     * graphing.
+     * The pitch is calculated using the PitchDetector and passed to the provided
+     * listener.
+     * 
      * @param pitchListener
      * 
-     * example usage in TrainingController:
+     *                      example usage in TrainingController:
      * 
-     * audioManager.startRecordingWithLivePitch(pitch -> {
-     *      feedbackManager.updatePitchGraph(pitch);
-     *     });
+     *                      audioManager.startRecordingWithLivePitch(pitch -> {
+     *                      feedbackManager.updatePitchGraph(pitch);
+     *                      });
      */
     private static final double MIN_RMS = 0.02; // Schwellenwert anpassen
 
-    public boolean startRecordingWithLivePitchGraph(Consumer<Double> pitchListener, Runnable onTooQuiet, RecordingFinishedCallback updateUiAfterRecordingCallback) {
+    public boolean startRecordingWithLivePitchGraph(Consumer<Double> pitchListener, Runnable onTooQuiet,
+            RecordingFinishedCallback updateUiAfterRecordingCallback) {
         recorder.setAudioChunkListener(chunk -> {
             double rms = pitchDetector.calculateRMS(chunk);
             if (rms < MIN_RMS) {
@@ -96,20 +103,23 @@ public class AudioManager {
         if (recorder == null) {
             System.err.println("AudioManager: Recorder ist null!");
             // Still need to invoke the callback to avoid deadlock in GUI
-            if (updateUiAfterRecordingCallback != null) SwingUtilities.invokeLater(
-                () -> updateUiAfterRecordingCallback.onRecordingFinished(false));
+            if (updateUiAfterRecordingCallback != null)
+                SwingUtilities.invokeLater(
+                        () -> updateUiAfterRecordingCallback.onRecordingFinished(false));
             return false;
         }
         if (selectedMic == null) {
             System.err.println("AudioManager: Kein Mikrofon ausgewählt!");
-             if (updateUiAfterRecordingCallback != null) SwingUtilities.invokeLater(
-                () -> updateUiAfterRecordingCallback.onRecordingFinished(false));
+            if (updateUiAfterRecordingCallback != null)
+                SwingUtilities.invokeLater(
+                        () -> updateUiAfterRecordingCallback.onRecordingFinished(false));
             return false;
         }
         if (recorderFormat == null) { // Zusätzlicher Check
             System.err.println("AudioManager: AudioFormat ist nicht gesetzt!");
-            if (updateUiAfterRecordingCallback != null) SwingUtilities.invokeLater(
-                () -> updateUiAfterRecordingCallback.onRecordingFinished(false));
+            if (updateUiAfterRecordingCallback != null)
+                SwingUtilities.invokeLater(
+                        () -> updateUiAfterRecordingCallback.onRecordingFinished(false));
             return false;
         }
         try {
@@ -119,7 +129,7 @@ public class AudioManager {
                 // Execute the UI callback when processing is done
                 if (updateUiAfterRecordingCallback != null) {
                     System.out.println("TrainingController: Führe UI-Update-Callback aus der View aus.");
-                    updateUiAfterRecordingCallback.onRecordingFinished(success); 
+                    updateUiAfterRecordingCallback.onRecordingFinished(success);
                 }
             });
         } catch (LineUnavailableException e) {
@@ -137,12 +147,15 @@ public class AudioManager {
     }
 
     /**
-     * Gets the lastest recorded audio data. This will either be called after a recording is finished
+     * Gets the lastest recorded audio data. This will either be called after a
+     * recording is finished
      * or in between recordings to get the latest audio data.
+     * 
      * @return byte[] of the audio data
      */
     public byte[] getRecordedAudioData() {
-        if (recorder == null) return new byte[0];
+        if (recorder == null)
+            return new byte[0];
         return recorder.getAudioData();
     }
 
@@ -173,8 +186,10 @@ public class AudioManager {
 
     /**
      * Plays a frequency using the synthesizer to generate an instrument sound.
-     * @param referenceNotes List of reference notes to play
-     * @param onPlaybackFinishedCallback callback to execute when playback is finished
+     * 
+     * @param referenceNotes             List of reference notes to play
+     * @param onPlaybackFinishedCallback callback to execute when playback is
+     *                                   finished
      */
     public boolean playReference(List<MidiNote> referenceNotes, Runnable updateUiAfterPlaybackCallback) {
         if (player == null) {
@@ -185,7 +200,8 @@ public class AudioManager {
             }
             return false;
         }
-        // System.out.println("AudioManager: Spiele Referenznote (Freq: " + frequency + ", Dauer: " + durationMs + "ms)");
+        // System.out.println("AudioManager: Spiele Referenznote (Freq: " + frequency +
+        // ", Dauer: " + durationMs + "ms)");
         return player.playNotes(referenceNotes, updateUiAfterPlaybackCallback);
     }
 
@@ -195,7 +211,9 @@ public class AudioManager {
 
     /**
      * Analyzes the recorded audio data using the MelodyAnalyzer.
-     * It compares the detected notes with the reference notes and returns the analysis result.
+     * It compares the detected notes with the reference notes and returns the
+     * analysis result.
+     * 
      * @return AnalysisResult
      */
     public AnalysisResult analyzeMelody() {
@@ -207,19 +225,20 @@ public class AudioManager {
             e.printStackTrace();
             return null;
         }
-        
+
     }
 
     /**
      * Detects the pitch of the recorded audio data using the PitchDetector.
+     * 
      * @return double dominant frequency
      */
     public double detectPitchOfRecordedAudio() {
         if (audioData == null || audioData.length == 0) {
             System.err.println("AudioManager: Keine Audiodaten zum Analysieren vorhanden.");
-            return -1; 
+            return -1;
         }
-        
+
         try {
             return pitchDetector.getDominantFrequency(audioData);
         } catch (Exception e) {
@@ -250,6 +269,27 @@ public class AudioManager {
     public void cleanup() {
         if (player != null) {
             player.close();
+        }
+    }
+
+    public void getUserBaseNote(Consumer<String> noteCallback) {
+        try {
+            recorder.startRecording(3, selectedMic, (boolean success) -> {
+                if (success) {
+                    audioData = recorder.getAudioData();
+                    double detectedPitch = pitchDetector.getDominantFrequency(audioData);
+                    Note baseNote = NoteUtil.getApproximateNoteFromPitch(detectedPitch);
+                    String noteName = baseNote.getName();
+
+                    // Return result via callback
+                    noteCallback.accept(noteName);
+                } else {
+                    noteCallback.accept("Undefined");
+                }
+            });
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+            noteCallback.accept("Undefined");
         }
     }
 }
