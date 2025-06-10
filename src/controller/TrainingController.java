@@ -25,6 +25,7 @@ import model.Level;
 import model.AudioSettings;
 import utils.AudioUtil;
 import utils.FileUtils;
+import utils.Helper;
 import utils.ProgressUtil;
 import utils.NoteUtil;
 
@@ -68,16 +69,58 @@ public class TrainingController {
     public boolean startRecordingWithLivePitchGraph(RecordingFinishedCallback updateUiAfterRecordingCallback,
             Runnable onTooQuiet) {
 
+        long startTime = System.nanoTime();
+        if(levelInfo.getMode() == Mode.INTERVAL) {
+            // For INTERVAL mode, we need to ensure that the target interval note is set
+            if (level.getTargetIntervalNote() == null) {
+                System.err.println("TrainingController: Target interval note is not set for INTERVAL mode.");
+                return false; // Cannot start recording without a target interval note
+            }
+            return audioManager.startRecordingWithLivePitchGraph(
+                    pitch -> {
+                        feedbackManager.updatePitchGraphForIntervalOrMelody(pitch, level.getTargetIntervalNote());
+                    },
+                    onTooQuiet,
+                    (boolean success) -> {
+                        // This callback is called when the recording is complete
+                        setLevelFeedback(); // Analyze the recorded audio and set feedback
+                        updateUiAfterRecordingCallback.onRecordingFinished(success); // Update the UI after recording
+                    });
+        } else if (levelInfo.getMode() == Mode.MELODY) {
+            // For MELODY mode, we need to ensure that the reference notes are set
+            if (level.getReferenceNotes() == null || level.getReferenceNotes().isEmpty()) {
+                System.err.println("TrainingController: Reference notes are not set for MELODY mode.");
+                return false; // Cannot start recording without reference notes
+            }
+            
+            
+            return audioManager.startRecordingWithLivePitchGraph(
+                    pitch -> {
+                        long elapsed = System.nanoTime() - startTime;
+                        System.out.println("TrainingController: Elapsed time for melody pitch update: " + elapsed + " ns");
+                        int playedIndex = Helper.getPlayedNoteIndexByElapsedTime(elapsed, level.getReferenceNotes());
+                        MidiNote expected = level.getPlayedNotes().get(playedIndex);
+                        System.out.println("TrainingController: Updating pitch graph for melody note: " + expected.getName());
+                        feedbackManager.updatePitchGraphForIntervalOrMelody(pitch, expected);
+                    },
+                    onTooQuiet,
+                    (boolean success) -> {
+                        // This callback is called when the recording is complete
+                        setLevelFeedback(); // Analyze the recorded audio and set feedback
+                        updateUiAfterRecordingCallback.onRecordingFinished(success); // Update the UI after recording
+                    });
+        }
+
         return audioManager.startRecordingWithLivePitchGraph(
-                pitch -> {
-                    feedbackManager.updatePitchGraph(pitch);
-                },
-                onTooQuiet,
-                (boolean success) -> {
-                    // This callback is called when the recording is complete
-                    setLevelFeedback(); // Analyze the recorded audio and set feedback
-                    updateUiAfterRecordingCallback.onRecordingFinished(success); // Update the UI after recording
-                });
+                    pitch -> {
+                        feedbackManager.updatePitchGraph(pitch);
+                    },
+                    onTooQuiet,
+                    (boolean success) -> {
+                        // This callback is called when the recording is complete
+                        setLevelFeedback(); // Analyze the recorded audio and set feedback
+                        updateUiAfterRecordingCallback.onRecordingFinished(success); // Update the UI after recording
+                    });
     }
 
     public void setLevelFeedback() {

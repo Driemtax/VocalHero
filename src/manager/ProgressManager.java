@@ -86,7 +86,7 @@ public class ProgressManager {
 
                 for (LevelState levelState : lines) {
                     boolean unlock;
-                    if (newLevelUnlocked && level != 1) {
+                    if (newLevelUnlocked) {
                         unlock = true;
                     } else {
                         unlock = levelState.isUnlocked();
