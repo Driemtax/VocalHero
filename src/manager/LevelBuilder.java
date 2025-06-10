@@ -25,8 +25,24 @@ public class LevelBuilder {
 
     public Level buildLevel(MidiNote.Note baseVoice) {
         Mode mode = levelInfo.getMode();
-        Difficulty difficulty = levelInfo.getDifficulty();
         int levelNumber = levelInfo.getLevelNumber();
+        Difficulty difficulty;
+
+        switch (levelNumber) {
+            case 1:
+                difficulty = Difficulty.EASY;
+                break;
+            case 2:
+                difficulty = Difficulty.MEDIUM;
+                break;
+            case 3:
+                difficulty = Difficulty.HARD;
+                break;
+            default:
+                difficulty = Difficulty.EASY; // Default to easy if level number is not recognized
+                break;
+        }
+
         if (mode == Mode.MELODY) {
             // For melody mode, we can choose a random melody from a predefined pool
             String melodyPath = FileUtils.chooseMelody(difficulty);
