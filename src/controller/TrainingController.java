@@ -25,6 +25,7 @@ import model.Level;
 import model.AudioSettings;
 import utils.AudioUtil;
 import utils.FileUtils;
+import utils.ProgressUtil;
 import utils.NoteUtil;
 
 public class TrainingController {
@@ -249,15 +250,7 @@ public class TrainingController {
     public List<LevelState> getLevels(Mode mode) throws IOException {
         try {
             List<LevelState> levels = progressManager.parseLevels();
-            Iterator<LevelState> iterator = levels.iterator();
-            while (iterator.hasNext()) {
-                LevelState levelState = iterator.next();
-                if (levelState.mode() != mode) {
-                    iterator.remove();
-                }
-            }
-            Collections.sort(levels);
-            return levels;
+            return ProgressUtil.getProgressByMode(mode, levels);
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (IOException e) {
@@ -311,5 +304,19 @@ public class TrainingController {
                 SwingUtilities.invokeLater(updateUICallback); // safe on EDT
             }
         });
+    }
+
+    public List<LevelState> getProgress(Mode mode) {
+        try {
+            return ProgressUtil.getProgressByMode(mode, progressManager.parseLevels());
+        } catch (IllegalArgumentException e) {
+            // TODO UpdateUIwithError
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO updateUIwithError
+            e.printStackTrace();
+        }
+        List<LevelState> empty = new ArrayList();
+        return empty;
     }
 }
