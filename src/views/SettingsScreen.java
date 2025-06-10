@@ -22,6 +22,8 @@ public class SettingsScreen extends JPanel {
     private JComboBox<String> inputDeviceCombo;
     private JComboBox<String> outputDeviceCombo;
 
+    private ModernButton gotoBaseVoiceButton;
+
     public SettingsScreen(WindowController controller) {
         this.windowController = controller;
 
@@ -33,13 +35,27 @@ public class SettingsScreen extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
 
+        // Zurück-Button oben links
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        ModernButton backButton = new ModernButton("⬅️ " + LanguageManager.get("sidebar.menu"));
+        backButton.setFont(new Font("Segoe UI Emoji", Font.BOLD, 14));
+        backButton.addActionListener(e -> windowController.showHome());
+        add(backButton, gbc);
+
+        // Titel mittig oben
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridwidth = 1;
         JLabel titleLabel = new JLabel(LanguageManager.get("settings.title"));
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
         add(titleLabel, gbc);
+
         gbc.gridwidth = 1;
+        gbc.gridx = 0;
+        gbc.anchor = GridBagConstraints.WEST;
 
         // Mikrofon-Auswahl
         gbc.gridy = 1;
@@ -70,6 +86,11 @@ public class SettingsScreen extends JPanel {
         setSelectedDevice(outputDeviceCombo, AudioSettings.getOutputDevice());
         add(outputDeviceCombo, gbc);
 
+        //Basisstimmlage bestimmen
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gotoBaseVoiceButton = new ModernButton(LanguageManager.get("settings.baseVoice"));
+        add(gotoBaseVoiceButton, gbc);    
 
         inputDeviceCombo.addActionListener(e -> {
             String selected = (String) inputDeviceCombo.getSelectedItem();
@@ -92,6 +113,8 @@ public class SettingsScreen extends JPanel {
                 }
             }
         });
+
+        gotoBaseVoiceButton.addActionListener(_1 -> windowController.showBaseVoiceRecordScreen());
 
         // Sprachauswahl
         gbc.gridx = 0;

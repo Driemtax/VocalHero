@@ -22,15 +22,7 @@ public class ContentPanel extends JPanel {
         revalidate();
         repaint();
     }
-
-    //Redundant since it already exists in windowController
-    /* 
-    public void showLevelSelection(Mode mode) {
-        removeAll();
-        add(new LevelSelectionPanel(windowController, mode,), BorderLayout.CENTER);
-        revalidate();
-        repaint();
-    }*/
+    
     public void showLevelSelection(Mode mode){
         windowController.showLevelSelection(mode);
     }

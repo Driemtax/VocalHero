@@ -28,3 +28,6 @@ replay_pid*
 
 # audio files
 *.wav
+
+# text files
+.txt
