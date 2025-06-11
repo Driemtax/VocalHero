@@ -30,6 +30,15 @@ public class FeedbackManager {
         }
     }
 
+    public void updatePitchGraphForIntervalOrMelody(double pitch, MidiNote targetNote) {
+        double targetFrequency = targetNote.getFrequency();
+        // Convert frequency to cent offset before updating the pitch graph
+        double centOffset = Helper.frequencyToCentOffset(pitch, targetFrequency);
+        if (pitchListener != null) {
+            pitchListener.onPitchUpdate(centOffset);
+        }
+    }
+
     public Feedback calculateFeedbackForRecordedNote(double recordedPitch, double targetPitch) {
         System.out.println("Recorded Pitch: " + recordedPitch + " Hz, Target Pitch: " + targetPitch + " Hz");
 
@@ -45,11 +54,7 @@ public class FeedbackManager {
             // 100 Punkte bei exakt, linear runter bis 90 bei ±50 Cent
             score = (float) Math.max(90, 100 - (absCents / 5));
         } else {
-            if (absCents >= 200) {
-                score = 0f;
-            } else {
-                score = (float) Math.max(0, 100 - (absCents / 2));
-            }
+            score = (float) Math.max(0, 100 - (absCents / 2));
         }
         return new Feedback(score);
     }

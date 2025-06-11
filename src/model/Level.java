@@ -2,6 +2,7 @@
 package model;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Represents a training level in the application, encapsulating the configuration
@@ -55,4 +56,8 @@ public class Level {
     public void setIntervalName(String intervalName) {this.intervalName = intervalName;}
 
     public int getLevelNumber() {return levelNumber;}
+
+    public List<MidiNote> getPlayedNotes() {
+        return referenceNotes.stream().filter(n -> !n.getName().equalsIgnoreCase("Rest")).collect(Collectors.toList());
+    }
 }

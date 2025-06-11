@@ -25,6 +25,7 @@ import model.Level;
 import model.AudioSettings;
 import utils.AudioUtil;
 import utils.FileUtils;
+import utils.Helper;
 import utils.ProgressUtil;
 import utils.NoteUtil;
 
@@ -68,16 +69,33 @@ public class TrainingController {
     public boolean startRecordingWithLivePitchGraph(RecordingFinishedCallback updateUiAfterRecordingCallback,
             Runnable onTooQuiet) {
 
+        long startTime = System.nanoTime();
+
         return audioManager.startRecordingWithLivePitchGraph(
-                pitch -> {
-                    feedbackManager.updatePitchGraph(pitch);
-                },
-                onTooQuiet,
-                (boolean success) -> {
-                    // This callback is called when the recording is complete
-                    setLevelFeedback(); // Analyze the recorded audio and set feedback
-                    updateUiAfterRecordingCallback.onRecordingFinished(success); // Update the UI after recording
-                });
+                    pitch -> {
+                        switch (levelInfo.getMode()) {
+                            case INTERVAL:
+                                feedbackManager.updatePitchGraphForIntervalOrMelody(pitch, level.getTargetIntervalNote());
+                                break;
+                            case MELODY:
+                                long elapsed = System.nanoTime() - startTime;
+                                System.out.println("TrainingController: Elapsed time for melody pitch update: " + elapsed + " ns");
+                                int playedIndex = Helper.getPlayedNoteIndexByElapsedTime(elapsed, level.getReferenceNotes());
+                                MidiNote expected = level.getPlayedNotes().get(playedIndex);
+                                System.out.println("TrainingController: Updating pitch graph for melody note: " + expected.getName());
+                                feedbackManager.updatePitchGraphForIntervalOrMelody(pitch, expected);
+                                break;
+                            default:
+                                feedbackManager.updatePitchGraph(pitch);
+                                break;
+                        }
+                    },
+                    onTooQuiet,
+                    (boolean success) -> {
+                        // This callback is called when the recording is complete
+                        setLevelFeedback(); // Analyze the recorded audio and set feedback
+                        updateUiAfterRecordingCallback.onRecordingFinished(success); // Update the UI after recording
+                    });
     }
 
     public void setLevelFeedback() {
